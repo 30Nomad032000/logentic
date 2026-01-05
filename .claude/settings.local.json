@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(mkdir -p:*)",
+      "Bash(dir:*)",
+      "Bash(ffmpeg:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(venvScriptspython.exe -c \"import torch; print\\(f''PyTorch: {torch.__version__}''\\); print\\(f''CUDA available: {torch.cuda.is_available\\(\\)}''\\)\")",
+      "Bash(E:\\\\Work\\\\logentic\\\\voice-assistant\\\\venv\\\\Scripts\\\\python.exe:*)",
+      "Bash(python:*)",
+      "Bash(tree:*)",
+      "Bash(git init:*)",
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh api:*)",
+      "Bash(git config:*)",
+      "Bash(gh repo create:*)"
+    ]
+  }
+}

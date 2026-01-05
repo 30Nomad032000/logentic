@@ -1,0 +1,45 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Models cache
+*.pt
+*.bin
+*.safetensors
+
+# Audio files (keep samples)
+*.wav
+*.mp3
+!samples/*.wav
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/

@@ -1,0 +1,58 @@
+# Core ML/AI
+torch>=2.1.0
+torchaudio>=2.1.0
+transformers>=4.36.0
+accelerate>=0.25.0
+
+# Speech Recognition (ASR)
+openai-whisper>=20231117
+soundfile>=0.12.1
+librosa>=0.10.1
+
+# Translation (IndicTrans2)
+sentencepiece>=0.1.99
+sacremoses>=0.0.53
+
+# Text-to-Speech (TTS)
+TTS>=0.22.0
+cartesia>=1.0.0  # Cartesia TTS API
+
+# Agent Frameworks
+langchain>=0.1.0
+langgraph>=0.0.20
+langchain-community>=0.0.10
+
+# LLM APIs
+openai>=1.6.0
+anthropic>=0.8.0
+
+# API Server
+fastapi>=0.108.0
+uvicorn>=0.25.0
+python-multipart>=0.0.6
+websockets>=12.0
+
+# Audio Processing
+sounddevice>=0.4.6
+pyaudio>=0.2.14
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Configuration & Utilities
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Edge Device (Raspberry Pi)
+# Note: Install these on the Pi itself
+# RPi.GPIO>=0.7.1
+# gpiozero>=2.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+
+# Development
+black>=23.12.0
+ruff>=0.1.9

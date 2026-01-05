@@ -1,0 +1,21 @@
+# Minimal requirements for running demos
+# Install with: pip install -r requirements-demo.txt
+
+# For basic demos (no audio)
+langgraph>=0.0.20
+langchain>=0.1.0
+
+# For audio recording demos (laptop mic)
+sounddevice>=0.4.6
+soundfile>=0.12.1
+numpy>=1.24.0
+
+# For ASR (speech recognition)
+openai-whisper>=20231117
+torch>=2.1.0
+torchaudio>=2.1.0
+
+# For API server demo
+fastapi>=0.108.0
+uvicorn>=0.25.0
+python-multipart>=0.0.6

@@ -1,0 +1,109 @@
+# Voice Assistant Configuration
+# Sprint 1 - Development Settings
+
+app:
+  name: "Hyper-Localized Voice Assistant"
+  version: "0.1.0"
+  debug: true
+
+# Development Environment
+dev:
+  platform: "wsl2"  # Running on WSL2 with CUDA passthrough
+  target: "raspberry_pi_5"  # Deployment target
+
+# ASR Configuration
+asr:
+  engine: "whisper"  # Options: whisper, omnilingual
+  whisper:
+    model_size: "base"  # Options: tiny, base, small, medium, large
+    device: "cuda"  # Options: cuda, cpu
+    language: null  # null for auto-detection
+  omnilingual:
+    model_path: null  # Path to Omnilingual ASR model
+
+# TTS Configuration
+tts:
+  engine: "mms"  # Options: mms (offline), cartesia (online), indic_parler
+  default_language: "ml"  # Malayalam default
+
+  # MMS-TTS (Offline - Recommended for speed)
+  mms:
+    device: "cuda"  # cuda or cpu
+    # Model auto-downloads on first use (~300MB per language)
+
+  # Cartesia (Online - High quality)
+  cartesia:
+    api_key: "${CARTESIA_API_KEY}"  # Set in .env
+    model_id: "sonic-2"
+    voice_id: null  # Use default or specify voice ID
+
+  supported_languages:
+    - ml  # Malayalam (primary)
+    - hi  # Hindi
+    - ta  # Tamil
+    - te  # Telugu
+    - bn  # Bengali
+    - mr  # Marathi
+    - gu  # Gujarati
+    - kn  # Kannada
+    - en  # English
+
+# Translation Configuration
+translation:
+  engine: "indictrans2"
+  device: "cuda"
+  source_lang: "ml"  # Malayalam (user speaks)
+  target_lang: "en"  # English (LLM processes)
+
+# LLM Configuration
+llm:
+  engine: "qwen"
+  model_size: "1.5b"  # Options: 0.5b, 1.5b, 3b, 7b
+  device: "cuda"
+  max_new_tokens: 256
+  temperature: 0.7
+  max_memory_messages: 10  # Conversation history limit
+
+# NLU Configuration (optional - LLM handles this now)
+nlu:
+  intent_model: "local"  # Options: local, openai, anthropic
+  confidence_threshold: 0.7
+
+# Agent Configuration
+agents:
+  orchestrator: "langgraph"
+  available_agents:
+    - name: "info_agent"
+      description: "Handles information queries and general QA"
+      enabled: true
+    - name: "task_agent"
+      description: "Manages tasks, reminders, and calendar"
+      enabled: true
+    - name: "smart_home_agent"
+      description: "Controls smart home devices"
+      enabled: false
+
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+
+# Edge Device Configuration
+edge:
+  device_type: "raspberry_pi_5"
+  audio:
+    sample_rate: 16000
+    channels: 1
+    chunk_size: 1024
+  wake_word:
+    enabled: true
+    keyword: "hey assistant"
+    sensitivity: 0.5
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
