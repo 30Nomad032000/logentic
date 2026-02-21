@@ -1,6 +1,9 @@
 """
-Voice Assistant Pipeline Orchestrator
+Voice Assistant Pipeline Orchestrator (Legacy)
 Connects all components: ASR → Translation → LLM → Translation → TTS
+
+Note: This is the legacy orchestrator. For new deployments, use
+PipecatVoicePipeline from src.pipeline.pipecat_pipeline instead.
 """
 
 import logging
@@ -136,7 +139,11 @@ class VoiceAssistantPipeline:
         if self._asr is not None:
             return
 
-        if self.asr_engine == "whisper":
+        if self.asr_engine == "pingala":
+            from ..asr import PingalaASR
+            self._asr = PingalaASR(device=self.device)
+            self._asr.load_model()
+        elif self.asr_engine == "whisper":
             from ..asr import WhisperASR
             self._asr = WhisperASR(
                 model_size=self.asr_model_size,
@@ -152,7 +159,10 @@ class VoiceAssistantPipeline:
             return
 
         from ..translation import IndicTranslator
-        self._translator = IndicTranslator(device=self.device)
+        self._translator = IndicTranslator(
+            device=self.device,
+            model_variant=getattr(self, 'translation_variant', 'dist'),
+        )
         # Pre-load both directions
         self._translator.load_models(["indic-en", "en-indic"])
 
@@ -161,11 +171,20 @@ class VoiceAssistantPipeline:
         if self._llm is not None:
             return
 
-        from ..llm import QwenLLM
-        self._llm = QwenLLM(
-            model_size=self.llm_model_size,
-            device=self.device,
-        )
+        llm_engine = getattr(self, 'llm_engine', 'qwen')
+        if llm_engine == "qwen3":
+            from ..llm import Qwen3LLM
+            self._llm = Qwen3LLM(
+                model_size=self.llm_model_size,
+                backend=getattr(self, 'llm_backend', 'llamacpp'),
+                device=self.device,
+            )
+        else:
+            from ..llm import QwenLLM
+            self._llm = QwenLLM(
+                model_size=self.llm_model_size,
+                device=self.device,
+            )
         # Set voice assistant system prompt
         self._llm.set_system_prompt("""You are a helpful voice assistant that speaks Malayalam. You provide concise, friendly responses suitable for spoken conversation. Keep responses brief (1-3 sentences) and natural. Respond in English - your response will be translated to Malayalam.
 

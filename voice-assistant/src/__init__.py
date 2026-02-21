@@ -1,6 +1,6 @@
 """
 Hyper-Localized Multilingual Voice Assistant
-Sprint 1 - Foundation Implementation
+Edge Computing + Agentic Workflows for Regional Indian Languages
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

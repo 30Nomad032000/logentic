@@ -41,11 +41,11 @@ class TTSEngine:
         results = engine.compare("Hello world", backends=["mms", "cartesia"])
     """
 
-    BACKENDS = ["mms", "cartesia", "indic"]
+    BACKENDS = ["mms", "cartesia", "indic", "chatterbox"]
 
     def __init__(
         self,
-        backend: Literal["mms", "cartesia", "indic"] = "mms",
+        backend: Literal["mms", "cartesia", "indic", "chatterbox"] = "mms",
         device: str = "cuda",
         **kwargs,
     ):
@@ -55,7 +55,7 @@ class TTSEngine:
         Args:
             backend: TTS backend to use
             device: Device for local models (cuda/cpu)
-            **kwargs: Backend-specific arguments
+            **kwargs: Backend-specific arguments (e.g. variant="mini" for indic)
         """
         self.default_backend = backend
         self.device = device
@@ -75,7 +75,14 @@ class TTSEngine:
 
             elif backend == "indic":
                 from .indic_tts import IndicTTS
-                self._engines[backend] = IndicTTS(device=self.device)
+                variant = self.kwargs.get("variant", "mini")
+                self._engines[backend] = IndicTTS(
+                    device=self.device, variant=variant
+                )
+
+            elif backend == "chatterbox":
+                from .chatterbox_tts import ChatterboxTTS
+                self._engines[backend] = ChatterboxTTS(device=self.device)
 
             else:
                 raise ValueError(f"Unknown backend: {backend}")

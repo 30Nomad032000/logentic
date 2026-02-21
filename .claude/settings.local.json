@@ -16,7 +16,10 @@
       "Bash(git commit:*)",
       "Bash(gh api:*)",
       "Bash(git config:*)",
-      "Bash(gh repo create:*)"
+      "Bash(gh repo create:*)",
+      "WebFetch(domain:docs.openclaw.ai)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

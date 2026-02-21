@@ -271,11 +271,38 @@ Respond naturally as if speaking to someone."""
 _llm = None
 
 
-def get_llm(model_size: str = "1.5b", device: str = "cuda") -> QwenLLM:
-    """Get or create singleton LLM instance."""
+def get_llm(
+    model_size: str = "1.5b",
+    device: str = "cuda",
+    engine: str = "qwen",
+    backend: str = "llamacpp",
+    **kwargs,
+):
+    """
+    Get or create singleton LLM instance.
+
+    Args:
+        model_size: Model size (0.5b/1.5b/3b/7b for qwen, 0.6b/1.7b/4b for qwen3)
+        device: Device to run on
+        engine: LLM engine - "qwen" (Qwen 2.5) or "qwen3" (Qwen 3)
+        backend: Backend for qwen3 - "llamacpp" or "transformers"
+        **kwargs: Additional kwargs passed to the LLM constructor
+
+    Returns:
+        QwenLLM or Qwen3LLM instance
+    """
     global _llm
     if _llm is None:
-        _llm = QwenLLM(model_size=model_size, device=device)
+        if engine == "qwen3":
+            from .qwen3 import Qwen3LLM
+            _llm = Qwen3LLM(
+                model_size=model_size,
+                backend=backend,
+                device=device,
+                **kwargs,
+            )
+        else:
+            _llm = QwenLLM(model_size=model_size, device=device, **kwargs)
     return _llm
 
 

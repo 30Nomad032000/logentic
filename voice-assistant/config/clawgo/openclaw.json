@@ -1,0 +1,25 @@
+{
+  "gateway": {
+    "url": "http://localhost:11434",
+    "provider": "ollama"
+  },
+  "model": {
+    "name": "qwen3:1.7b",
+    "provider": "ollama",
+    "options": {
+      "temperature": 0.7,
+      "num_predict": 256,
+      "top_p": 0.9
+    }
+  },
+  "voice": {
+    "input_device": "default",
+    "output_device": "default",
+    "sample_rate": 16000,
+    "vad_enabled": true
+  },
+  "workspace": {
+    "soul_file": "SOUL.md",
+    "tools_file": "TOOLS.md"
+  }
+}

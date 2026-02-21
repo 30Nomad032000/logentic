@@ -1,9 +1,9 @@
 # Voice Assistant Configuration
-# Sprint 1 - Development Settings
+# v0.2.0 - Major Upgrade
 
 app:
   name: "Hyper-Localized Voice Assistant"
-  version: "0.1.0"
+  version: "0.2.0"
   debug: true
 
 # Development Environment
@@ -13,29 +13,42 @@ dev:
 
 # ASR Configuration
 asr:
-  engine: "whisper"  # Options: whisper, omnilingual
+  engine: "pingala"  # Options: pingala (recommended), whisper, indic_whisper
+
+  # Pingala V1 (CPU-first, 2.94% WER - recommended)
+  pingala:
+    model_id: "shunya-labs/pingala-v1"
+    device: "cpu"  # CPU-optimized, no GPU needed
+
+  # Whisper (legacy fallback)
   whisper:
     model_size: "base"  # Options: tiny, base, small, medium, large
     device: "cuda"  # Options: cuda, cpu
     language: null  # null for auto-detection
-  omnilingual:
-    model_path: null  # Path to Omnilingual ASR model
 
 # TTS Configuration
 tts:
-  engine: "mms"  # Options: mms (offline), cartesia (online), indic_parler
+  engine: "mms"  # Options: mms (offline), cartesia (online), indic, chatterbox
   default_language: "ml"  # Malayalam default
 
   # MMS-TTS (Offline - Recommended for speed)
   mms:
-    device: "cuda"  # cuda or cpu
-    # Model auto-downloads on first use (~300MB per language)
+    device: "cpu"
+
+  # Indic Parler-TTS (69 voices, emotion control)
+  indic:
+    variant: "mini"  # Options: full, mini (recommended for edge)
+    device: "cpu"
+
+  # Chatterbox-Turbo (350M, low compute, 24kHz)
+  chatterbox:
+    device: "cpu"
 
   # Cartesia (Online - High quality)
   cartesia:
     api_key: "${CARTESIA_API_KEY}"  # Set in .env
     model_id: "sonic-2"
-    voice_id: null  # Use default or specify voice ID
+    voice_id: null
 
   supported_languages:
     - ml  # Malayalam (primary)
@@ -51,33 +64,65 @@ tts:
 # Translation Configuration
 translation:
   engine: "indictrans2"
-  device: "cuda"
+  device: "cpu"
+  model_variant: "dist"  # Options: full (1B), dist (~211M, 5x smaller, recommended)
   source_lang: "ml"  # Malayalam (user speaks)
   target_lang: "en"  # English (LLM processes)
+  enable_m2m: false  # Enable direct Indic-to-Indic translation
 
 # LLM Configuration
 llm:
-  engine: "qwen"
-  model_size: "1.5b"  # Options: 0.5b, 1.5b, 3b, 7b
-  device: "cuda"
+  engine: "qwen3"  # Options: qwen (2.5), qwen3 (recommended)
+  model_size: "1.7b"  # Qwen3 options: 0.6b, 1.7b, 4b | Qwen2.5 options: 0.5b, 1.5b, 3b, 7b
+  device: "cpu"
+  backend: "llamacpp"  # Options: llamacpp (recommended for edge), transformers
   max_new_tokens: 256
   temperature: 0.7
-  max_memory_messages: 10  # Conversation history limit
+  max_memory_messages: 10
+
+  # llama.cpp backend config (used when backend=llamacpp)
+  llamacpp:
+    n_ctx: 2048
+    n_threads: 4
+    n_gpu_layers: 0  # 0 for CPU-only on Pi
+    quantization: "Q4_K_M"  # Options: Q4_K_M (recommended), Q5_K_M, Q8_0
+
+# Inference Engine Configuration
+inference:
+  asr_backend: "transformers"  # Options: transformers, onnx
+  tts_backend: "transformers"  # Options: transformers, onnx
+  llm_backend: "llamacpp"  # Options: llamacpp, transformers
 
 # NLU Configuration (optional - LLM handles this now)
 nlu:
   intent_model: "local"  # Options: local, openai, anthropic
   confidence_threshold: 0.7
 
+# Pipeline Configuration
+pipeline:
+  mode: "pipecat"  # Options: pipecat (recommended), legacy
+  default_language: "ml"
+
 # Agent Configuration
 agents:
-  orchestrator: "langgraph"
+  orchestrator: "langgraph"  # Options: langgraph, clawgo
+
+  # ClawGo (OpenClaw Pi node) config
+  clawgo:
+    gateway_url: "http://localhost:11434"  # Ollama endpoint
+    llm_provider: "ollama"
+    llm_model: "qwen3:1.7b"
+    workspace_dir: null  # Uses config/clawgo/ by default
+
   available_agents:
     - name: "info_agent"
       description: "Handles information queries and general QA"
       enabled: true
     - name: "task_agent"
       description: "Manages tasks, reminders, and calendar"
+      enabled: true
+    - name: "chat_agent"
+      description: "General conversation"
       enabled: true
     - name: "smart_home_agent"
       description: "Controls smart home devices"
