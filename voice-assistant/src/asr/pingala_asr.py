@@ -1,7 +1,7 @@
 """
 Pingala V1 ASR Implementation
 CPU-first multilingual speech recognition with 2.94% WER.
-Supports 200+ languages including all Indian target languages.
+Uses the official pingala-shunya SDK.
 """
 
 import logging
@@ -16,12 +16,12 @@ class PingalaASR:
     """
     Pingala V1 Automatic Speech Recognition.
 
-    CPU-first model optimized for edge deployment.
+    Uses the official PingalaTranscriber from pingala-shunya package.
     Achieves 2.94% WER -- significantly better than Whisper on Indian languages.
     Supports 200+ languages including all 11 target Indian languages.
     """
 
-    MODEL_ID = "shunya-labs/pingala-v1"
+    MODEL_ID = "shunyalabs/pingala-v1-universal"
 
     SUPPORTED_INDIAN_LANGUAGES = {
         "hi": "Hindi",
@@ -43,69 +43,46 @@ class PingalaASR:
         device: str = "cpu",
         language: Optional[str] = None,
     ):
-        """
-        Initialize Pingala ASR.
-
-        Args:
-            model_id: HuggingFace model ID (defaults to shunya-labs/pingala-v1)
-            device: Device to run on - cpu (default, optimized) or cuda
-            language: Target language code (None for auto-detection)
-        """
         self.model_id = model_id or self.MODEL_ID
         self.device = device
         self.language = language
-        self.model = None
-        self.processor = None
+        self.transcriber = None
 
     def load_model(self):
-        """Load the Pingala V1 model."""
+        """Load the Pingala V1 model via official SDK."""
         try:
-            from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
-            import torch
+            from pingala_shunya import PingalaTranscriber
 
             logger.info(f"Loading Pingala V1 model: {self.model_id}")
 
-            dtype = torch.float32 if self.device == "cpu" else torch.float16
-
-            self.processor = AutoProcessor.from_pretrained(
-                self.model_id,
-                trust_remote_code=True,
+            self.transcriber = PingalaTranscriber(
+                model_name=self.model_id,
+                backend="ct2",
             )
 
-            self.model = AutoModelForSpeechSeq2Seq.from_pretrained(
-                self.model_id,
-                torch_dtype=dtype,
-                trust_remote_code=True,
-            )
-            self.model.to(self.device)
-            self.model.eval()
-
-            logger.info(f"Pingala V1 model loaded successfully on {self.device}")
+            logger.info(f"Pingala V1 model loaded successfully")
 
         except Exception as e:
             logger.error(f"Failed to load Pingala V1 model: {e}")
             raise
 
-    def _load_audio(self, audio: Union[str, Path, np.ndarray]) -> np.ndarray:
-        """Load and preprocess audio to 16kHz mono float32."""
-        if isinstance(audio, np.ndarray):
-            audio_data = audio
-        else:
-            import soundfile as sf
-            audio_data, sr = sf.read(str(audio))
+    def _ensure_wav(self, audio: Union[str, Path]) -> str:
+        """Convert non-WAV audio to WAV using ffmpeg."""
+        audio_path = str(audio)
+        if audio_path.lower().endswith(".wav"):
+            return audio_path
 
-            # Resample to 16kHz if needed
-            if sr != 16000:
-                duration = len(audio_data) / sr
-                target_length = int(duration * 16000)
-                indices = np.linspace(0, len(audio_data) - 1, target_length).astype(int)
-                audio_data = audio_data[indices]
+        # Use ffmpeg to convert to a temp WAV file
+        import tempfile
+        import subprocess
 
-        # Convert to mono if stereo
-        if len(audio_data.shape) > 1:
-            audio_data = audio_data.mean(axis=1)
-
-        return audio_data.astype(np.float32)
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        tmp.close()
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", audio_path, "-ar", "16000", "-ac", "1", tmp.name],
+            capture_output=True,
+        )
+        return tmp.name
 
     def transcribe(
         self,
@@ -120,15 +97,9 @@ class PingalaASR:
             language: Override language for this transcription
 
         Returns:
-            Dictionary with transcription results:
-            - text: Transcribed text
-            - language: Detected/used language
-            - language_name: Human-readable language name
-            - segments: Detailed segments (if available)
+            Dictionary with text, language, language_name, segments
         """
-        import torch
-
-        if self.model is None:
+        if self.transcriber is None:
             self.load_model()
 
         target_lang = language or self.language
@@ -136,45 +107,60 @@ class PingalaASR:
         try:
             logger.info(f"Transcribing audio (language: {target_lang or 'auto'})")
 
-            audio_data = self._load_audio(audio)
+            tmp_wav = None
 
-            # Process audio through model
-            inputs = self.processor(
-                audio_data,
-                sampling_rate=16000,
-                return_tensors="pt",
-            )
-            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            if isinstance(audio, np.ndarray):
+                # Save numpy array to temp WAV
+                import tempfile
+                import soundfile as sf
 
-            # Set language token if specified
-            generate_kwargs = {}
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+                tmp.close()
+                if len(audio.shape) > 1:
+                    audio = audio.mean(axis=1)
+                sf.write(tmp.name, audio.astype(np.float32), 16000)
+                audio_path = tmp.name
+                tmp_wav = tmp.name
+            else:
+                audio_path = self._ensure_wav(audio)
+                if audio_path != str(audio):
+                    tmp_wav = audio_path
+
+            # Use official SDK transcribe_file
+            kwargs = {"beam_size": 5}
             if target_lang:
-                generate_kwargs["language"] = target_lang
+                kwargs["language"] = target_lang
 
-            with torch.no_grad():
-                predicted_ids = self.model.generate(
-                    **inputs,
-                    **generate_kwargs,
-                )
-
-            # Decode
-            transcription = self.processor.batch_decode(
-                predicted_ids, skip_special_tokens=True
+            segments, info = self.transcriber.transcribe_file(
+                audio_path,
+                **kwargs,
             )
 
-            text = transcription[0].strip() if transcription else ""
-            detected_lang = target_lang or "auto"
+            # Clean up temp file
+            if tmp_wav:
+                try:
+                    Path(tmp_wav).unlink()
+                except Exception:
+                    pass
+
+            # Combine all segment texts
+            text = " ".join(seg.text.strip() for seg in segments).strip()
+
+            detected_lang = target_lang or getattr(info, "language", "auto")
             lang_name = self.SUPPORTED_INDIAN_LANGUAGES.get(
                 detected_lang, detected_lang
             )
 
-            logger.info(f"Transcription complete: '{text[:80]}...'")
+            logger.info(f"Transcription complete: '{text[:80]}'")
 
             return {
                 "text": text,
                 "language": detected_lang,
                 "language_name": lang_name,
-                "segments": [],
+                "segments": [
+                    {"start": s.start, "end": s.end, "text": s.text}
+                    for s in segments
+                ],
             }
 
         except Exception as e:
@@ -182,41 +168,21 @@ class PingalaASR:
             raise
 
     def detect_language(self, audio: Union[str, Path, np.ndarray]) -> dict:
-        """
-        Detect the language of audio.
-
-        Args:
-            audio: Audio file path or numpy array
-
-        Returns:
-            Dictionary with language detection results
-        """
-        # Transcribe with auto-detection to get language
+        """Detect the language of audio."""
         result = self.transcribe(audio, language=None)
-
         return {
             "language": result["language"],
             "language_name": result["language_name"],
-            "confidence": 0.0,  # Pingala doesn't expose per-language probs directly
+            "confidence": 0.0,
             "all_probabilities": {},
         }
 
 
-# Convenience function
 def transcribe_audio(
     audio_path: str,
     language: Optional[str] = None,
 ) -> str:
-    """
-    Quick transcription using Pingala V1.
-
-    Args:
-        audio_path: Path to audio file
-        language: Target language
-
-    Returns:
-        Transcribed text
-    """
+    """Quick transcription using Pingala V1."""
     asr = PingalaASR(language=language)
     result = asr.transcribe(audio_path)
     return result["text"]

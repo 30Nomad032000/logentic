@@ -4,9 +4,13 @@ Main API endpoints + Dashboard for the hyper-localized multilingual voice assist
 """
 
 import logging
+import time
 from typing import Optional
 from pathlib import Path
 import tempfile
+
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -61,6 +65,8 @@ class HealthResponse(BaseModel):
 
 asr_engine = None
 tts_engine = None
+llm_engine = None
+translator = None
 orchestrator = None
 app_config = None
 db = None
@@ -71,7 +77,7 @@ db = None
 @app.on_event("startup")
 async def startup_event():
     """Initialize models and database on startup."""
-    global asr_engine, tts_engine, orchestrator, app_config, db
+    global asr_engine, tts_engine, llm_engine, translator, orchestrator, app_config, db
 
     logger.info("Initializing voice assistant components...")
 
@@ -86,28 +92,71 @@ async def startup_event():
         app_config = load_config()
 
         # ASR
-        if app_config.asr.engine == "pingala":
-            from src.asr import PingalaASR
-            asr_engine = PingalaASR(device=app_config.asr.device)
-        elif app_config.asr.engine == "whisper":
-            from src.asr import WhisperASR
-            asr_engine = WhisperASR(
-                model_size=app_config.asr.whisper_model_size,
-                device=app_config.asr.device,
-            )
-        else:
-            from src.asr import WhisperASR
-            asr_engine = WhisperASR(model_size="base")
+        try:
+            if app_config.asr.engine == "mms":
+                from src.asr import create_asr
+                asr_engine = create_asr(device=app_config.asr.device)
+            elif app_config.asr.engine == "pingala":
+                from src.asr import PingalaASR
+                asr_engine = PingalaASR(device=app_config.asr.device)
+            elif app_config.asr.engine == "indic_whisper":
+                from src.asr import IndicWhisperASR
+                asr_engine = IndicWhisperASR(device=app_config.asr.device)
+            elif app_config.asr.engine == "whisper":
+                from src.asr import WhisperASR
+                asr_engine = WhisperASR(
+                    model_size=app_config.asr.whisper_model_size,
+                    device=app_config.asr.device,
+                )
+            else:
+                from src.asr import WhisperASR
+                asr_engine = WhisperASR(model_size="base")
+            logger.info(f"ASR initialized: {type(asr_engine).__name__}")
+        except Exception as e:
+            logger.warning(f"ASR initialization failed (non-critical): {e}")
 
         # TTS
-        from src.tts import TTSEngine
-        tts_engine = TTSEngine(
-            backend=app_config.tts.engine,
-            device=app_config.tts.device,
-            variant=app_config.tts.indic_variant,
-        )
+        try:
+            from src.tts import TTSEngine
+            tts_engine = TTSEngine(
+                backend=app_config.tts.engine,
+                device=app_config.tts.device,
+                variant=app_config.tts.indic_variant,
+            )
+            logger.info(f"TTS initialized: {app_config.tts.engine}")
+        except Exception as e:
+            logger.warning(f"TTS initialization failed (non-critical): {e}")
 
-        # Agent orchestrator
+        # LLM
+        try:
+            from src.llm import get_llm
+            llm_engine = get_llm(
+                model_size=app_config.llm.model_size,
+                device=app_config.llm.device,
+                engine=app_config.llm.engine,
+                backend=app_config.llm.backend,
+            )
+            llm_engine.load_model()
+            logger.info(f"LLM initialized: {app_config.llm.engine} {app_config.llm.model_size}")
+        except Exception as e:
+            logger.warning(f"LLM initialization failed (will use fallback responses): {e}")
+            llm_engine = None
+
+        # Translation
+        try:
+            from src.translation import IndicTranslator
+            translator = IndicTranslator(
+                device=app_config.translation.device,
+                model_variant=app_config.translation.model_variant,
+            )
+            # Pre-load both directions
+            translator.load_models(["indic-en", "en-indic"])
+            logger.info(f"Translation initialized: IndicTrans2 ({app_config.translation.model_variant})")
+        except Exception as e:
+            logger.warning(f"Translation initialization failed (non-critical): {e}")
+            translator = None
+
+        # Agent orchestrator — pass LLM so agents can generate real responses
         from src.agents import AgentFactory
         orchestrator = AgentFactory.create(
             backend=app_config.agents.orchestrator,
@@ -117,16 +166,22 @@ async def startup_event():
                 "llm_model": app_config.agents.clawgo_llm_model,
                 "workspace_dir": app_config.agents.clawgo_workspace_dir,
             },
+            llm=llm_engine,
         )
 
         logger.info(
             f"Components initialized: ASR={app_config.asr.engine}, "
-            f"LLM={app_config.llm.engine}, TTS={app_config.tts.engine}, "
+            f"LLM={'loaded' if llm_engine else 'fallback'}, "
+            f"TTS={app_config.tts.engine}, "
             f"Agents={app_config.agents.orchestrator}"
         )
 
     except Exception as e:
         logger.error(f"Failed to initialize components: {e}")
+        # Ensure orchestrator exists even if config fails
+        if orchestrator is None:
+            from src.agents import AgentFactory
+            orchestrator = AgentFactory.create(backend="langgraph", llm=None)
 
 
 @app.on_event("shutdown")
@@ -275,7 +330,9 @@ async def health_check():
     """Health check endpoint."""
     components = {
         "asr": type(asr_engine).__name__ if asr_engine else "not loaded",
+        "translation": "IndicTrans2" if translator else "not loaded",
         "tts": type(tts_engine).__name__ if tts_engine else "not loaded",
+        "llm": type(llm_engine).__name__ if llm_engine else "fallback",
         "orchestrator": type(orchestrator).__name__ if orchestrator else "not loaded",
         "database": "connected" if db else "not loaded",
     }
@@ -296,7 +353,18 @@ async def transcribe_audio(
         raise HTTPException(status_code=503, detail="ASR engine not initialized")
 
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        # Determine file extension from upload content type
+        content_type = audio.content_type or ""
+        if "webm" in content_type:
+            suffix = ".webm"
+        elif "ogg" in content_type:
+            suffix = ".ogg"
+        elif "mp4" in content_type or "m4a" in content_type:
+            suffix = ".m4a"
+        else:
+            suffix = ".wav"
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             content = await audio.read()
             tmp.write(content)
             tmp_path = tmp.name
@@ -325,7 +393,17 @@ async def process_audio(
         raise HTTPException(status_code=503, detail="Components not initialized")
 
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        content_type = audio.content_type or ""
+        if "webm" in content_type:
+            suffix = ".webm"
+        elif "ogg" in content_type:
+            suffix = ".ogg"
+        elif "mp4" in content_type or "m4a" in content_type:
+            suffix = ".m4a"
+        else:
+            suffix = ".wav"
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             content = await audio.read()
             tmp.write(content)
             tmp_path = tmp.name
@@ -346,6 +424,8 @@ async def process_audio(
             response_text=response_text,
             language=detected_lang,
             intent=intent,
+            llm_ms=agent_result.get("llm_time_ms", 0),
+            total_ms=agent_result.get("llm_time_ms", 0),
         )
 
         return ProcessResponse(
@@ -431,6 +511,7 @@ async def websocket_stream_endpoint(websocket: WebSocket):
                             response_text=response_text,
                             language=asr_result.get("language", "en"),
                             intent=agent_result.get("intent", ""),
+                            llm_ms=agent_result.get("llm_time_ms", 0),
                         )
 
                         await websocket.send_json({
@@ -458,26 +539,68 @@ async def process_text(
     text: str = Form(...),
     language: str = Form("en"),
 ):
-    """Process text input directly (skip ASR)."""
+    """
+    Process text input through the full pipeline (skip ASR).
+
+    Pipeline: Input → Translate(src→EN) → LLM → Translate(EN→src) → Response
+    If input is already English, translation steps are skipped.
+    """
     if orchestrator is None:
         raise HTTPException(status_code=503, detail="Orchestrator not initialized")
 
     try:
-        result = orchestrator.process(text, language)
-        response_text = result.get("response", "")
+        total_start = time.perf_counter()
+        translation_ms = 0.0
+        english_input = text
+        original_input = text
+
+        # Step 1: Translate input to English (if not English)
+        if language != "en" and translator:
+            try:
+                t_start = time.perf_counter()
+                english_input = translator.translate(text, source_lang=language, target_lang="en")
+                translation_ms += (time.perf_counter() - t_start) * 1000
+                logger.info(f"Translated input ({language}→en): {english_input[:80]}")
+            except Exception as e:
+                logger.warning(f"Input translation failed, using raw text: {e}")
+                english_input = text
+
+        # Step 2: Process through agent orchestrator (LLM)
+        llm_start = time.perf_counter()
+        result = orchestrator.process(english_input, "en")
+        llm_ms = (time.perf_counter() - llm_start) * 1000
+
+        english_response = result.get("response", "")
         intent = result.get("intent", "")
 
+        # Step 3: Translate response back to original language (if not English)
+        final_response = english_response
+        if language != "en" and translator and english_response:
+            try:
+                t_start = time.perf_counter()
+                final_response = translator.translate(english_response, source_lang="en", target_lang=language)
+                translation_ms += (time.perf_counter() - t_start) * 1000
+                logger.info(f"Translated response (en→{language}): {final_response[:80]}")
+            except Exception as e:
+                logger.warning(f"Response translation failed, returning English: {e}")
+                final_response = english_response
+
+        total_ms = (time.perf_counter() - total_start) * 1000
+
         _log_conversation(
-            user_text=text,
-            response_text=response_text,
+            user_text=original_input,
+            response_text=final_response,
             language=language,
             intent=intent,
+            translation_ms=translation_ms,
+            llm_ms=llm_ms,
+            total_ms=total_ms,
         )
 
         return {
-            "input": text,
+            "input": original_input,
             "intent": intent,
-            "response": response_text,
+            "response": final_response,
             "language": language,
         }
 
@@ -497,7 +620,7 @@ async def serve_spa(full_path: str):
     return FileResponse(STATIC_DIR / "index.html")
 
 
-# Run with: uvicorn src.api.main:app --reload
+# Run with: uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,14 +1,50 @@
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface2: #242836;
-  --border: #2e3348;
-  --text: #e4e6f0;
-  --text-dim: #8b8fa3;
-  --accent: #6c63ff;
-  --accent-glow: rgba(108, 99, 255, 0.15);
-  --green: #22c55e;
-  --red: #ef4444;
-  --orange: #f59e0b;
-  --blue: #3b82f6;
+  /* Surfaces */
+  --bg: #111110;
+  --bg-subtle: #161615;
+  --surface: rgba(26, 25, 23, 0.7);
+  --surface-solid: #1a1917;
+  --surface2: #211f1d;
+  --surface-hover: #282624;
+  --border: rgba(255, 200, 120, 0.06);
+  --border-strong: rgba(255, 200, 120, 0.12);
+
+  /* Text */
+  --text: #ede9e1;
+  --text-secondary: #a09a8e;
+  --text-dim: #8a8478;
+
+  /* Accent — warm amber/copper */
+  --accent: #e8a44a;
+  --accent-dim: #c48832;
+  --accent-glow: rgba(232, 164, 74, 0.08);
+  --accent-glow-strong: rgba(232, 164, 74, 0.15);
+
+  /* Semantic */
+  --green: #5cb97a;
+  --green-glow: rgba(92, 185, 122, 0.1);
+  --red: #d4564e;
+  --red-glow: rgba(212, 86, 78, 0.1);
+  --orange: #d49a4e;
+  --orange-glow: rgba(212, 154, 78, 0.1);
+  --blue: #5a9ec4;
+  --blue-glow: rgba(90, 158, 196, 0.1);
+  --teal: #4db8a4;
+  --teal-glow: rgba(77, 184, 164, 0.1);
+
+  /* Typography */
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
+  --font-body: "DM Sans", system-ui, sans-serif;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 40px rgba(232, 164, 74, 0.05);
 }

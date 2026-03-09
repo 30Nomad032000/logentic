@@ -22,6 +22,7 @@ class AgentFactory:
     def create(
         backend: str = "langgraph",
         config: Optional[Dict[str, Any]] = None,
+        llm=None,
     ):
         """
         Create an agent instance.
@@ -29,6 +30,7 @@ class AgentFactory:
         Args:
             backend: Agent backend - "langgraph" or "clawgo"
             config: Backend-specific configuration
+            llm: Optional LLM instance for generating responses
 
         Returns:
             AgentOrchestrator or ClawGoAgent instance
@@ -49,7 +51,7 @@ class AgentFactory:
 
         elif backend == "langgraph":
             from .orchestrator import AgentOrchestrator
-            agent = AgentOrchestrator(config=config)
+            agent = AgentOrchestrator(config=config, llm=llm)
             agent.setup()
             return agent
 

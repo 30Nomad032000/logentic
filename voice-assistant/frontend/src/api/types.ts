@@ -64,3 +64,17 @@ export interface TextResponse {
   response: string;
   language: string;
 }
+
+export interface TranscriptionResponse {
+  text: string;
+  language: string;
+  language_name: string;
+  confidence: number | null;
+}
+
+export interface ProcessAudioResponse {
+  transcription: string;
+  intent: string;
+  response_text: string;
+  language: string;
+}

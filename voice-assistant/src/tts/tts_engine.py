@@ -71,7 +71,8 @@ class TTSEngine:
 
             elif backend == "cartesia":
                 from .cartesia_tts import CartesiaTTS
-                self._engines[backend] = CartesiaTTS(**self.kwargs)
+                cartesia_kwargs = {k: v for k, v in self.kwargs.items() if k not in ("variant",)}
+                self._engines[backend] = CartesiaTTS(**cartesia_kwargs)
 
             elif backend == "indic":
                 from .indic_tts import IndicTTS

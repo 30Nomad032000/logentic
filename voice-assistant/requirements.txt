@@ -14,7 +14,7 @@ sentencepiece>=0.1.99
 sacremoses>=0.0.53
 
 # Text-to-Speech (TTS)
-TTS>=0.22.0
+# TTS>=0.22.0  # Requires Python <=3.11
 cartesia>=1.0.0  # Cartesia TTS API
 
 # Agent Frameworks

@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { getConversation } from "../../api/client";
 import { useDashboard } from "../../context/DashboardContext";
 import type { Conversation } from "../../api/types";
-import { Card } from "../common/Card";
+import { Card } from "@/components/common/Card";
 import { ConversationList } from "./ConversationList";
 import { ConversationDetail } from "./ConversationDetail";
 

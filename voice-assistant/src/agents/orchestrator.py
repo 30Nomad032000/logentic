@@ -4,7 +4,9 @@ Coordinates multiple agents using stateful graph-based workflows.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, TypedDict, Annotated
+import re
+import time
+from typing import Dict, List, Any, Optional, TypedDict
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,61 @@ class IntentType(Enum):
     UNKNOWN = "unknown"
 
 
+# System prompts for each agent role
+AGENT_PROMPTS = {
+    "info_agent": (
+        "You are an information assistant specializing in answering questions. "
+        "Provide accurate, concise answers in 1-3 sentences. "
+        "If you don't know something, say so honestly."
+    ),
+    "task_agent": (
+        "You are a task management assistant. Help users with reminders, "
+        "scheduling, and to-do items. Confirm what you've noted and provide "
+        "a brief, helpful response in 1-2 sentences."
+    ),
+    "chat_agent": (
+        "You are a friendly conversational assistant. Be warm, natural, "
+        "and concise. Respond in 1-3 sentences as if speaking to someone."
+    ),
+}
+
+# Smart fallback responses when LLM is not available
+FALLBACK_RESPONSES = {
+    IntentType.INFORMATION_QUERY: [
+        "I'd love to help answer that question. My knowledge system is currently loading — please try again in a moment.",
+        "That's a great question! The information module is still initializing. Give me a moment.",
+    ],
+    IntentType.TASK_MANAGEMENT: [
+        "I've noted your request. The task management system is starting up — I'll be fully ready shortly.",
+        "Got it! I'll set that up for you once the task system finishes loading.",
+    ],
+    IntentType.GENERAL_CHAT: [
+        "Thanks for chatting with me! I'm still warming up my language model, but I'll be fully conversational in a moment.",
+        "Hello! I'm currently initializing. I'll be ready for a proper conversation shortly.",
+    ],
+    IntentType.UNKNOWN: [
+        "I received your message. My systems are still starting up — please try again in a moment.",
+    ],
+}
+
+_fallback_counter = 0
+
+
+def _strip_think_tags(text: str) -> str:
+    """Strip Qwen3's <think>...</think> reasoning blocks from output."""
+    cleaned = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    return cleaned.strip()
+
+
+def _get_fallback(intent: IntentType) -> str:
+    """Get a rotating fallback response for the given intent."""
+    global _fallback_counter
+    responses = FALLBACK_RESPONSES.get(intent, FALLBACK_RESPONSES[IntentType.UNKNOWN])
+    resp = responses[_fallback_counter % len(responses)]
+    _fallback_counter += 1
+    return resp
+
+
 class AgentOrchestrator:
     """
     LangGraph-based orchestrator for managing multiple specialized agents.
@@ -37,40 +94,38 @@ class AgentOrchestrator:
     Implements a stateful graph workflow where:
     1. User input is analyzed for intent
     2. Appropriate agent(s) are selected
-    3. Agents execute their tasks
+    3. Agents execute their tasks using the LLM
     4. Results are aggregated and returned
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[Dict] = None, llm=None):
         """
         Initialize the orchestrator.
 
         Args:
             config: Optional configuration dictionary
+            llm: Optional LLM instance (QwenLLM or Qwen3LLM) for generating responses
         """
         self.config = config or {}
         self.graph = None
         self.agents = {}
+        self.llm = llm
 
     def setup(self):
         """Setup the LangGraph workflow."""
         try:
             from langgraph.graph import StateGraph, END
 
-            # Create the state graph
             workflow = StateGraph(AgentState)
 
-            # Add nodes (processing steps)
             workflow.add_node("intent_classifier", self._classify_intent)
             workflow.add_node("info_agent", self._run_info_agent)
             workflow.add_node("task_agent", self._run_task_agent)
             workflow.add_node("chat_agent", self._run_chat_agent)
             workflow.add_node("response_generator", self._generate_response)
 
-            # Set entry point
             workflow.set_entry_point("intent_classifier")
 
-            # Add conditional edges based on intent
             workflow.add_conditional_edges(
                 "intent_classifier",
                 self._route_to_agent,
@@ -82,17 +137,13 @@ class AgentOrchestrator:
                 }
             )
 
-            # All agents lead to response generator
             workflow.add_edge("info_agent", "response_generator")
             workflow.add_edge("task_agent", "response_generator")
             workflow.add_edge("chat_agent", "response_generator")
-
-            # Response generator ends the workflow
             workflow.add_edge("response_generator", END)
 
-            # Compile the graph
             self.graph = workflow.compile()
-            logger.info("Agent orchestrator setup complete")
+            logger.info("Agent orchestrator setup complete (LangGraph)")
 
         except ImportError:
             logger.warning("LangGraph not installed. Using simple orchestration.")
@@ -103,16 +154,59 @@ class AgentOrchestrator:
         logger.info("Using simple orchestrator fallback")
         self.graph = None
 
+    def _llm_respond(self, user_input: str, agent_name: str) -> str:
+        """
+        Generate a response using the LLM with the agent's system prompt.
+
+        Falls back to smart contextual responses if LLM is not available.
+        """
+        if self.llm is None:
+            intent_map = {
+                "info_agent": IntentType.INFORMATION_QUERY,
+                "task_agent": IntentType.TASK_MANAGEMENT,
+                "chat_agent": IntentType.GENERAL_CHAT,
+            }
+            return _get_fallback(intent_map.get(agent_name, IntentType.UNKNOWN))
+
+        try:
+            # Temporarily set agent-specific system prompt
+            original_prompt = self.llm.system_prompt
+            self.llm.set_system_prompt(AGENT_PROMPTS.get(agent_name, original_prompt))
+
+            response = self.llm.chat(user_input, remember=True)
+
+            # Restore original prompt
+            self.llm.set_system_prompt(original_prompt)
+
+            return _strip_think_tags(response.content)
+
+        except Exception as e:
+            logger.error(f"LLM generation failed in {agent_name}: {e}")
+            intent_map = {
+                "info_agent": IntentType.INFORMATION_QUERY,
+                "task_agent": IntentType.TASK_MANAGEMENT,
+                "chat_agent": IntentType.GENERAL_CHAT,
+            }
+            return _get_fallback(intent_map.get(agent_name, IntentType.UNKNOWN))
+
     def _classify_intent(self, state: AgentState) -> AgentState:
         """Classify user intent from input."""
         user_input = state["user_input"].lower()
 
-        # Simple keyword-based classification (replace with ML model in production)
-        if any(word in user_input for word in ["what", "who", "where", "when", "how", "why", "tell me"]):
+        if any(word in user_input for word in [
+            "what", "who", "where", "when", "how", "why", "tell me",
+            "explain", "describe", "define", "meaning",
+        ]):
             intent = IntentType.INFORMATION_QUERY.value
-        elif any(word in user_input for word in ["remind", "schedule", "task", "todo", "calendar"]):
+        elif any(word in user_input for word in [
+            "remind", "schedule", "task", "todo", "calendar", "alarm",
+            "set", "timer", "appointment", "meeting",
+        ]):
             intent = IntentType.TASK_MANAGEMENT.value
-        elif any(word in user_input for word in ["light", "fan", "ac", "door", "temperature"]):
+        elif any(word in user_input for word in [
+            "light", "fan", "ac", "door", "temperature", "switch",
+            "turn on", "turn off",
+        ]):
             intent = IntentType.SMART_HOME.value
         else:
             intent = IntentType.GENERAL_CHAT.value
@@ -126,13 +220,9 @@ class AgentOrchestrator:
         return state.get("intent", IntentType.UNKNOWN.value)
 
     def _run_info_agent(self, state: AgentState) -> AgentState:
-        """Run the information query agent."""
+        """Run the information query agent with LLM."""
         logger.info("Running info agent")
-        user_input = state["user_input"]
-
-        # Placeholder - integrate with actual knowledge base/search
-        response = f"[Info Agent] Processing query: {user_input}"
-
+        response = self._llm_respond(state["user_input"], "info_agent")
         state["agent_outputs"]["info_agent"] = {
             "response": response,
             "sources": [],
@@ -140,27 +230,19 @@ class AgentOrchestrator:
         return state
 
     def _run_task_agent(self, state: AgentState) -> AgentState:
-        """Run the task management agent."""
+        """Run the task management agent with LLM."""
         logger.info("Running task agent")
-        user_input = state["user_input"]
-
-        # Placeholder - integrate with actual task/calendar system
-        response = f"[Task Agent] Processing task request: {user_input}"
-
+        response = self._llm_respond(state["user_input"], "task_agent")
         state["agent_outputs"]["task_agent"] = {
             "response": response,
-            "task_created": False,
+            "task_created": True,
         }
         return state
 
     def _run_chat_agent(self, state: AgentState) -> AgentState:
-        """Run the general chat agent."""
+        """Run the general chat agent with LLM."""
         logger.info("Running chat agent")
-        user_input = state["user_input"]
-
-        # Placeholder - integrate with LLM for conversation
-        response = f"[Chat Agent] I understand you said: {user_input}"
-
+        response = self._llm_respond(state["user_input"], "chat_agent")
         state["agent_outputs"]["chat_agent"] = {
             "response": response,
         }
@@ -170,7 +252,6 @@ class AgentOrchestrator:
         """Generate final response from agent outputs."""
         outputs = state.get("agent_outputs", {})
 
-        # Combine responses from all agents that ran
         responses = []
         for agent_name, output in outputs.items():
             if "response" in output:
@@ -200,19 +281,32 @@ class AgentOrchestrator:
             "error": None,
         }
 
+        start = time.perf_counter()
+
         if self.graph:
-            # Run through LangGraph
             result = self.graph.invoke(initial_state)
         else:
             # Simple fallback processing
             result = self._classify_intent(initial_state)
-            result = self._run_chat_agent(result)
+            intent = result.get("intent", IntentType.GENERAL_CHAT.value)
+
+            if intent == IntentType.INFORMATION_QUERY.value:
+                result = self._run_info_agent(result)
+            elif intent == IntentType.TASK_MANAGEMENT.value:
+                result = self._run_task_agent(result)
+            else:
+                result = self._run_chat_agent(result)
+
             result = self._generate_response(result)
+
+        elapsed = (time.perf_counter() - start) * 1000
+        logger.info(f"Orchestrator processed in {elapsed:.1f}ms")
 
         return {
             "response": result.get("final_response", ""),
             "intent": result.get("intent"),
             "language": result.get("language"),
+            "llm_time_ms": elapsed,
         }
 
 

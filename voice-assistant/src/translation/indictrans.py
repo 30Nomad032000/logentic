@@ -7,6 +7,8 @@ Supports both full (1B) and distilled (~211M) model variants.
 import logging
 from typing import Optional, Literal
 
+from IndicTransToolkit import IndicProcessor
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,6 +72,7 @@ class IndicTranslator:
         self.model_variant = model_variant
         self.models = {}
         self.tokenizers = {}
+        self.ip = IndicProcessor(inference=True)
 
         if load_on_init:
             self.load_models()
@@ -235,11 +238,13 @@ class IndicTranslator:
         logger.info(f"Translating: {src_code} → {tgt_code}")
 
         try:
-            # Prepare input with language tags
-            input_text = f"{src_code} {text}"
+            # Preprocess with IndicProcessor (handles normalization + language tags)
+            batch = self.ip.preprocess_batch(
+                [text], src_lang=src_code, tgt_lang=tgt_code
+            )
 
             inputs = tokenizer(
-                input_text,
+                batch,
                 return_tensors="pt",
                 padding=True,
                 truncation=True,
@@ -249,26 +254,25 @@ class IndicTranslator:
             if self.device == "cuda":
                 inputs = {k: v.to("cuda") for k, v in inputs.items()}
 
-            # Generate translation
             with torch.no_grad():
                 outputs = model.generate(
                     **inputs,
                     max_length=max_length,
                     num_beams=5,
                     num_return_sequences=1,
-                    forced_bos_token_id=tokenizer.convert_tokens_to_ids(tgt_code),
                 )
 
-            # Decode output
-            translated = tokenizer.decode(
-                outputs[0],
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=True,
-            )
+            # Decode with target tokenizer context
+            with tokenizer.as_target_tokenizer():
+                decoded = tokenizer.batch_decode(
+                    outputs,
+                    skip_special_tokens=True,
+                    clean_up_tokenization_spaces=True,
+                )
 
-            # Remove language tag if present
-            if translated.startswith(tgt_code):
-                translated = translated[len(tgt_code):].strip()
+            # Postprocess to convert script (e.g. Devanagari -> Malayalam)
+            results = self.ip.postprocess_batch(decoded, lang=tgt_code)
+            translated = results[0] if results else ""
 
             logger.info(f"Translation complete: '{text[:50]}...' → '{translated[:50]}...'")
 

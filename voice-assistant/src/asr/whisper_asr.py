@@ -53,8 +53,15 @@ class WhisperASR:
     def load_model(self):
         """Load the Whisper model."""
         try:
+            import torch
             import whisper
-            logger.info(f"Loading Whisper model: {self.model_size}")
+
+            # Fall back to CPU if CUDA was requested but isn't available
+            if self.device == "cuda" and not torch.cuda.is_available():
+                logger.warning("CUDA requested but not available, falling back to CPU")
+                self.device = "cpu"
+
+            logger.info(f"Loading Whisper model: {self.model_size} on {self.device}")
             self.model = whisper.load_model(self.model_size, device=self.device)
             logger.info("Whisper model loaded successfully")
         except Exception as e:
@@ -87,26 +94,30 @@ class WhisperASR:
         try:
             logger.info(f"Transcribing audio (language: {target_lang or 'auto'})")
 
-            # Load audio using soundfile to avoid ffmpeg dependency
+            # Load audio — use whisper's ffmpeg-based loader for non-WAV
+            # formats (webm, ogg, m4a), soundfile for WAV
             audio_input = audio
             if isinstance(audio, (str, Path)):
-                try:
-                    import soundfile as sf
-                    audio_data, sr = sf.read(str(audio))
-                    # Resample to 16kHz if needed (Whisper expects 16kHz)
-                    if sr != 16000:
-                        # Simple resampling
-                        duration = len(audio_data) / sr
-                        target_length = int(duration * 16000)
-                        indices = np.linspace(0, len(audio_data) - 1, target_length).astype(int)
-                        audio_data = audio_data[indices]
-                    # Convert to float32 and mono
-                    if len(audio_data.shape) > 1:
-                        audio_data = audio_data.mean(axis=1)
-                    audio_input = audio_data.astype(np.float32)
-                except ImportError:
-                    # Fall back to whisper's loader (requires ffmpeg)
-                    audio_input = str(audio)
+                audio_str = str(audio)
+                if audio_str.lower().endswith(".wav"):
+                    try:
+                        import soundfile as sf
+                        audio_data, sr = sf.read(audio_str)
+                        if sr != 16000:
+                            duration = len(audio_data) / sr
+                            target_length = int(duration * 16000)
+                            indices = np.linspace(0, len(audio_data) - 1, target_length).astype(int)
+                            audio_data = audio_data[indices]
+                        if len(audio_data.shape) > 1:
+                            audio_data = audio_data.mean(axis=1)
+                        audio_input = audio_data.astype(np.float32)
+                    except (ImportError, Exception):
+                        audio_input = audio_str
+                else:
+                    # Non-WAV formats (webm, ogg, etc.) — use whisper's
+                    # ffmpeg-based loader which handles format conversion
+                    import whisper as _whisper
+                    audio_input = _whisper.load_audio(audio_str)
 
             result = self.model.transcribe(
                 audio_input,

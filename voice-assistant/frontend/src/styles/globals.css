@@ -1,5 +1,35 @@
 @import "./variables.css";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* shadcn/ui theme — mapped to amber dark palette */
+@layer base {
+  :root {
+    --background: 30 5% 7%;
+    --foreground: 38 20% 91%;
+    --card: 30 5% 9%;
+    --card-foreground: 38 20% 91%;
+    --popover: 30 5% 9%;
+    --popover-foreground: 38 20% 91%;
+    --primary: 35 77% 61%;
+    --primary-foreground: 30 5% 7%;
+    --secondary: 30 6% 13%;
+    --secondary-foreground: 35 10% 63%;
+    --muted: 30 6% 13%;
+    --muted-foreground: 35 8% 50%;
+    --accent: 35 77% 61%;
+    --accent-foreground: 30 5% 7%;
+    --destructive: 2 63% 55%;
+    --destructive-foreground: 38 20% 91%;
+    --border: 35 30% 14%;
+    --input: 30 6% 13%;
+    --ring: 35 62% 55%;
+    --radius: 0.625rem;
+  }
+}
+
 *,
 *::before,
 *::after {
@@ -9,25 +39,94 @@
 }
 
 body {
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Noise texture overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--border-strong);
   border-radius: 3px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 200, 120, 0.18);
+}
 
+/* Selection */
+::selection {
+  background: var(--accent-glow-strong);
+  color: var(--accent);
+}
+
+/* Keyframes */
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes stagePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }

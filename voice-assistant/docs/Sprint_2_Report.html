@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sprint 2 Report</title>
+<style>
+  @page { size: A4; margin: 20mm 22mm; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font: 11pt/1.6 Georgia, 'Times New Roman', Times, serif;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 190mm;
+    margin: 0 auto;
+    padding: 18mm 0;
+  }
+
+  /* Header */
+  header { margin-bottom: 32px; }
+  header h1 {
+    font-size: 18pt;
+    font-weight: normal;
+    letter-spacing: -0.3px;
+    margin-bottom: 2px;
+  }
+  header .project {
+    font-size: 10pt;
+    color: #555;
+    margin-bottom: 14px;
+  }
+  header .meta {
+    font-size: 9pt;
+    color: #333;
+    display: flex;
+    gap: 28px;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 6px 0;
+  }
+  header .meta span { white-space: nowrap; }
+
+  /* Sections */
+  section { margin-bottom: 26px; }
+  section h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-bottom: 3px;
+    border-bottom: 0.5px solid #999;
+  }
+  section h3 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    margin: 14px 0 6px;
+  }
+  section p { margin-bottom: 8px; }
+
+  /* Lists */
+  ul { padding-left: 18px; margin-bottom: 8px; }
+  li { margin-bottom: 3px; font-size: 10pt; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 8px 0 10px;
+  }
+  th, td {
+    border: 0.5px solid #888;
+    padding: 4px 7px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    font-weight: bold;
+    font-size: 9pt;
+    background: none;
+    border-bottom: 1.5px solid #333;
+  }
+
+  /* Chart */
+  .chart-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 12px auto 20px;
+  }
+  .chart-box {
+    position: relative;
+    height: 200px;
+    border-left: 1px solid #333;
+    border-bottom: 1px solid #333;
+    margin-left: 28px;
+  }
+  .chart-box .grid {
+    position: absolute; left: 0; right: 0;
+    border-top: 1px solid #ddd;
+  }
+  .chart-y { position: absolute; left: 0; width: 24px; height: 200px; }
+  .chart-y span {
+    position: absolute; right: 3px;
+    font: 7.5pt Georgia, serif; color: #666;
+    transform: translateY(50%);
+  }
+  .chart-x {
+    display: flex; margin-left: 28px;
+    font: 7.5pt Georgia, serif; color: #666;
+  }
+  .chart-x span { flex: 1; text-align: center; padding-top: 3px; }
+  .legend {
+    display: flex; gap: 16px; justify-content: center;
+    margin-top: 6px; font-size: 8pt; color: #555;
+  }
+  .legend i {
+    display: inline-block; width: 20px; height: 1.5px;
+    vertical-align: middle; margin-right: 4px;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 36px;
+    padding-top: 8px;
+    border-top: 0.5px solid #aaa;
+    font-size: 8pt;
+    color: #888;
+    text-align: center;
+  }
+
+  /* Print */
+  .page-break { page-break-before: always; }
+  @media print {
+    body { padding: 0; max-width: none; }
+    section { page-break-inside: avoid; }
+    .page-break { page-break-before: always; }
+    .chart-box, .legend i {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sprint 2 Report</h1>
+  <div class="project">Hyper-Localized Multilingual Voice Assistant</div>
+  <div class="meta">
+    <span><b>Sprint:</b> 2 of 6</span>
+    <span><b>Duration:</b> Week 3 &ndash; 4</span>
+    <span><b>Team:</b> Dev (Solo)</span>
+    <span><b>Velocity:</b> 21 / 21 pts</span>
+  </div>
+</header>
+
+<section>
+  <h2>1. Sprint Goal</h2>
+  <p>Complete the translation layer and conversational AI. Build bidirectional Malayalam&ndash;English translation using IndicTrans2, integrate Qwen 2.5 LLM for response generation, add conversation memory, and validate translation quality across supported Indian languages.</p>
+</section>
+
+<section>
+  <h2>2. Sprint Outcome</h2>
+  <p>All 21 story points delivered. Full translation capability and conversational AI integrated.</p>
+  <h3>Key Deliverables</h3>
+  <ul>
+    <li>IndicTrans2-Dist models &mdash; ~211M parameters, 5x smaller than original, same quality</li>
+    <li>Qwen3 LLM with llama.cpp GGUF backend &mdash; fast CPU inference for local deployment</li>
+    <li>Direct Indic-to-Indic translation without English pivot, supporting all 11 languages</li>
+    <li>Dual backend support &mdash; llamacpp + transformers for flexible deployment</li>
+    <li>Conversation memory &mdash; context retention across multi-turn dialogues</li>
+    <li>Translation quality validation &mdash; ~93% accuracy confirmed for Malayalam</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scrum Status Report</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:42%">Task Description</th>
+        <th style="width:14%">Date</th>
+        <th style="width:16%">Completion Status</th>
+        <th style="width:28%">Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>T2.1 &mdash; IndicTrans2 ML&rarr;EN setup (3 pts)</td><td></td><td>Completed</td><td>SentencePiece tokenizer configured; ~93% accuracy</td></tr>
+      <tr><td>T2.2 &mdash; IndicTrans2 EN&rarr;ML setup (2 pts)</td><td></td><td>Completed</td><td>Reverse translation with same quality metrics</td></tr>
+      <tr><td>T2.3 &mdash; Translation API wrapper (2 pts)</td><td></td><td>Completed</td><td>Unified interface with language detection</td></tr>
+      <tr><td>T2.4 &mdash; Qwen 2.5 LLM integration (3 pts)</td><td></td><td>Completed</td><td>1.5B variant selected; transformers pipeline</td></tr>
+      <tr><td>T2.5 &mdash; Conversation memory (2 pts)</td><td></td><td>Completed</td><td>Sliding window context retention</td></tr>
+      <tr><td>T2.6 &mdash; System prompt tuning (2 pts)</td><td></td><td>Completed</td><td>Kerala regional context prompts</td></tr>
+      <tr><td>T2.7 &mdash; IndicTrans2-Dist upgrade (3 pts)</td><td></td><td>Completed</td><td>~211M params, 5x smaller, same quality</td></tr>
+      <tr><td>T2.8 &mdash; Qwen3 + llama.cpp backend (2 pts)</td><td></td><td>Completed</td><td>GGUF backend for fast CPU inference</td></tr>
+      <tr><td>T2.9 &mdash; Indic-to-Indic translation (2 pts)</td><td></td><td>Completed</td><td>Direct translation without English pivot</td></tr>
+    </tbody>
+  </table>
+  <p>Total: 9 tasks, 21 story points, 100% complete.</p>
+</section>
+
+<section class="page-break">
+  <h2>4. Daily Scrum Meeting Log</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:10%">Date</th>
+        <th style="width:30%">Work Done</th>
+        <th style="width:30%">Work Planned</th>
+        <th style="width:18%">Issues</th>
+        <th style="width:12%">Sign</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td>Sprint 1 retrospective; reviewed ASR/TTS deliverables</td>
+        <td>Begin IndicTrans2 ML&rarr;EN model setup (T2.1); download model weights</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Downloaded IndicTrans2 weights; configured SentencePiece tokenizer for Malayalam</td>
+        <td>Complete ML&rarr;EN translation pipeline and run accuracy tests (T2.1); start EN&rarr;ML (T2.2)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>ML&rarr;EN translation working; ~93% accuracy on test set (T2.1 done)</td>
+        <td>Complete EN&rarr;ML translation (T2.2); build translation API wrapper (T2.3)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>EN&rarr;ML translation complete (T2.2 done); started API wrapper</td>
+        <td>Finish translation wrapper with language detection (T2.3); begin Qwen 2.5 research (T2.4)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Translation wrapper done (T2.3 done); downloaded Qwen 2.5 model</td>
+        <td>Integrate Qwen 2.5 with transformers pipeline (T2.4); test response quality</td>
+        <td>GPU memory constraints &mdash; evaluating 1.5B vs 3B variants</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Qwen 2.5 1.5B running; response quality acceptable</td>
+        <td>Complete LLM integration with system prompt (T2.4); implement conversation memory (T2.5)</td>
+        <td>None &mdash; settled on 1.5B variant</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>LLM integration done (T2.4 done); conversation memory started</td>
+        <td>Complete conversation memory (T2.5); tune system prompts for regional context (T2.6)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Conversation memory done (T2.5 done); system prompts drafted for Kerala context</td>
+        <td>Finalize system prompt tuning (T2.6); research IndicTrans2-Dist (T2.7)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>System prompt tuning complete (T2.6 done); IndicTrans2-Dist downloaded (211M params)</td>
+        <td>Migrate to IndicTrans2-Dist (T2.7); set up Qwen3 + llama.cpp GGUF (T2.8)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>IndicTrans2-Dist working (T2.7 done); llama.cpp backend configured (T2.8 done)</td>
+        <td>Implement Indic-to-Indic translation (T2.9); sprint wrap-up and quality tests</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page-break">
+  <h2>5. Burndown Chart</h2>
+  <p style="font-size:9pt;color:#666;">21 story points over 10 working days</p>
+
+  <div class="chart-wrap">
+    <div class="chart-y">
+      <span style="bottom:100%">21</span>
+      <span style="bottom:71.4%">15</span>
+      <span style="bottom:47.6%">10</span>
+      <span style="bottom:23.8%">5</span>
+      <span style="bottom:0%">0</span>
+    </div>
+    <div class="chart-box">
+      <div class="grid" style="bottom:25%;"></div>
+      <div class="grid" style="bottom:50%;"></div>
+      <div class="grid" style="bottom:75%;"></div>
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%"
+           viewBox="0 0 100 100" preserveAspectRatio="none">
+        <!-- Ideal: straight line from (0,0) to (100,100) in SVG coords = 21 to 0 remaining -->
+        <line x1="0" y1="0" x2="100" y2="100"
+              stroke="#aaa" stroke-width="0.7" stroke-dasharray="3,2"/>
+        <!-- Actual: 21,18,16,14,11,9,7,5,4,2,0 remaining -->
+        <polyline fill="none" stroke="#1a1a1a" stroke-width="1"
+          points="0,0 10,14.3 20,23.8 30,33.3 40,47.6 50,57.1 60,66.7 70,76.2 80,81.0 90,90.5 100,100"/>
+      </svg>
+    </div>
+    <div class="chart-x">
+      <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+      <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+    </div>
+    <div class="legend">
+      <span><i style="background:#aaa;"></i> Ideal</span>
+      <span><i style="background:#1a1a1a;"></i> Actual</span>
+    </div>
+  </div>
+
+  <h3>Burndown Data</h3>
+  <table>
+    <thead>
+      <tr><th>Day</th><th>Ideal</th><th>Actual</th><th>Done</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>21.0</td><td>21</td><td>0</td><td>Sprint start</td></tr>
+      <tr><td>1</td><td>18.9</td><td>18</td><td>3</td><td>T2.1 started</td></tr>
+      <tr><td>2</td><td>16.8</td><td>16</td><td>5</td><td>T2.1 complete</td></tr>
+      <tr><td>3</td><td>14.7</td><td>14</td><td>7</td><td>T2.2 complete</td></tr>
+      <tr><td>4</td><td>12.6</td><td>11</td><td>10</td><td>T2.3 complete, ahead of ideal</td></tr>
+      <tr><td>5</td><td>10.5</td><td>9</td><td>12</td><td>T2.4 in progress</td></tr>
+      <tr><td>6</td><td>8.4</td><td>7</td><td>14</td><td>T2.4 complete</td></tr>
+      <tr><td>7</td><td>6.3</td><td>5</td><td>16</td><td>T2.5 + T2.6 complete</td></tr>
+      <tr><td>8</td><td>4.2</td><td>4</td><td>17</td><td>T2.7 in progress</td></tr>
+      <tr><td>9</td><td>2.1</td><td>2</td><td>19</td><td>T2.7 + T2.8 complete</td></tr>
+      <tr><td>10</td><td>0.0</td><td>0</td><td>21</td><td>T2.9 complete; sprint done</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page-break">
+  <h2>6. Next Sprint Backlog &mdash; Sprint 3</h2>
+  <p><b>Goal:</b> Working end-to-end voice assistant with API, upgraded models, and dashboard.</p>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Task</th><th>Assignee</th><th>Points</th><th>Priority</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>T3.1</td><td>Pingala V1 ASR engine (CPU-first, 2.94% WER)</td><td>Dev</td><td>3</td><td>Critical</td></tr>
+      <tr><td>T3.2</td><td>Pipecat pipeline framework integration</td><td>Dev</td><td>5</td><td>Critical</td></tr>
+      <tr><td>T3.3</td><td>FastAPI endpoints + dashboard serving</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T3.4</td><td>WebSocket streaming (/ws/stream)</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T3.5</td><td>Indic Parler-TTS Mini + Chatterbox TTS</td><td>Dev</td><td>2</td><td>High</td></tr>
+      <tr><td>T3.6</td><td>ONNX Runtime inference backend</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T3.7</td><td>Typed configuration system</td><td>Dev</td><td>2</td><td>Medium</td></tr>
+    </tbody>
+  </table>
+  <p>Total: 7 tasks, 21 story points.</p>
+</section>
+
+<footer>
+  Sprint 2 Report &middot; Hyper-Localized Multilingual Voice Assistant
+</footer>
+
+</body>
+</html>

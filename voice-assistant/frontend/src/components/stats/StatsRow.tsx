@@ -20,19 +20,12 @@ export function StatsRow() {
       : "-";
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
-        gap: "16px",
-        gridColumn: "1 / -1",
-      }}
-    >
-      <StatCard value={total} label="Total Conversations" color="accent" />
-      <StatCard value={avgLatency} label="Avg Latency (ms)" color="green" />
-      <StatCard value={todayCount} label="Today" color="blue" />
-      <StatCard value={topLang} label="Top Language" color="orange" />
-      <StatCard value={topIntent} label="Top Intent" />
+    <div className="grid grid-cols-5 gap-4 col-span-full">
+      <StatCard value={total} label="Conversations" color="accent" delay={0} />
+      <StatCard value={avgLatency} label="Avg Latency ms" color="green" delay={60} />
+      <StatCard value={todayCount} label="Today" color="blue" delay={120} />
+      <StatCard value={topLang} label="Top Language" color="orange" delay={180} />
+      <StatCard value={topIntent} label="Top Intent" delay={240} />
     </div>
   );
 }

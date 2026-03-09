@@ -162,11 +162,15 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     config.asr.language = asr_cfg.get("language")
     whisper_cfg = asr_cfg.get("whisper", {})
     config.asr.whisper_model_size = whisper_cfg.get("model_size", config.asr.whisper_model_size)
-    if whisper_cfg.get("device"):
-        config.asr.device = whisper_cfg["device"]
     pingala_cfg = asr_cfg.get("pingala", {})
     config.asr.pingala_model_id = pingala_cfg.get("model_id")
-    if pingala_cfg.get("device"):
+    mms_cfg = asr_cfg.get("mms", {})
+    # Only apply device from the active engine's section
+    if config.asr.engine == "mms" and mms_cfg.get("device"):
+        config.asr.device = mms_cfg["device"]
+    elif config.asr.engine == "whisper" and whisper_cfg.get("device"):
+        config.asr.device = whisper_cfg["device"]
+    elif config.asr.engine == "pingala" and pingala_cfg.get("device"):
         config.asr.device = pingala_cfg["device"]
 
     # LLM

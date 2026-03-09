@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sprint 4 Report</title>
+<style>
+  @page { size: A4; margin: 20mm 22mm; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font: 11pt/1.6 Georgia, 'Times New Roman', Times, serif;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 190mm;
+    margin: 0 auto;
+    padding: 18mm 0;
+  }
+
+  header { margin-bottom: 32px; }
+  header h1 {
+    font-size: 18pt;
+    font-weight: normal;
+    letter-spacing: -0.3px;
+    margin-bottom: 2px;
+  }
+  header .project {
+    font-size: 10pt;
+    color: #555;
+    margin-bottom: 14px;
+  }
+  header .meta {
+    font-size: 9pt;
+    color: #333;
+    display: flex;
+    gap: 28px;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 6px 0;
+  }
+  header .meta span { white-space: nowrap; }
+
+  section { margin-bottom: 26px; }
+  section h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-bottom: 3px;
+    border-bottom: 0.5px solid #999;
+  }
+  section h3 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    margin: 14px 0 6px;
+  }
+  section p { margin-bottom: 8px; }
+
+  ul { padding-left: 18px; margin-bottom: 8px; }
+  li { margin-bottom: 3px; font-size: 10pt; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 8px 0 10px;
+  }
+  th, td {
+    border: 0.5px solid #888;
+    padding: 4px 7px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    font-weight: bold;
+    font-size: 9pt;
+    background: none;
+    border-bottom: 1.5px solid #333;
+  }
+
+  .chart-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 12px auto 20px;
+  }
+  .chart-box {
+    position: relative;
+    height: 200px;
+    border-left: 1px solid #333;
+    border-bottom: 1px solid #333;
+    margin-left: 28px;
+  }
+  .chart-box .grid {
+    position: absolute; left: 0; right: 0;
+    border-top: 1px solid #ddd;
+  }
+  .chart-y { position: absolute; left: 0; width: 24px; height: 200px; }
+  .chart-y span {
+    position: absolute; right: 3px;
+    font: 7.5pt Georgia, serif; color: #666;
+    transform: translateY(50%);
+  }
+  .chart-x {
+    display: flex; margin-left: 28px;
+    font: 7.5pt Georgia, serif; color: #666;
+  }
+  .chart-x span { flex: 1; text-align: center; padding-top: 3px; }
+  .legend {
+    display: flex; gap: 16px; justify-content: center;
+    margin-top: 6px; font-size: 8pt; color: #555;
+  }
+  .legend i {
+    display: inline-block; width: 20px; height: 1.5px;
+    vertical-align: middle; margin-right: 4px;
+  }
+
+  footer {
+    margin-top: 36px;
+    padding-top: 8px;
+    border-top: 0.5px solid #aaa;
+    font-size: 8pt;
+    color: #888;
+    text-align: center;
+  }
+
+  .page-break { page-break-before: always; }
+  @media print {
+    body { padding: 0; max-width: none; }
+    section { page-break-inside: avoid; }
+    .chart-box, .legend i {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sprint 4 Report</h1>
+  <div class="project">Hyper-Localized Multilingual Voice Assistant</div>
+  <div class="meta">
+    <span><b>Sprint:</b> 4 of 6</span>
+    <span><b>Duration:</b> Week 7 &ndash; 8</span>
+    <span><b>Team:</b> Dev (Solo)</span>
+    <span><b>Velocity:</b> 18 / 18 pts</span>
+  </div>
+</header>
+
+<section>
+  <h2>1. Sprint Goal</h2>
+  <p>Agentic capabilities, monitoring dashboard, database, and testing infrastructure. Build LangGraph-based agent orchestration with intent routing, integrate ClawGo/OpenClaw for local inference, add SQLite conversation logging, create a real-time monitoring dashboard, and establish a comprehensive pytest test suite.</p>
+</section>
+
+<section>
+  <h2>2. Sprint Outcome</h2>
+  <p>All 18 story points delivered. The assistant now has intelligent agent routing, persistent storage, a live dashboard, and proper test coverage.</p>
+  <h3>Key Deliverables</h3>
+  <ul>
+    <li>LangGraph stateful workflow &mdash; intent-based routing to Info, Task, Chat, and Smart Home agents</li>
+    <li>ClawGo/OpenClaw Pi agent &mdash; with Ollama for local Qwen3 inference (BYOM)</li>
+    <li>AgentFactory &mdash; runtime switching between LangGraph and ClawGo backends</li>
+    <li>SQLite database &mdash; conversation/message/metric models for persistent logging</li>
+    <li>Real-time dashboard &mdash; stats, latency breakdown, conversation logs, language distribution, live testing</li>
+    <li>Dashboard auto-served at root (/) when API starts</li>
+    <li>Comprehensive test suite &mdash; conftest.py fixtures, core tests, DB CRUD tests, API endpoint tests</li>
+    <li>Repository cleanup &mdash; removed 13 unnecessary files</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scrum Status Report</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:42%">Task Description</th>
+        <th style="width:14%">Date</th>
+        <th style="width:16%">Completion Status</th>
+        <th style="width:28%">Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>T4.1 &mdash; LangGraph agent orchestrator (3 pts)</td><td></td><td>Completed</td><td>Stateful workflow with intent-based routing</td></tr>
+      <tr><td>T4.2 &mdash; ClawGo/OpenClaw agent + Ollama BYOM (3 pts)</td><td></td><td>Completed</td><td>Local Qwen3 inference via Ollama</td></tr>
+      <tr><td>T4.3 &mdash; Agent factory routing (2 pts)</td><td></td><td>Completed</td><td>Runtime switching: LangGraph / ClawGo</td></tr>
+      <tr><td>T4.4 &mdash; SQLite database for logging (2 pts)</td><td></td><td>Completed</td><td>Conversation/message/metric models</td></tr>
+      <tr><td>T4.5 &mdash; Frontend dashboard (3 pts)</td><td></td><td>Completed</td><td>Stats, latency, conversations, live test panel</td></tr>
+      <tr><td>T4.6 &mdash; Dashboard API endpoints (2 pts)</td><td></td><td>Completed</td><td>Stats + conversations endpoints; served at /</td></tr>
+      <tr><td>T4.7 &mdash; Comprehensive test suite (3 pts)</td><td></td><td>Completed</td><td>conftest, test_basic, test_database, test_api</td></tr>
+    </tbody>
+  </table>
+  <p>Total: 7 tasks, 18 story points, 100% complete.</p>
+</section>
+
+<section class="page-break">
+  <h2>4. Daily Scrum Meeting Log</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:10%">Date</th>
+        <th style="width:30%">Work Done</th>
+        <th style="width:30%">Work Planned</th>
+        <th style="width:18%">Issues</th>
+        <th style="width:12%">Sign</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td>Sprint 3 retrospective; reviewed pipeline, API, model upgrade deliverables</td>
+        <td>Design LangGraph agent orchestrator architecture (T4.1); define state schema</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Designed agent graph: classify_intent &rarr; route &rarr; [info|task|chat|smart_home] &rarr; respond</td>
+        <td>Implement LangGraph orchestrator with stateful graph (T4.1); test intent routing</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>LangGraph orchestrator working with 4 agent types (T4.1 done)</td>
+        <td>Research ClawGo/OpenClaw framework (T4.2); set up Ollama for local Qwen3</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>ClawGo agent integrated with Ollama BYOM; Qwen3 running locally</td>
+        <td>Complete ClawGo testing (T4.2); build AgentFactory for backend switching (T4.3)</td>
+        <td>Ollama model download slow &mdash; resolved with pre-pull script</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>ClawGo complete (T4.2 done); AgentFactory config-based routing (T4.3 done)</td>
+        <td>Design SQLite schema for conversations/messages/metrics (T4.4); implement CRUD</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>SQLite database with conversation logging complete (T4.4 done)</td>
+        <td>Begin frontend dashboard &mdash; layout, stats cards, latency chart (T4.5)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Dashboard layout with stats row, latency bars, conversation list done</td>
+        <td>Add language distribution + Try It panel (T4.5); dashboard API endpoints (T4.6)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Dashboard feature-complete (T4.5 done); API endpoints serving data (T4.6 done)</td>
+        <td>Set up pytest infrastructure &mdash; conftest.py, test structure (T4.7); write core tests</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Test fixtures + core tests written; database CRUD tests added</td>
+        <td>Write API endpoint tests (T4.7); clean up repository &mdash; remove 13 files</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>API tests complete; all tests passing; repo cleanup done</td>
+        <td>Full test suite verification (T4.7 done); sprint wrap-up; update SCRUM_BOOK.md</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page-break">
+  <h2>5. Burndown Chart</h2>
+  <p style="font-size:9pt;color:#666;">18 story points over 10 working days</p>
+
+  <div class="chart-wrap">
+    <div class="chart-y">
+      <span style="bottom:100%">18</span>
+      <span style="bottom:75%">13.5</span>
+      <span style="bottom:50%">9</span>
+      <span style="bottom:25%">4.5</span>
+      <span style="bottom:0%">0</span>
+    </div>
+    <div class="chart-box">
+      <div class="grid" style="bottom:25%;"></div>
+      <div class="grid" style="bottom:50%;"></div>
+      <div class="grid" style="bottom:75%;"></div>
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%"
+           viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="0" x2="100" y2="100"
+              stroke="#aaa" stroke-width="0.7" stroke-dasharray="3,2"/>
+        <!-- Actual remaining: 18,18,15,12,10,8,5,5,2,2,0 -->
+        <polyline fill="none" stroke="#1a1a1a" stroke-width="1"
+          points="0,0 10,0 20,16.7 30,33.3 40,44.4 50,55.6 60,72.2 70,72.2 80,88.9 90,88.9 100,100"/>
+      </svg>
+    </div>
+    <div class="chart-x">
+      <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+      <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+    </div>
+    <div class="legend">
+      <span><i style="background:#aaa;"></i> Ideal</span>
+      <span><i style="background:#1a1a1a;"></i> Actual</span>
+    </div>
+  </div>
+
+  <h3>Burndown Data</h3>
+  <table>
+    <thead>
+      <tr><th>Day</th><th>Ideal</th><th>Actual</th><th>Done</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>18.0</td><td>18</td><td>0</td><td>Sprint start</td></tr>
+      <tr><td>1</td><td>16.2</td><td>18</td><td>0</td><td>T4.1 architecture design</td></tr>
+      <tr><td>2</td><td>14.4</td><td>15</td><td>3</td><td>T4.1 LangGraph orchestrator complete</td></tr>
+      <tr><td>3</td><td>12.6</td><td>12</td><td>6</td><td>T4.2 ClawGo agent in progress</td></tr>
+      <tr><td>4</td><td>10.8</td><td>10</td><td>8</td><td>T4.2 + T4.3 complete</td></tr>
+      <tr><td>5</td><td>9.0</td><td>8</td><td>10</td><td>T4.4 SQLite database complete</td></tr>
+      <tr><td>6</td><td>7.2</td><td>5</td><td>13</td><td>T4.5 dashboard in progress (ahead)</td></tr>
+      <tr><td>7</td><td>5.4</td><td>5</td><td>13</td><td>T4.5 + T4.6 completion</td></tr>
+      <tr><td>8</td><td>3.6</td><td>2</td><td>16</td><td>T4.5 + T4.6 done; tests started</td></tr>
+      <tr><td>9</td><td>1.8</td><td>2</td><td>16</td><td>T4.7 API tests in progress</td></tr>
+      <tr><td>10</td><td>0.0</td><td>0</td><td>18</td><td>T4.7 complete; sprint done</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page-break">
+  <h2>6. Next Sprint Backlog &mdash; Sprint 5</h2>
+  <p><b>Goal:</b> Running on Raspberry Pi 5 with optimized performance.</p>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Task</th><th>Assignee</th><th>Points</th><th>Priority</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>T5.1</td><td>Pi 5 environment setup</td><td>Dev</td><td>2</td><td>High</td></tr>
+      <tr><td>T5.2</td><td>Model quantization</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T5.3</td><td>ONNX conversion</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T5.4</td><td>Audio I/O on Pi</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T5.5</td><td>Response caching</td><td>Dev</td><td>2</td><td>Medium</td></tr>
+      <tr><td>T5.6</td><td>Performance profiling</td><td>Dev</td><td>2</td><td>Medium</td></tr>
+      <tr><td>T5.7</td><td>Latency optimization</td><td>Dev</td><td>3</td><td>High</td></tr>
+    </tbody>
+  </table>
+  <p>Total: 7 tasks, 18 story points.</p>
+</section>
+
+<footer>
+  Sprint 4 Report &middot; Hyper-Localized Multilingual Voice Assistant
+</footer>
+
+</body>
+</html>

@@ -1,7 +1,6 @@
 import type { Conversation } from "../../api/types";
-import { EmptyState } from "../common/EmptyState";
+import { EmptyState } from "@/components/common/EmptyState";
 import { ConversationItem } from "./ConversationItem";
-import styles from "./ConversationList.module.css";
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -19,7 +18,7 @@ export function ConversationList({
   }
 
   return (
-    <div className={styles.list}>
+    <div className="max-h-[440px] overflow-y-auto">
       {conversations.map((conv) => (
         <ConversationItem
           key={conv.id}

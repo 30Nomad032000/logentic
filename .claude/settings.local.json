@@ -19,7 +19,21 @@
       "Bash(gh repo create:*)",
       "WebFetch(domain:docs.openclaw.ai)",
       "Bash(npm install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(cd E:/logentic/voice-assistant/frontend && npx tsc --noEmit 2>&1)",
+      "Bash(cd E:/logentic/voice-assistant/frontend && npx vite build 2>&1)",
+      "Bash(wc:*)",
+      "Bash(cd E:/logentic/voice-assistant && ./venv/Scripts/python -c \"import llama_cpp; print\\('llama-cpp-python OK'\\)\" 2>&1)",
+      "Bash(cd E:/logentic/voice-assistant && ./venv/Scripts/python -c \"import langgraph; print\\('langgraph OK'\\)\" 2>&1 && ./venv/Scripts/python -c \"from src.agents import AgentFactory; a = AgentFactory.create\\('langgraph'\\); print\\('Orchestrator OK:', type\\(a\\).__name__\\)\" 2>&1)",
+      "Bash(pip install:*)",
+      "Bash(E:/logentic/voice-assistant/venv/Scripts/pip install:*)",
+      "Bash(E:/logentic/voice-assistant/venv/Scripts/python:*)",
+      "Bash(pip show:*)",
+      "Bash(venv/Scripts/pip.exe install:*)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "WebFetch(domain:ai.meta.com)",
+      "WebFetch(domain:docs.cartesia.ai)",
+      "Bash(rm:*)"
     ]
   }
 }
