@@ -102,10 +102,41 @@ class IntentClassifier:
         return self._keyword_classify(text.lower(), language)
 
     def _llm_classify(self, text: str, language: str) -> IntentResult:
-        """LLM-based classification (placeholder)."""
-        # TODO: Implement with LLM API
-        logger.info("LLM classification not yet implemented, using keyword fallback")
-        return self._keyword_classify(text.lower(), language)
+        """LLM-based classification using local Qwen model."""
+        try:
+            from ..llm.qwen import get_llm
+
+            llm = get_llm(engine="qwen3", model_size="1.7b", device="cpu")
+            original_prompt = llm.system_prompt
+            llm.set_system_prompt(
+                "You are an intent classifier. Given a user message, respond with ONLY one word "
+                "from this list: greeting, farewell, weather, time, reminder, search, play_music, "
+                "smart_home, help. If none fit, respond with: unknown. "
+                "Respond with ONLY the intent word, nothing else."
+            )
+
+            result = llm.chat(text, remember=False, max_new_tokens=10)
+            llm.set_system_prompt(original_prompt)
+
+            intent_str = result.content.strip().lower().split()[0] if result.content.strip() else "unknown"
+            # Validate the intent is one of our known intents
+            valid_intents = set(self.INTENTS.keys()) | {"unknown"}
+            if intent_str not in valid_intents:
+                intent_str = "unknown"
+
+            entities = self._extract_entities(text)
+            confidence = 0.85 if intent_str != "unknown" else 0.3
+
+            return IntentResult(
+                intent=intent_str,
+                confidence=confidence,
+                entities=entities,
+                language=language,
+            )
+
+        except Exception as e:
+            logger.warning(f"LLM classification failed ({e}), falling back to keyword")
+            return self._keyword_classify(text.lower(), language)
 
     def _extract_entities(self, text: str) -> List[Dict[str, Any]]:
         """Extract entities from text (basic implementation)."""

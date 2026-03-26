@@ -7,9 +7,13 @@ Supports both full (1B) and distilled (~211M) model variants.
 import logging
 from typing import Optional, Literal
 
-from IndicTransToolkit import IndicProcessor
-
 logger = logging.getLogger(__name__)
+
+try:
+    from IndicTransToolkit import IndicProcessor
+except ImportError:
+    IndicProcessor = None
+    logger.debug("IndicTransToolkit not installed — translation will fail at runtime")
 
 
 class IndicTranslator:
@@ -72,7 +76,10 @@ class IndicTranslator:
         self.model_variant = model_variant
         self.models = {}
         self.tokenizers = {}
-        self.ip = IndicProcessor(inference=True)
+        if IndicProcessor is not None:
+            self.ip = IndicProcessor(inference=True)
+        else:
+            self.ip = None
 
         if load_on_init:
             self.load_models()

@@ -38,6 +38,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# XiaoZhi protocol bridge for EdgeX/ESP32 devices
+from src.api.xiaozhi_bridge import router as xiaozhi_router
+app.include_router(xiaozhi_router)
+
 
 # ── Response models ──
 
@@ -284,6 +288,13 @@ async def dashboard_conversation_detail(conv_id: str):
             for m in conv.messages
         ],
     }
+
+
+@app.get("/api/dashboard/devices")
+async def dashboard_devices():
+    """Get connected XiaoZhi/EdgeX devices."""
+    from src.api.xiaozhi_bridge import get_connected_devices
+    return {"devices": get_connected_devices()}
 
 
 # ── Helper: log conversation to DB ──

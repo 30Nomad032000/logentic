@@ -29,8 +29,8 @@ class TestASR:
 
         asr = PingalaASR(device="cpu")
         assert asr.device == "cpu"
-        assert asr.model is None
-        assert asr.model_id == "shunya-labs/pingala-v1"
+        assert asr.transcriber is None
+        assert asr.model_id == PingalaASR.MODEL_ID
 
     def test_pingala_supported_languages(self):
         from src.asr import PingalaASR
@@ -322,7 +322,7 @@ class TestConfig:
 
         config = load_config()
         assert config.version == "0.2.0"
-        assert config.asr.engine == "pingala"
+        assert config.asr.engine == "mms"  # settings.yaml uses mms as default
         assert config.llm.engine == "qwen3"
 
     def test_load_config_missing_file(self):

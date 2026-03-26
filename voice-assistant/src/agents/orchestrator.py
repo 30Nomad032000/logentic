@@ -11,6 +11,25 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+# Shared LLM instance for agents (lazy loaded)
+_agent_llm = None
+
+
+def _get_agent_llm():
+    """Get or create the shared LLM instance for agent responses."""
+    global _agent_llm
+    if _agent_llm is None:
+        try:
+            from ..llm.qwen import get_llm
+            _agent_llm = get_llm(engine="qwen3", model_size="1.7b", device="cpu")
+        except Exception:
+            try:
+                from ..llm.qwen import get_llm
+                _agent_llm = get_llm(engine="qwen", model_size="0.5b", device="cpu")
+            except Exception as e:
+                logger.error(f"Failed to load LLM for agents: {e}")
+    return _agent_llm
+
 
 class AgentState(TypedDict):
     """State passed between agents in the workflow."""
@@ -223,6 +242,7 @@ class AgentOrchestrator:
         """Run the information query agent with LLM."""
         logger.info("Running info agent")
         response = self._llm_respond(state["user_input"], "info_agent")
+
         state["agent_outputs"]["info_agent"] = {
             "response": response,
             "sources": [],
@@ -233,6 +253,7 @@ class AgentOrchestrator:
         """Run the task management agent with LLM."""
         logger.info("Running task agent")
         response = self._llm_respond(state["user_input"], "task_agent")
+
         state["agent_outputs"]["task_agent"] = {
             "response": response,
             "task_created": True,
@@ -243,6 +264,7 @@ class AgentOrchestrator:
         """Run the general chat agent with LLM."""
         logger.info("Running chat agent")
         response = self._llm_respond(state["user_input"], "chat_agent")
+
         state["agent_outputs"]["chat_agent"] = {
             "response": response,
         }

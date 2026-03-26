@@ -10,6 +10,16 @@ from fastapi.testclient import TestClient
 def client():
     """Create a test client for the FastAPI app."""
     from src.api.main import app
+    from src.agents import AgentOrchestrator
+    from src.db import get_db
+    import src.api.main as api_module
+
+    if api_module.orchestrator is None:
+        api_module.orchestrator = AgentOrchestrator()
+        api_module.orchestrator.setup()
+    if api_module.db is None:
+        api_module.db = get_db()
+
     return TestClient(app)
 
 
