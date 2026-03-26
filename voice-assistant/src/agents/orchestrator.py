@@ -324,10 +324,15 @@ class AgentOrchestrator:
         elapsed = (time.perf_counter() - start) * 1000
         logger.info(f"Orchestrator processed in {elapsed:.1f}ms")
 
+        # Determine which agent handled the request
+        agent_outputs = result.get("agent_outputs", {})
+        active_agent = list(agent_outputs.keys())[0] if agent_outputs else "unknown"
+
         return {
             "response": result.get("final_response", ""),
             "intent": result.get("intent"),
             "language": result.get("language"),
+            "agent": active_agent,
             "llm_time_ms": elapsed,
         }
 

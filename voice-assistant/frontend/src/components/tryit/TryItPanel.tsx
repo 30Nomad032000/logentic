@@ -42,6 +42,7 @@ export function TryItPanel() {
     text: string;
     intent: string;
     language: string;
+    agent?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<PipelineStage>("idle");
@@ -100,6 +101,7 @@ export function TryItPanel() {
         text: responseText,
         intent: data.intent || "-",
         language: responseLang,
+        agent: data.agent,
       });
 
       // Stage 3: TTS
@@ -154,6 +156,7 @@ export function TryItPanel() {
         text: data.response || "No response",
         intent: data.intent || "-",
         language: data.language,
+        agent: data.agent,
       });
       setStageTimes({ processing_ms: Math.round(procMs), total_ms: Math.round(procMs) });
       setStage("done");
@@ -189,9 +192,25 @@ export function TryItPanel() {
     }
   }
 
+  const AGENT_LABELS: Record<string, { label: string; icon: string; color: string }> = {
+    info_agent: { label: "Info Agent", icon: "i", color: "rgb(52,152,219)" },
+    task_agent: { label: "Task Agent", icon: "T", color: "rgb(155,89,182)" },
+    chat_agent: { label: "Chat Agent", icon: "C", color: "rgb(46,204,113)" },
+    smart_home_agent: { label: "Smart Home", icon: "H", color: "rgb(230,126,34)" },
+    unknown: { label: "Agent", icon: "?", color: "#8a8478" },
+  };
+
+  const INTENT_LABELS: Record<string, string> = {
+    information_query: "Information Query",
+    task_management: "Task Management",
+    general_chat: "General Chat",
+    smart_home: "Smart Home",
+    unknown: "Unknown",
+  };
+
   const stageLabels: { key: PipelineStage; label: string }[] = [
     { key: "asr", label: "ASR" },
-    { key: "processing", label: "LLM Pipeline" },
+    { key: "processing", label: "Translate + LLM + Translate" },
     { key: "tts", label: "TTS" },
   ];
 
@@ -343,10 +362,34 @@ export function TryItPanel() {
                   </button>
                 )}
               </div>
+              {/* Agent routing badge */}
+              {response.agent && response.agent !== "unknown" && (() => {
+                const agentInfo = AGENT_LABELS[response.agent] || AGENT_LABELS.unknown;
+                return (
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border font-mono text-[11px] font-semibold tracking-[0.04em]"
+                      style={{ borderColor: `${agentInfo.color}44`, color: agentInfo.color, background: `${agentInfo.color}11` }}
+                    >
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold" style={{ background: `${agentInfo.color}22`, color: agentInfo.color }}>
+                        {agentInfo.icon}
+                      </span>
+                      {agentInfo.label}
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a8478" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                    <span className="font-mono text-[11px] text-[#8a8478]">
+                      {INTENT_LABELS[response.intent] || response.intent}
+                    </span>
+                  </div>
+                );
+              })()}
               <div className="mt-1">{response.text}</div>
               <div className="flex gap-4 mt-2.5 font-mono text-[11px] text-[#8a8478]">
-                <span>Intent: {response.intent}</span>
+                <span>Intent: {INTENT_LABELS[response.intent] || response.intent}</span>
                 <span>Language: {response.language}</span>
+                {response.agent && <span>Agent: {(AGENT_LABELS[response.agent] || AGENT_LABELS.unknown).label}</span>}
               </div>
             </>
           ) : (

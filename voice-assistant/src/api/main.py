@@ -613,6 +613,10 @@ async def process_text(
             "intent": intent,
             "response": final_response,
             "language": language,
+            "agent": result.get("agent", "unknown"),
+            "translation_ms": round(translation_ms, 1),
+            "llm_ms": round(llm_ms, 1),
+            "total_ms": round(total_ms, 1),
         }
 
     except Exception as e:

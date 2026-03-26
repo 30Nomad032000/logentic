@@ -63,6 +63,10 @@ export interface TextResponse {
   intent: string;
   response: string;
   language: string;
+  agent?: string;
+  translation_ms?: number;
+  llm_ms?: number;
+  total_ms?: number;
 }
 
 export interface TranscriptionResponse {
