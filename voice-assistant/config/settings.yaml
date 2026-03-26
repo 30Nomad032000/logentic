@@ -33,7 +33,7 @@ asr:
 
 # TTS Configuration
 tts:
-  engine: "cartesia"  # Options: mms (offline), cartesia (online), indic, chatterbox
+  engine: "mms"  # Options: mms (offline), cartesia (online), indic, chatterbox
   default_language: "ml"  # Malayalam default
 
   # MMS-TTS (Offline - Recommended for speed)
@@ -78,7 +78,7 @@ translation:
 # LLM Configuration
 llm:
   engine: "qwen3"  # Options: qwen (2.5), qwen3 (recommended)
-  model_size: "4b"  # Qwen3 options: 0.6b, 1.7b, 4b | Qwen2.5 options: 0.5b, 1.5b, 3b, 7b
+  model_size: "0.6b"  # Qwen3 options: 0.6b, 1.7b, 4b | Qwen2.5 options: 0.5b, 1.5b, 3b, 7b
   device: "cpu"
   backend: "llamacpp"  # Options: llamacpp (recommended for edge), transformers
   max_new_tokens: 256
@@ -90,7 +90,7 @@ llm:
     n_ctx: 2048
     n_threads: 4
     n_gpu_layers: 0  # 0 for CPU-only on Pi
-    quantization: "Q4_K_M"  # Options: Q4_K_M (recommended), Q5_K_M, Q8_0
+    quantization: "Q8_0"  # Options: Q4_K_M, Q5_K_M, Q8_0 (using Q8_0 for Qwen3-0.6B)
 
 # Inference Engine Configuration
 inference:
