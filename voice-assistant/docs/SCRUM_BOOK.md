@@ -537,13 +537,13 @@ Points
 
 | Task ID | Task | Assignee | Status | Points |
 |---------|------|----------|--------|--------|
-| T6.1 | Unit test suite | Dev | ⬜ Todo | 3 |
-| T6.2 | Integration test suite | Dev | ⬜ Todo | 3 |
-| T6.3 | Performance benchmarks | Dev | ⬜ Todo | 2 |
-| T6.4 | User documentation | Dev | ⬜ Todo | 2 |
-| T6.5 | API documentation | Dev | ⬜ Todo | 2 |
-| T6.6 | Demo video/presentation | Dev | ⬜ Todo | 2 |
-| T6.7 | Final polish & bug fixes | Dev | ⬜ Todo | 1 |
+| T6.1 | Unit test suite | Dev | ✅ Done | 3 |
+| T6.2 | Integration test suite | Dev | ✅ Done | 3 |
+| T6.3 | Performance benchmarks | Dev | ✅ Done | 2 |
+| T6.4 | User documentation | Dev | ✅ Done | 2 |
+| T6.5 | API documentation | Dev | ✅ Done | 2 |
+| T6.6 | Demo video/presentation | Dev | ✅ Done | 2 |
+| T6.7 | Final polish & bug fixes | Dev | ✅ Done | 1 |
 
 **Sprint 6 Target:** 15 points
 
