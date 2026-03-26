@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sprint 1 Report</title>
+<style>
+  @page { size: A4; margin: 20mm 22mm; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font: 11pt/1.6 Georgia, 'Times New Roman', Times, serif;
+    color: #1a1a1a;
+    background: #fff;
+    max-width: 190mm;
+    margin: 0 auto;
+    padding: 18mm 0;
+  }
+
+  /* Header */
+  header { margin-bottom: 32px; }
+  header h1 {
+    font-size: 18pt;
+    font-weight: normal;
+    letter-spacing: -0.3px;
+    margin-bottom: 2px;
+  }
+  header .project {
+    font-size: 10pt;
+    color: #555;
+    margin-bottom: 14px;
+  }
+  header .meta {
+    font-size: 9pt;
+    color: #333;
+    display: flex;
+    gap: 28px;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 6px 0;
+  }
+  header .meta span { white-space: nowrap; }
+
+  /* Sections */
+  section { margin-bottom: 26px; }
+  section h2 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-bottom: 3px;
+    border-bottom: 0.5px solid #999;
+  }
+  section h3 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    margin: 14px 0 6px;
+  }
+  section p { margin-bottom: 8px; }
+
+  /* Lists */
+  ul { padding-left: 18px; margin-bottom: 8px; }
+  li { margin-bottom: 3px; font-size: 10pt; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 8px 0 10px;
+  }
+  th, td {
+    border: 0.5px solid #888;
+    padding: 4px 7px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    font-weight: bold;
+    font-size: 9pt;
+    background: none;
+    border-bottom: 1.5px solid #333;
+  }
+
+  /* Chart */
+  .chart-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 12px auto 20px;
+  }
+  .chart-box {
+    position: relative;
+    height: 200px;
+    border-left: 1px solid #333;
+    border-bottom: 1px solid #333;
+    margin-left: 28px;
+  }
+  .chart-box .grid {
+    position: absolute; left: 0; right: 0;
+    border-top: 1px solid #ddd;
+  }
+  .chart-y { position: absolute; left: 0; width: 24px; height: 200px; }
+  .chart-y span {
+    position: absolute; right: 3px;
+    font: 7.5pt Georgia, serif; color: #666;
+    transform: translateY(50%);
+  }
+  .chart-x {
+    display: flex; margin-left: 28px;
+    font: 7.5pt Georgia, serif; color: #666;
+  }
+  .chart-x span { flex: 1; text-align: center; padding-top: 3px; }
+  .legend {
+    display: flex; gap: 16px; justify-content: center;
+    margin-top: 6px; font-size: 8pt; color: #555;
+  }
+  .legend i {
+    display: inline-block; width: 20px; height: 1.5px;
+    vertical-align: middle; margin-right: 4px;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 36px;
+    padding-top: 8px;
+    border-top: 0.5px solid #aaa;
+    font-size: 8pt;
+    color: #888;
+    text-align: center;
+  }
+
+  /* Print */
+  .page-break { page-break-before: always; }
+  @media print {
+    body { padding: 0; max-width: none; }
+    section { page-break-inside: avoid; }
+    .page-break { page-break-before: always; }
+    .chart-box, .legend i {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sprint 1 Report</h1>
+  <div class="project">Hyper-Localized Multilingual Voice Assistant</div>
+  <div class="meta">
+    <span><b>Sprint:</b> 1 of 6</span>
+    <span><b>Duration:</b> Week 1 &ndash; 2</span>
+    <span><b>Team:</b> Dev (Solo)</span>
+    <span><b>Velocity:</b> 21 / 21 pts</span>
+  </div>
+</header>
+
+<section>
+  <h2>1. Sprint Goal</h2>
+  <p>Establish the project foundation. Complete technology stack research and selection, design the system architecture, set up the development environment, and build proof-of-concept implementations for the core ASR and TTS components across Indian languages.</p>
+</section>
+
+<section>
+  <h2>2. Sprint Outcome</h2>
+  <p>All 21 story points delivered. Technology stack finalized, architecture designed, development environment configured, and working PoCs built for speech recognition and text-to-speech.</p>
+  <h3>Key Deliverables</h3>
+  <ul>
+    <li>Technology selection document &mdash; ASR, TTS, LLM, translation, and agent framework options evaluated</li>
+    <li>System architecture diagram &mdash; three-layer edge-to-server design with component interfaces</li>
+    <li>Development environment &mdash; Python 3.10+, GPU/CUDA configured, project structure created</li>
+    <li>Whisper ASR PoC &mdash; working speech-to-text for Malayalam with &gt;80% accuracy</li>
+    <li>Meta MMS ASR research &mdash; 1600+ language coverage evaluated for Indian languages</li>
+    <li>MMS-TTS PoC &mdash; offline text-to-speech for Malayalam with intelligible output</li>
+    <li>Cartesia TTS PoC &mdash; high-quality online TTS integration with API wrapper</li>
+    <li>TTS comparison report &mdash; quality, latency, and offline capability assessed across engines</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scrum Status Report</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:42%">Task Description</th>
+        <th style="width:14%">Date</th>
+        <th style="width:16%">Completion Status</th>
+        <th style="width:28%">Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>T1.1 &mdash; Research ASR options: Whisper, Meta MMS, IndicASR (1 pt)</td><td></td><td>Completed</td><td>Compared accuracy, model size, language coverage</td></tr>
+      <tr><td>T1.2 &mdash; Research TTS options: MMS-TTS, Cartesia, AI4Bharat (1 pt)</td><td></td><td>Completed</td><td>Evaluated quality, latency, offline capability</td></tr>
+      <tr><td>T1.3 &mdash; Research LLM options: Qwen, Llama, cloud APIs (1 pt)</td><td></td><td>Completed</td><td>Qwen 2.5 selected for edge; 0.5B&ndash;7B range</td></tr>
+      <tr><td>T1.4 &mdash; Design system architecture diagram (2 pts)</td><td></td><td>Completed</td><td>Three-layer: edge I/O, processing, output</td></tr>
+      <tr><td>T1.5 &mdash; Document component interfaces (1 pt)</td><td></td><td>Completed</td><td>API contracts for ASR, TTS, LLM, translation</td></tr>
+      <tr><td>T1.6 &mdash; Setup Python virtual environment (1 pt)</td><td></td><td>Completed</td><td>Python 3.10+ venv with pip dependencies</td></tr>
+      <tr><td>T1.7 &mdash; Configure GPU/CUDA for ML (1 pt)</td><td></td><td>Completed</td><td>PyTorch with CUDA; CPU fallback tested</td></tr>
+      <tr><td>T1.8 &mdash; Create project folder structure (1 pt)</td><td></td><td>Completed</td><td>src/, tests/, config/, docs/ structure</td></tr>
+      <tr><td>T1.9 &mdash; Setup requirements.txt (1 pt)</td><td></td><td>Completed</td><td>Core ML + API + audio dependencies pinned</td></tr>
+      <tr><td>T1.10 &mdash; Implement Whisper ASR wrapper (2 pts)</td><td></td><td>Completed</td><td>Supports multiple model sizes; async interface</td></tr>
+      <tr><td>T1.11 &mdash; Test Whisper with Malayalam audio (1 pt)</td><td></td><td>Completed</td><td>&gt;80% accuracy confirmed; latency logged</td></tr>
+      <tr><td>T1.12 &mdash; Research Meta MMS ASR integration (2 pts)</td><td></td><td>Completed</td><td>1600+ languages; integration path documented</td></tr>
+      <tr><td>T1.13 &mdash; Implement MMS-TTS wrapper (2 pts)</td><td></td><td>Completed</td><td>Offline Malayalam TTS; WAV output</td></tr>
+      <tr><td>T1.14 &mdash; Implement Cartesia TTS wrapper (2 pts)</td><td></td><td>Completed</td><td>API-based HQ TTS; streaming support</td></tr>
+      <tr><td>T1.15 &mdash; Create TTS comparison script (1 pt)</td><td></td><td>Completed</td><td>Side-by-side quality and latency comparison</td></tr>
+    </tbody>
+  </table>
+  <p>Total: 15 tasks, 21 story points, 100% complete.</p>
+</section>
+
+<section class="page-break">
+  <h2>4. Daily Scrum Meeting Log</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:10%">Date</th>
+        <th style="width:30%">Work Done</th>
+        <th style="width:30%">Work Planned</th>
+        <th style="width:18%">Issues</th>
+        <th style="width:12%">Sign</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td>Project kickoff; reviewed objectives and scope</td>
+        <td>Begin ASR research (T1.1); survey Whisper, Meta MMS, IndicASR models</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>ASR research complete (T1.1 done); compared 3 engines on accuracy, size, language coverage</td>
+        <td>Research TTS options (T1.2); research LLM options (T1.3)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>TTS research complete (T1.2 done); LLM research complete (T1.3 done); Qwen 2.5 selected</td>
+        <td>Design system architecture (T1.4); document component interfaces (T1.5)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Architecture designed &mdash; three-layer edge-to-server model (T1.4 done); interfaces documented (T1.5 done)</td>
+        <td>Setup Python venv (T1.6); configure GPU/CUDA (T1.7)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Python 3.10 venv configured (T1.6 done); CUDA working with PyTorch (T1.7 done)</td>
+        <td>Create project structure (T1.8); setup requirements.txt (T1.9)</td>
+        <td>CUDA version mismatch &mdash; resolved with compatible PyTorch build</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Project structure created (T1.8 done); requirements.txt pinned (T1.9 done)</td>
+        <td>Implement Whisper ASR wrapper (T1.10)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Whisper ASR wrapper implemented with multi-size support (T1.10 done)</td>
+        <td>Test Whisper with Malayalam audio (T1.11); begin Meta MMS research (T1.12)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Whisper Malayalam test: &gt;80% accuracy confirmed (T1.11 done); Meta MMS integration path documented (T1.12 done)</td>
+        <td>Implement MMS-TTS wrapper (T1.13)</td>
+        <td>Whisper Malayalam accuracy lower than Hindi &mdash; noted for future improvement</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>MMS-TTS wrapper complete &mdash; offline Malayalam TTS working (T1.13 done)</td>
+        <td>Implement Cartesia TTS wrapper (T1.14); create TTS comparison script (T1.15)</td>
+        <td>None</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Cartesia TTS done (T1.14 done); TTS comparison script done (T1.15 done); sprint complete</td>
+        <td>Sprint 1 retrospective; plan Sprint 2 backlog</td>
+        <td>None &mdash; all 21 points delivered</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page-break">
+  <h2>5. Burndown Chart</h2>
+  <p style="font-size:9pt;color:#666;">21 story points over 10 working days</p>
+
+  <div class="chart-wrap">
+    <div class="chart-y">
+      <span style="bottom:100%">21</span>
+      <span style="bottom:71.4%">15</span>
+      <span style="bottom:47.6%">10</span>
+      <span style="bottom:23.8%">5</span>
+      <span style="bottom:0%">0</span>
+    </div>
+    <div class="chart-box">
+      <div class="grid" style="bottom:25%;"></div>
+      <div class="grid" style="bottom:50%;"></div>
+      <div class="grid" style="bottom:75%;"></div>
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%"
+           viewBox="0 0 100 100" preserveAspectRatio="none">
+        <!-- Ideal: straight line from (0,0) to (100,100) = 21 to 0 remaining -->
+        <line x1="0" y1="0" x2="100" y2="100"
+              stroke="#aaa" stroke-width="0.7" stroke-dasharray="3,2"/>
+        <!-- Actual: 21,20,17,14,11,9,7,5,3,1,0 remaining -->
+        <polyline fill="none" stroke="#1a1a1a" stroke-width="1"
+          points="0,0 10,4.8 20,19.0 30,33.3 40,47.6 50,57.1 60,66.7 70,76.2 80,85.7 90,95.2 100,100"/>
+      </svg>
+    </div>
+    <div class="chart-x">
+      <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+      <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+    </div>
+    <div class="legend">
+      <span><i style="background:#aaa;"></i> Ideal</span>
+      <span><i style="background:#1a1a1a;"></i> Actual</span>
+    </div>
+  </div>
+
+  <h3>Burndown Data</h3>
+  <table>
+    <thead>
+      <tr><th>Day</th><th>Ideal</th><th>Actual</th><th>Done</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>21.0</td><td>21</td><td>0</td><td>Sprint start</td></tr>
+      <tr><td>1</td><td>18.9</td><td>20</td><td>1</td><td>T1.1 complete (ASR research)</td></tr>
+      <tr><td>2</td><td>16.8</td><td>17</td><td>4</td><td>T1.2 + T1.3 complete (TTS &amp; LLM research)</td></tr>
+      <tr><td>3</td><td>14.7</td><td>14</td><td>7</td><td>T1.4 + T1.5 complete (architecture)</td></tr>
+      <tr><td>4</td><td>12.6</td><td>11</td><td>10</td><td>T1.6 + T1.7 + T1.8 complete (env setup)</td></tr>
+      <tr><td>5</td><td>10.5</td><td>9</td><td>12</td><td>T1.9 complete; T1.10 in progress</td></tr>
+      <tr><td>6</td><td>8.4</td><td>7</td><td>14</td><td>T1.10 complete (Whisper wrapper)</td></tr>
+      <tr><td>7</td><td>6.3</td><td>5</td><td>16</td><td>T1.11 + T1.12 complete (tests &amp; MMS research)</td></tr>
+      <tr><td>8</td><td>4.2</td><td>3</td><td>18</td><td>T1.13 complete (MMS-TTS wrapper)</td></tr>
+      <tr><td>9</td><td>2.1</td><td>1</td><td>20</td><td>T1.14 complete (Cartesia TTS)</td></tr>
+      <tr><td>10</td><td>0.0</td><td>0</td><td>21</td><td>T1.15 complete; sprint done</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>6. Sprint Retrospective</h2>
+  <h3>What went well</h3>
+  <ul>
+    <li>All 15 tasks completed on schedule &mdash; 21/21 story points delivered</li>
+    <li>Technology research was thorough; confident in stack selections (Whisper, IndicTrans2, Qwen, LangGraph)</li>
+    <li>Both ASR and TTS proof-of-concepts produced working output for Malayalam</li>
+    <li>Project structure and dev environment set up cleanly from day one</li>
+  </ul>
+  <h3>What could improve</h3>
+  <ul>
+    <li>Whisper accuracy for Malayalam (~80%) is lower than Hindi (~92%) &mdash; need a specialized Indic ASR model</li>
+    <li>MMS-TTS voice quality is functional but robotic &mdash; explore higher-quality alternatives</li>
+    <li>Research tasks took slightly longer than estimated on day 1; adjusted pace for remaining days</li>
+  </ul>
+  <h3>Action items for Sprint 2</h3>
+  <ul>
+    <li>Integrate IndicTrans2 for bidirectional Malayalam&ndash;English translation</li>
+    <li>Set up Qwen 2.5 LLM for local conversational AI</li>
+    <li>Investigate distilled translation models for smaller memory footprint</li>
+  </ul>
+</section>
+
+<section class="page-break">
+  <h2>7. Next Sprint Backlog &mdash; Sprint 2</h2>
+  <p><b>Goal:</b> Build the translation layer and conversational AI with conversation memory.</p>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Task</th><th>Assignee</th><th>Points</th><th>Priority</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>T2.1</td><td>IndicTrans2 ML&rarr;EN translation setup</td><td>Dev</td><td>3</td><td>Critical</td></tr>
+      <tr><td>T2.2</td><td>IndicTrans2 EN&rarr;ML translation setup</td><td>Dev</td><td>2</td><td>Critical</td></tr>
+      <tr><td>T2.3</td><td>Translation API wrapper with language detection</td><td>Dev</td><td>2</td><td>High</td></tr>
+      <tr><td>T2.4</td><td>Qwen 2.5 LLM integration (transformers)</td><td>Dev</td><td>3</td><td>Critical</td></tr>
+      <tr><td>T2.5</td><td>Conversation memory (sliding window)</td><td>Dev</td><td>2</td><td>High</td></tr>
+      <tr><td>T2.6</td><td>System prompt tuning for Kerala context</td><td>Dev</td><td>2</td><td>High</td></tr>
+      <tr><td>T2.7</td><td>IndicTrans2-Dist upgrade (211M params)</td><td>Dev</td><td>3</td><td>High</td></tr>
+      <tr><td>T2.8</td><td>Qwen3 + llama.cpp GGUF backend</td><td>Dev</td><td>2</td><td>High</td></tr>
+      <tr><td>T2.9</td><td>Indic-to-Indic direct translation</td><td>Dev</td><td>2</td><td>Medium</td></tr>
+    </tbody>
+  </table>
+  <p>Total: 9 tasks, 21 story points.</p>
+</section>
+
+<footer>
+  Sprint 1 Report &middot; Hyper-Localized Multilingual Voice Assistant
+</footer>
+
+</body>
+</html>

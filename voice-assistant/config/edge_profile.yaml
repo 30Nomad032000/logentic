@@ -1,0 +1,58 @@
+# Edge-Optimized Configuration Profile
+# Designed for resource-constrained devices (Raspberry Pi 5, Docker 4GB limit)
+# Uses the smallest available models for minimal memory footprint
+
+app:
+  name: "Voice Assistant (Edge)"
+  version: "0.2.0-edge"
+
+asr:
+  engine: "mms"
+  model: "facebook/mms-1b-all"
+  device: "cpu"
+
+tts:
+  engine: "mms"
+  language: "ml"
+
+translation:
+  engine: "indictrans2"
+  model_variant: "dist"  # 211M params (5x smaller than full)
+  m2m_support: false      # Disable Indic-to-Indic to save memory
+
+llm:
+  engine: "qwen3"
+  model_size: "0.6b"     # Smallest Qwen3 variant
+  backend: "llamacpp"     # GGUF quantized for CPU efficiency
+  llamacpp:
+    n_ctx: 1024           # Reduced context window
+    n_threads: 2          # Match edge CPU cores
+    n_gpu_layers: 0       # CPU only
+    quantization: "Q4_K_M"
+
+agents:
+  orchestrator: "langgraph"
+  max_memory_messages: 5  # Reduced from default
+
+inference:
+  asr_backend: "transformers"
+  tts_backend: "transformers"
+  llm_backend: "llamacpp"
+  translation_backend: "onnx"  # ONNX for faster CPU translation
+
+pipeline:
+  enable_cache: true
+  cache_ttl_seconds: 1800
+  cache_translation_max: 500
+  cache_tts_max: 100
+  cache_llm_max: 200
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+supported_languages:
+  - "ml"
+  - "hi"
+  - "en"
+  # Reduced language set for edge

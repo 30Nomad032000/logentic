@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyper-Localized Multilingual Voice Assistant &mdash; Interim Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Manrope:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --black: #111111;
+    --white: #fafaf9;
+    --gray-1: #2a2a2a;
+    --gray-2: #555555;
+    --gray-3: #888888;
+    --gray-4: #b0b0b0;
+    --gray-5: #d4d4d4;
+    --gray-6: #ececec;
+    --gray-7: #f5f5f4;
+    --accent: #2563EB;
+    --accent-light: rgba(37, 99, 235, 0.06);
+    --accent-mid: rgba(37, 99, 235, 0.12);
+    --accent-dark: #1d4ed8;
+    --green: #16a34a;
+    --green-light: rgba(22, 163, 74, 0.08);
+    --amber: #d97706;
+    --serif: 'Newsreader', Georgia, serif;
+    --sans: 'Manrope', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    font-family: var(--sans);
+    background: var(--white);
+    color: var(--black);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Institutional header bar ---- */
+  .inst-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 110px;
+    background: #4A66AC;
+    border-bottom: 2px solid #374e8a;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+  }
+
+  .inst-header img {
+    height: 100%;
+    width: 100%;
+    object-fit: fill;
+    padding: 6px 0;
+  }
+
+  /* ---- Institutional footer ---- */
+  .inst-footer {
+    position: fixed;
+    bottom: 48px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray-3);
+    z-index: 150;
+    pointer-events: none;
+  }
+
+  /* ---- Campus watermark ---- */
+  .campus-watermark {
+    position: fixed;
+    top: 110px; left: 0; right: 0; bottom: 0;
+    background: url('campus-watermark.png') center center / cover no-repeat;
+    opacity: 0.06;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ---- Slide engine ---- */
+  .slide {
+    width: 100vw; height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 136px 100px 110px;
+    position: relative;
+    z-index: 1;
+  }
+  .slide.active { display: flex; }
+
+  .slide-number {
+    position: absolute;
+    bottom: 36px; right: 48px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gray-4);
+    letter-spacing: 0.5px;
+  }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 110px; left: 0; right: 0;
+    height: 0px;
+    background: var(--gray-5);
+  }
+
+  /* progress */
+  .progress {
+    position: fixed; top: 110px; left: 0;
+    height: 2px;
+    background: var(--accent);
+    z-index: 200;
+    transition: width 0.5s ease;
+  }
+
+  /* ---- Typography ---- */
+  .serif { font-family: var(--serif); }
+  .mono { font-family: var(--mono); }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(38px, 4.2vw, 60px);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    color: var(--black);
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(30px, 3vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.3px;
+    color: var(--black);
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+    color: var(--black);
+    margin-bottom: 6px;
+  }
+
+  .lead {
+    font-family: var(--sans);
+    font-size: clamp(15px, 1.3vw, 18px);
+    font-weight: 400;
+    color: var(--gray-2);
+    line-height: 1.65;
+    max-width: 680px;
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .accent { color: var(--accent); }
+  .muted { color: var(--gray-3); }
+  .light { color: var(--gray-2); }
+
+  em.h { font-style: italic; color: var(--accent); }
+
+  /* ---- Layout helpers ---- */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    width: 100%;
+    align-items: start;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    width: 100%;
+  }
+
+  .four-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 32px;
+    width: 100%;
+  }
+
+  .five-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .stack { display: flex; flex-direction: column; }
+  .gap-4 { gap: 4px; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .gap-20 { gap: 20px; }
+  .gap-24 { gap: 24px; }
+  .gap-32 { gap: 32px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mt-32 { margin-top: 32px; }
+  .mt-40 { margin-top: 40px; }
+
+  /* ---- Stat blocks ---- */
+  .stat { text-align: left; }
+  .stat-val {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.5vw, 52px);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--black);
+    letter-spacing: -1px;
+  }
+  .stat-val.blue { color: var(--accent); }
+  .stat-val.green { color: var(--green); }
+  .stat-unit {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ---- Table ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray-3);
+    text-align: left;
+    padding: 0 16px 10px 0;
+    border-bottom: 1px solid var(--black);
+  }
+
+  td {
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--gray-6);
+    color: var(--gray-2);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.val {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--black);
+  }
+
+  td.val-accent {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  td.val-green {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  /* ---- Bars ---- */
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 32px;
+  }
+
+  .bar-label {
+    width: 140px;
+    font-size: 12px;
+    color: var(--gray-2);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--gray-6);
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--black);
+    position: absolute;
+    left: 0; top: 0;
+    transition: width 0.8s ease;
+  }
+
+  .bar-fill.blue { background: var(--accent); }
+  .bar-fill.green { background: var(--green); }
+
+  .bar-val {
+    width: 60px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-2);
+    flex-shrink: 0;
+  }
+
+  /* ---- Ruled list ---- */
+  .ruled-list { list-style: none; }
+  .ruled-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-6);
+    font-size: 14px;
+    color: var(--gray-2);
+    line-height: 1.55;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .ruled-list li:last-child { border-bottom: none; }
+
+  .ruled-list .num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gray-4);
+    width: 18px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  /* ---- Boxed section ---- */
+  .box {
+    border: 1px solid var(--gray-5);
+    padding: 24px 28px;
+  }
+
+  .box-accent {
+    border: 1px solid var(--accent);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    background: var(--accent-light);
+  }
+
+  .box-green {
+    border: 1px solid var(--green);
+    border-left: 3px solid var(--green);
+    padding: 20px 24px;
+    background: var(--green-light);
+  }
+
+  /* ---- Diagram elements ---- */
+  .diagram-node {
+    border: 1px solid var(--gray-5);
+    padding: 12px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray-1);
+    background: var(--white);
+  }
+
+  .diagram-node.dark {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
+  }
+
+  .diagram-node.accent {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .diagram-node.accent-fill {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .diagram-node.muted {
+    border-style: dashed;
+    color: var(--gray-4);
+  }
+
+  .diagram-arrow {
+    text-align: center;
+    color: var(--gray-4);
+    font-size: 13px;
+    padding: 4px 0;
+  }
+
+  /* ---- Quote ---- */
+  .quote {
+    font-family: var(--serif);
+    font-size: clamp(18px, 1.8vw, 24px);
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--gray-1);
+    max-width: 700px;
+    border-left: 2px solid var(--accent);
+    padding-left: 24px;
+  }
+
+  .quote-attr {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 11px;
+    color: var(--gray-3);
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- Note ---- */
+  .note {
+    font-size: 13px;
+    color: var(--gray-2);
+    line-height: 1.6;
+    padding: 16px 20px;
+    background: var(--gray-7);
+    border-left: 2px solid var(--gray-5);
+  }
+
+  .note strong { color: var(--black); }
+
+  .note-accent {
+    font-size: 13px;
+    color: var(--gray-1);
+    line-height: 1.6;
+    padding: 16px 20px;
+    background: var(--accent-light);
+    border-left: 2px solid var(--accent);
+  }
+
+  .note-accent strong { color: var(--accent); }
+
+  /* ---- Horizontal rule ---- */
+  hr {
+    border: none;
+    border-top: 1px solid var(--gray-6);
+    margin: 16px 0;
+  }
+
+  /* ---- Pipeline flow ---- */
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .pipeline-step {
+    flex: 1;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border: 1px solid var(--gray-5);
+    background: var(--white);
+    position: relative;
+  }
+
+  .pipeline-step.active-step {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .pipeline-step small {
+    display: block;
+    font-weight: 400;
+    font-size: 10px;
+    color: var(--gray-3);
+    margin-top: 2px;
+  }
+
+  .pipeline-arrow {
+    font-size: 16px;
+    color: var(--gray-4);
+    flex-shrink: 0;
+    padding: 0 2px;
+  }
+
+  /* ---- Sprint timeline ---- */
+  .sprint-card {
+    border: 1px solid var(--gray-5);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .sprint-card.done {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+
+  .sprint-card.current {
+    border-color: var(--accent);
+    border-width: 2px;
+    background: var(--accent-light);
+  }
+
+  .sprint-card h3 {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .sprint-card p {
+    font-size: 11px;
+    color: var(--gray-2);
+    line-height: 1.5;
+  }
+
+  .sprint-status {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    margin-top: 8px;
+  }
+
+  .sprint-status.done { background: var(--green); color: white; }
+  .sprint-status.in-progress { background: var(--accent); color: white; }
+  .sprint-status.planned { background: var(--gray-5); color: var(--gray-2); }
+
+  /* ---- Nav ---- */
+  .nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 48px;
+    background: var(--white);
+    border-top: 1px solid var(--gray-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 48px;
+    z-index: 100;
+  }
+
+  .nav-btn { display: none; }
+
+  .nav-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-4);
+    letter-spacing: 1px;
+  }
+
+  /* ---- Animations ---- */
+  .slide.active .fade-up {
+    animation: fadeUp 0.5s ease both;
+  }
+  .slide.active .fade-up-1 { animation-delay: 0.05s; }
+  .slide.active .fade-up-2 { animation-delay: 0.12s; }
+  .slide.active .fade-up-3 { animation-delay: 0.2s; }
+  .slide.active .fade-up-4 { animation-delay: 0.28s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 900px) {
+    .inst-header { height: 52px; }
+    .inst-header img { height: 36px; }
+    .progress { top: 52px; }
+    .campus-watermark { top: 52px; }
+    .slide { padding: 68px 20px 80px; }
+    .slide::before { top: 52px; }
+    .two-col, .three-col, .four-col, .five-col { grid-template-columns: 1fr; gap: 20px; }
+    .bar-label { width: 90px; }
+    h1 { font-size: clamp(26px, 6vw, 38px); }
+    h2 { font-size: clamp(22px, 5vw, 30px); }
+    .lead { font-size: 14px; }
+    .stat-val { font-size: clamp(24px, 6vw, 36px); }
+    .nav { padding: 0 16px; height: 44px; }
+    .nav-btn { padding: 8px 20px; font-size: 13px; min-height: 36px; }
+    .inst-footer { bottom: 44px; font-size: 10px; }
+    .slide-number { bottom: 52px; right: 20px; }
+    .quote { font-size: 16px; padding-left: 16px; }
+    .box, .box-accent { padding: 16px; }
+    .note, .note-accent { padding: 12px 16px; }
+    table { font-size: 11px; }
+    th { font-size: 9px; }
+    td { padding: 8px 8px 8px 0; font-size: 11px; }
+    .pipeline-flow { flex-wrap: wrap; }
+  }
+
+  @media (max-width: 480px) {
+    .slide { padding: 60px 14px 72px; overflow-y: auto; }
+    .four-col { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .bar-label { width: 70px; font-size: 10px; }
+    .bar-val { width: 50px; font-size: 10px; }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+  }
+
+  @media print {
+    .slide { display: flex !important; page-break-after: always; height: auto; min-height: 100vh; }
+    .nav, .progress, .inst-header, .inst-footer, .campus-watermark { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Institutional header bar -->
+<div class="inst-header">
+  <img src="header-logo.jpg" alt="Adi Shankara Institute of Engineering and Technology">
+</div>
+
+<!-- Campus watermark background -->
+<div class="campus-watermark"></div>
+
+<!-- Institutional footer -->
+<div class="inst-footer">Main Project &mdash; Interim Presentation &mdash; MCA S4</div>
+
+<div class="progress" id="progress"></div>
+
+<!-- ====================== 01. TITLE ====================== -->
+<div class="slide active" id="s1">
+  <span class="label fade-up fade-up-1">MCA S4 &mdash; Main Project Interim Presentation</span>
+  <h1 class="fade-up fade-up-2" style="max-width: 900px;">Hyper-Localized Multilingual<br>Voice Assistant</h1>
+  <p class="lead mt-16 fade-up fade-up-3">
+    Edge-computing voice assistant enabling interaction with digital services using natural voice commands in regional Indian languages, powered by agentic AI workflows.
+  </p>
+  <div class="mt-40 fade-up fade-up-4" style="font-size: 13px; color: var(--gray-2); line-height: 2.2;">
+    <div style="display: flex; gap: 48px; flex-wrap: wrap;">
+      <div>
+        <span style="font-family: var(--mono); font-size: 10px; color: var(--gray-4); letter-spacing: 1px; text-transform: uppercase;">Student</span><br>
+        <strong>Ebin John Joseph</strong>
+      </div>
+      <div>
+        <span style="font-family: var(--mono); font-size: 10px; color: var(--gray-4); letter-spacing: 1px; text-transform: uppercase;">Register No.</span><br>
+        ASI24MCA-2025
+      </div>
+      <div>
+        <span style="font-family: var(--mono); font-size: 10px; color: var(--gray-4); letter-spacing: 1px; text-transform: uppercase;">Guide</span><br>
+        Sukrith Lal
+      </div>
+      <div>
+        <span style="font-family: var(--mono); font-size: 10px; color: var(--gray-4); letter-spacing: 1px; text-transform: uppercase;">Date</span><br>
+        March 2026
+      </div>
+    </div>
+    <div style="margin-top: 4px; font-size: 12px; color: var(--gray-3);">
+      Department of Computer Applications &middot; Adi Shankara Institute of Engineering and Technology, Kalady
+    </div>
+  </div>
+  <span class="slide-number">01</span>
+</div>
+
+<!-- ====================== 02. INTRODUCTION ====================== -->
+<div class="slide" id="s2">
+  <span class="label fade-up fade-up-1">Introduction</span>
+  <h2 class="fade-up fade-up-2">780 million Indians can't use voice assistants<br>in their own language.</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-20">
+      <div class="quote">
+        India has 22 official languages and 19,500 dialects, yet commercial voice assistants primarily support English and Hindi &mdash; leaving the vast majority underserved.
+      </div>
+      <ul class="ruled-list">
+        <li><span class="num">01</span><strong>Digital divide</strong> &mdash; 90% of India's internet users prefer local languages; most digital services are English-only</li>
+        <li><span class="num">02</span><strong>Privacy concerns</strong> &mdash; cloud-based assistants send personal voice data to remote servers</li>
+        <li><span class="num">03</span><strong>Connectivity gaps</strong> &mdash; 65% of rural India has unreliable internet, making cloud-dependent assistants impractical</li>
+      </ul>
+    </div>
+    <div class="stack gap-16">
+      <div class="four-col" style="grid-template-columns: 1fr 1fr;">
+        <div class="stat">
+          <div class="stat-val blue">22</div>
+          <div class="stat-unit">Official Languages</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">38M</div>
+          <div class="stat-unit">Malayalam Speakers</div>
+        </div>
+      </div>
+      <div class="box-accent">
+        <h3 style="color: var(--accent);">Why this matters</h3>
+        <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 6px;">
+          Voice is the most natural interface for technology interaction, especially for users with limited literacy. A <strong>local-language, privacy-preserving, offline-capable</strong> voice assistant can bridge the digital divide for millions.
+        </p>
+      </div>
+      <div class="box">
+        <h3>Project scope</h3>
+        <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+          Build a voice assistant that runs entirely on <strong>edge hardware</strong>, supports <strong>Malayalam</strong> as primary language with 10+ Indian languages, uses <strong>open-source AI models</strong>, and requires <strong>minimal internet</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">02</span>
+</div>
+
+<!-- ====================== 03. OBJECTIVES ====================== -->
+<div class="slide" id="s3">
+  <span class="label fade-up fade-up-1">Objectives</span>
+  <h2 class="fade-up fade-up-2">Project objectives</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-16">
+      <div class="box-accent" style="padding: 28px;">
+        <h3 style="color: var(--accent); font-size: 16px;">Main Objective</h3>
+        <p style="font-size: 14px; color: var(--gray-1); line-height: 1.7; margin-top: 8px;">
+          Design and develop a hyper-localized multilingual voice assistant that enables seamless human-computer interaction using natural voice commands in regional Indian languages, with edge-computing capabilities and agentic AI workflows.
+        </p>
+      </div>
+    </div>
+    <div class="stack gap-0">
+      <div style="padding: 18px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">01</span>
+        <div>
+          <h3 style="font-size: 14px;">Multilingual speech recognition</h3>
+          <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Achieve &gt;85% accuracy for Malayalam ASR using state-of-the-art models</p>
+        </div>
+      </div>
+      <div style="padding: 18px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">02</span>
+        <div>
+          <h3 style="font-size: 14px;">Real-time bidirectional translation</h3>
+          <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Enable seamless Malayalam &harr; English translation with &gt;90% accuracy using IndicTrans2</p>
+        </div>
+      </div>
+      <div style="padding: 18px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">03</span>
+        <div>
+          <h3 style="font-size: 14px;">Agentic AI orchestration</h3>
+          <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Implement LangGraph-based intelligent agent routing for task execution, Q&A, and conversational AI</p>
+        </div>
+      </div>
+      <div style="padding: 18px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">04</span>
+        <div>
+          <h3 style="font-size: 14px;">Edge deployment readiness</h3>
+          <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Optimize models for resource-constrained devices with &lt;3 second end-to-end latency</p>
+        </div>
+      </div>
+      <div style="padding: 18px 0; display: flex; gap: 16px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">05</span>
+        <div>
+          <h3 style="font-size: 14px;">Privacy-preserving architecture</h3>
+          <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Process all voice data locally &mdash; no audio leaves the device</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">03</span>
+</div>
+
+<!-- ====================== 04. LITERATURE REVIEW ====================== -->
+<div class="slide" id="s4">
+  <span class="label fade-up fade-up-1">Literature Review</span>
+  <h2 class="fade-up fade-up-2">Existing systems &amp; research</h2>
+  <div class="mt-24 fade-up fade-up-3" style="max-width: 100%;">
+    <table>
+      <thead>
+        <tr>
+          <th>System / Paper</th>
+          <th>Year</th>
+          <th>Approach</th>
+          <th>Indian Languages</th>
+          <th>Edge / Offline</th>
+          <th>Limitation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Google Assistant</strong></td>
+          <td>2016</td>
+          <td>Cloud-based NLU + ASR</td>
+          <td class="val">Hindi only (limited)</td>
+          <td style="color: var(--gray-4);">No</td>
+          <td>Cloud-dependent; no Malayalam support; privacy concerns</td>
+        </tr>
+        <tr>
+          <td><strong>Amazon Alexa</strong></td>
+          <td>2014</td>
+          <td>Cloud ASR + Skills API</td>
+          <td class="val">Hindi only</td>
+          <td style="color: var(--gray-4);">No</td>
+          <td>Proprietary; requires constant internet; limited Indic</td>
+        </tr>
+        <tr>
+          <td><strong>Rasa Open Source</strong></td>
+          <td>2020</td>
+          <td>Local NLU + dialogue manager</td>
+          <td style="color: var(--gray-4);">None built-in</td>
+          <td class="val-green">Partial</td>
+          <td>No built-in ASR/TTS; no Indian language models</td>
+        </tr>
+        <tr>
+          <td><strong>AI4Bharat IndicTrans2</strong></td>
+          <td>2023</td>
+          <td>Transformer-based translation</td>
+          <td class="val-accent">22 languages</td>
+          <td class="val-green">Yes</td>
+          <td>Translation only &mdash; no voice pipeline or agents</td>
+        </tr>
+        <tr>
+          <td><strong>Whisper (OpenAI)</strong></td>
+          <td>2023</td>
+          <td>Multilingual ASR</td>
+          <td class="val">99 languages</td>
+          <td class="val-green">Yes</td>
+          <td>Generic &mdash; lower accuracy for low-resource languages</td>
+        </tr>
+        <tr>
+          <td><strong>Bhashini (Govt.)</strong></td>
+          <td>2022</td>
+          <td>API gateway for Indic AI</td>
+          <td class="val-accent">11 languages</td>
+          <td style="color: var(--gray-4);">No</td>
+          <td>Cloud API only; no offline or edge support; no agents</td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--accent);">Our System</strong></td>
+          <td>2026</td>
+          <td><strong>Edge LLM + LangGraph agents</strong></td>
+          <td class="val-accent">11 languages</td>
+          <td class="val-accent">Yes (full)</td>
+          <td style="color: var(--accent);"><strong>Addresses all above gaps</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note-accent mt-16 fade-up fade-up-4">
+    <strong>Research gap:</strong> No existing system combines <strong>multilingual Indic ASR + local LLM + agentic workflows + edge deployment</strong> in a single privacy-preserving pipeline. Our system fills this gap.
+  </div>
+  <span class="slide-number">04</span>
+</div>
+
+<!-- ====================== 05. PROPOSED SYSTEM ====================== -->
+<div class="slide" id="s5">
+  <span class="label fade-up fade-up-1">Proposed System</span>
+  <h2 class="fade-up fade-up-2">An end-to-end voice AI pipeline,<br>running entirely on-device</h2>
+  <div class="three-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-12">
+      <h3>Key Features</h3>
+      <hr>
+      <ul class="ruled-list">
+        <li><span class="num">01</span><strong>Fully offline</strong> &mdash; all models run locally, no data leaves the device</li>
+        <li><span class="num">02</span><strong>11 Indian languages</strong> &mdash; Malayalam primary, with Hindi, Tamil, Telugu, Bengali, and more</li>
+        <li><span class="num">03</span><strong>Agentic workflows</strong> &mdash; LangGraph routes to specialized agents (Info, Task, Chat, Smart Home)</li>
+        <li><span class="num">04</span><strong>Real-time dashboard</strong> &mdash; live monitoring, metrics, conversation logs, and interactive testing</li>
+      </ul>
+    </div>
+    <div class="stack gap-12">
+      <h3>Advantages over existing systems</h3>
+      <hr>
+      <ul class="ruled-list">
+        <li><span class="num" style="color: var(--accent);">+</span><strong>Privacy</strong> &mdash; zero cloud dependency for core pipeline</li>
+        <li><span class="num" style="color: var(--accent);">+</span><strong>Cost</strong> &mdash; no API fees; uses open-source models (Qwen, IndicTrans2, MMS)</li>
+        <li><span class="num" style="color: var(--accent);">+</span><strong>Latency</strong> &mdash; local inference avoids network round-trips (&lt;3s end-to-end)</li>
+        <li><span class="num" style="color: var(--accent);">+</span><strong>Extensibility</strong> &mdash; plug-in agent tools, swappable model backends</li>
+      </ul>
+    </div>
+    <div class="stack gap-12">
+      <h3>System components</h3>
+      <hr>
+      <div class="stack gap-8 mt-8">
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px; color: var(--accent);">ASR Engine</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">Pingala V1 (2.94% WER) + Whisper fallback</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px; color: var(--accent);">Translation</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">IndicTrans2-Dist (211M params, ~93% accuracy)</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px; color: var(--accent);">LLM</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">Qwen3 (0.6B&ndash;4B) via llama.cpp GGUF</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px; color: var(--accent);">TTS</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">MMS-TTS (offline) + Cartesia (online, HQ)</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px; color: var(--accent);">Agents</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">LangGraph stateful graph with 4 agents</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">05</span>
+</div>
+
+<!-- ====================== 06. SYSTEM ARCHITECTURE ====================== -->
+<div class="slide" id="s6">
+  <span class="label fade-up fade-up-1">System Architecture</span>
+  <h2 class="fade-up fade-up-2">Three-layer architecture</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-4" style="max-width: 440px;">
+      <!-- Input -->
+      <div class="diagram-node dark" style="padding: 16px;">
+        <strong>User Voice Input</strong><br>
+        <span style="font-size: 11px; opacity: 0.7;">Malayalam / Hindi / Tamil / ...</span>
+      </div>
+      <div class="diagram-arrow">&darr;</div>
+      <!-- Layer 1: Perception -->
+      <div style="border: 2px solid var(--accent); padding: 12px; background: var(--accent-light);">
+        <p style="font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">Layer 1 &mdash; Perception</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div class="diagram-node" style="font-size: 11px; padding: 8px;">ASR<br><small style="color: var(--gray-3);">Pingala / Whisper</small></div>
+          <div class="diagram-node" style="font-size: 11px; padding: 8px;">Translation<br><small style="color: var(--gray-3);">IndicTrans2</small></div>
+        </div>
+      </div>
+      <div class="diagram-arrow">&darr;</div>
+      <!-- Layer 2: Cognition -->
+      <div style="border: 2px solid var(--black); padding: 12px;">
+        <p style="font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray-2); margin-bottom: 8px;">Layer 2 &mdash; Cognition</p>
+        <div class="diagram-node accent" style="margin-bottom: 6px; padding: 8px;">
+          <strong>LangGraph Orchestrator</strong><br>
+          <span style="font-size: 10px;">Intent Classification &rarr; Agent Routing</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px;">
+          <div class="diagram-node" style="font-size: 9px; padding: 6px;">Info<br>Agent</div>
+          <div class="diagram-node" style="font-size: 9px; padding: 6px;">Task<br>Agent</div>
+          <div class="diagram-node" style="font-size: 9px; padding: 6px;">Chat<br>Agent</div>
+          <div class="diagram-node muted" style="font-size: 9px; padding: 6px;">Smart<br>Home</div>
+        </div>
+        <div class="diagram-node" style="margin-top: 6px; font-size: 11px; padding: 8px;">
+          LLM &mdash; <strong>Qwen3</strong><small style="color: var(--gray-3);"> via llama.cpp</small>
+        </div>
+      </div>
+      <div class="diagram-arrow">&darr;</div>
+      <!-- Layer 3: Expression -->
+      <div style="border: 2px solid var(--green); padding: 12px; background: var(--green-light);">
+        <p style="font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green); margin-bottom: 8px;">Layer 3 &mdash; Expression</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div class="diagram-node" style="font-size: 11px; padding: 8px;">Translation<br><small style="color: var(--gray-3);">EN &rarr; ML</small></div>
+          <div class="diagram-node" style="font-size: 11px; padding: 8px;">TTS<br><small style="color: var(--gray-3);">MMS / Cartesia</small></div>
+        </div>
+      </div>
+      <div class="diagram-arrow">&darr;</div>
+      <div class="diagram-node dark" style="padding: 16px;">
+        <strong>Voice Response</strong><br>
+        <span style="font-size: 11px; opacity: 0.7;">In user's native language</span>
+      </div>
+    </div>
+    <div class="stack gap-16">
+      <div class="box">
+        <h3>Layer 1: Perception</h3>
+        <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+          Converts user's voice to machine-readable text. <strong>Pingala V1</strong> achieves 2.94% WER for Malayalam (50% better than Whisper). <strong>IndicTrans2-Dist</strong> translates to English for LLM processing.
+        </p>
+      </div>
+      <div class="box" style="border-color: var(--black);">
+        <h3>Layer 2: Cognition</h3>
+        <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+          The brain of the system. <strong>LangGraph</strong> classifies intent and routes to specialized agents. Each agent has domain-specific prompts and tools. <strong>Qwen3</strong> LLM generates context-aware responses.
+        </p>
+      </div>
+      <div class="box">
+        <h3>Layer 3: Expression</h3>
+        <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+          Converts the response back to the user's language and synthesizes natural-sounding speech. <strong>MMS-TTS</strong> supports all target languages offline.
+        </p>
+      </div>
+      <div class="note">
+        <strong>Data flow:</strong> Audio &rarr; ASR &rarr; ML&rarr;EN &rarr; Intent &rarr; Agent &rarr; LLM &rarr; EN&rarr;ML &rarr; TTS &rarr; Audio. All processing happens <strong>locally</strong> on the device.
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">06</span>
+</div>
+
+<!-- ====================== 07. METHODOLOGY ====================== -->
+<div class="slide" id="s7">
+  <span class="label fade-up fade-up-1">Methodology</span>
+  <h2 class="fade-up fade-up-2">Agile Scrum &mdash; 6 sprints, 12 weeks</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-16">
+      <div class="four-col" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="stat">
+          <div class="stat-val blue">6</div>
+          <div class="stat-unit">Sprints</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">114</div>
+          <div class="stat-unit">Story Points</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">19</div>
+          <div class="stat-unit">Avg Velocity</div>
+        </div>
+      </div>
+      <!-- Scrum cycle diagram -->
+      <div class="stack gap-4">
+        <div class="diagram-node accent" style="padding: 10px;">Product Backlog (8 Epics, 30 User Stories)</div>
+        <div class="diagram-arrow">&darr;</div>
+        <div style="border: 1px dashed var(--accent); padding: 14px;">
+          <p style="font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">Sprint Cycle (2 weeks)</p>
+          <div class="diagram-node" style="margin-bottom: 6px; font-size: 12px;">Sprint Planning &rarr; Daily Standup &rarr; Development &rarr; Sprint Review</div>
+          <div class="diagram-node" style="font-size: 12px; border-style: dashed;">Retrospective &rarr; Backlog Refinement</div>
+        </div>
+        <div class="diagram-arrow">&#8635; repeat &times; 6</div>
+        <div class="diagram-node dark" style="padding: 10px;">Deliverable: Working Voice Assistant</div>
+      </div>
+    </div>
+    <div class="stack gap-8">
+      <h3 style="margin-bottom: 4px;">System workflow</h3>
+      <div class="pipeline-flow" style="flex-wrap: wrap; gap: 4px;">
+        <div class="pipeline-step active-step" style="flex: none; width: 100%;">
+          <strong>1. Audio Capture</strong>
+          <small>Microphone / WebSocket</small>
+        </div>
+      </div>
+      <div style="text-align: center; color: var(--gray-4); font-size: 13px;">&darr;</div>
+      <div class="pipeline-flow" style="flex-wrap: nowrap; gap: 0;">
+        <div class="pipeline-step" style="font-size: 10px;">ASR<small>Pingala V1</small></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step" style="font-size: 10px;">ML&rarr;EN<small>IndicTrans2</small></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step active-step" style="font-size: 10px;">Intent<small>LangGraph</small></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step" style="font-size: 10px;">Agent<small>Info/Task/Chat</small></div>
+      </div>
+      <div style="text-align: center; color: var(--gray-4); font-size: 13px;">&darr;</div>
+      <div class="pipeline-flow" style="flex-wrap: nowrap; gap: 0;">
+        <div class="pipeline-step active-step" style="font-size: 10px;">LLM<small>Qwen3</small></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step" style="font-size: 10px;">EN&rarr;ML<small>IndicTrans2</small></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step" style="font-size: 10px;">TTS<small>MMS-TTS</small></div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step" style="font-size: 10px; border-color: var(--green); color: var(--green);">Audio Out<small>Speaker</small></div>
+      </div>
+      <div class="note mt-8">
+        <strong>Latency target:</strong> &lt;3 seconds end-to-end. ASR ~500ms, Translation ~200ms each, LLM ~500ms, TTS ~400ms.
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">07</span>
+</div>
+
+<!-- ====================== 08. SYSTEM DESIGN ====================== -->
+<div class="slide" id="s8">
+  <span class="label fade-up fade-up-1">System Design</span>
+  <h2 class="fade-up fade-up-2">Use Case &amp; Activity Diagrams</h2>
+  <div class="two-col mt-24 fade-up fade-up-3">
+    <!-- Use Case -->
+    <div class="stack gap-8">
+      <h3 style="color: var(--accent);">Use Case Diagram</h3>
+      <div class="stack gap-4" style="border: 1px solid var(--gray-5); padding: 16px;">
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start;">
+          <div class="stack gap-8" style="padding-top: 8px;">
+            <div class="diagram-node dark" style="font-size: 11px; padding: 8px 12px;">User<br><small style="opacity:.7;">Malayalam Speaker</small></div>
+            <div style="height: 120px;"></div>
+            <div class="diagram-node" style="font-size: 11px; padding: 8px 12px; border-style: dashed;">Admin</div>
+          </div>
+          <div class="stack gap-4">
+            <div class="diagram-node" style="font-size: 11px; padding: 6px 12px;">UC1: Speak Voice Command</div>
+            <div class="diagram-node" style="font-size: 11px; padding: 6px 12px;">UC2: Transcribe Speech (ASR)</div>
+            <div class="diagram-node" style="font-size: 11px; padding: 6px 12px;">UC3: Translate ML &harr; EN</div>
+            <div class="diagram-node accent" style="font-size: 11px; padding: 6px 12px;">UC4: Process Intent &amp; Generate Response</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; padding-left: 20px;">
+              <div class="diagram-node" style="font-size: 9px; padding: 4px 6px;">UC4a: Q&A</div>
+              <div class="diagram-node" style="font-size: 9px; padding: 4px 6px;">UC4b: Task</div>
+              <div class="diagram-node muted" style="font-size: 9px; padding: 4px 6px;">UC4c: IoT</div>
+            </div>
+            <div class="diagram-node" style="font-size: 11px; padding: 6px 12px;">UC5: Synthesize Speech (TTS)</div>
+            <hr style="margin: 4px 0;">
+            <div class="diagram-node" style="font-size: 11px; padding: 6px 12px; border-style: dashed;">UC6: Configure Settings</div>
+            <div class="diagram-node" style="font-size: 11px; padding: 6px 12px; border-style: dashed;">UC7: Monitor Performance</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Activity Diagram -->
+    <div class="stack gap-8">
+      <h3 style="color: var(--accent);">Activity Diagram &mdash; Voice Command Flow</h3>
+      <div class="stack gap-3" style="border: 1px solid var(--gray-5); padding: 16px;">
+        <div class="diagram-node dark" style="font-size: 11px; padding: 6px;">START</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node" style="font-size: 11px; padding: 6px;">User Speaks Command (Malayalam)</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node" style="font-size: 11px; padding: 6px;">Capture Audio (Microphone)</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node accent" style="font-size: 11px; padding: 6px;">ASR Processing (Pingala V1)</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node" style="font-size: 11px; padding: 6px;">Translate ML &rarr; EN (IndicTrans2)</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node accent" style="font-size: 11px; padding: 6px;">LangGraph: Intent &rarr; Agent &rarr; LLM (Qwen3)</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node" style="font-size: 11px; padding: 6px;">Translate EN &rarr; ML (IndicTrans2)</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node" style="font-size: 11px; padding: 6px; border-color: var(--green); color: var(--green);">TTS Synthesis (MMS-TTS) &rarr; Play Audio</div>
+        <div class="diagram-arrow" style="font-size: 11px;">&darr;</div>
+        <div class="diagram-node dark" style="font-size: 11px; padding: 6px;">END</div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">08</span>
+</div>
+
+<!-- ====================== 09. DFD & ER DIAGRAM ====================== -->
+<div class="slide" id="s9">
+  <span class="label fade-up fade-up-1">System Design</span>
+  <h2 class="fade-up fade-up-2">Data Flow &amp; Database Design</h2>
+  <div class="two-col mt-24 fade-up fade-up-3">
+    <!-- DFD -->
+    <div class="stack gap-8">
+      <h3 style="color: var(--accent);">Data Flow Diagram (Level 1)</h3>
+      <div class="stack gap-4" style="border: 1px solid var(--gray-5); padding: 16px;">
+        <!-- External entities -->
+        <div class="diagram-node dark" style="font-size: 11px; padding: 8px;">
+          <strong>User</strong> (External Entity)
+        </div>
+        <div class="diagram-arrow">&darr; Voice Audio</div>
+        <!-- Process 1 -->
+        <div class="diagram-node accent" style="font-size: 11px; padding: 8px;">
+          <strong>P1:</strong> Speech Recognition (ASR)
+        </div>
+        <div class="diagram-arrow">&darr; Malayalam Text</div>
+        <!-- Process 2 -->
+        <div class="diagram-node accent" style="font-size: 11px; padding: 8px;">
+          <strong>P2:</strong> Translation (ML &rarr; EN)
+        </div>
+        <div class="diagram-arrow">&darr; English Text</div>
+        <!-- Process 3 -->
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;">
+          <div class="diagram-node accent" style="font-size: 11px; padding: 8px;">
+            <strong>P3:</strong> Agent Orchestration &amp; LLM
+          </div>
+          <div style="font-size: 10px; color: var(--gray-3); text-align: center;">&harr;<br><span style="font-size: 9px;">D1: Conversations</span></div>
+        </div>
+        <div class="diagram-arrow">&darr; English Response</div>
+        <!-- Process 4 -->
+        <div class="diagram-node accent" style="font-size: 11px; padding: 8px;">
+          <strong>P4:</strong> Translation (EN &rarr; ML)
+        </div>
+        <div class="diagram-arrow">&darr; Malayalam Response</div>
+        <!-- Process 5 -->
+        <div class="diagram-node accent" style="font-size: 11px; padding: 8px;">
+          <strong>P5:</strong> Speech Synthesis (TTS)
+        </div>
+        <div class="diagram-arrow">&darr; Audio Response</div>
+        <div class="diagram-node dark" style="font-size: 11px; padding: 8px;">
+          <strong>User</strong> (Receives Audio)
+        </div>
+      </div>
+      <p style="font-size: 10px; color: var(--gray-3); line-height: 1.5;">
+        <strong>Data Stores:</strong> D1: Conversations DB &middot; D2: System Metrics &middot; D3: Cache Store
+      </p>
+    </div>
+    <!-- ER Diagram -->
+    <div class="stack gap-8">
+      <h3 style="color: var(--accent);">ER Diagram &mdash; SQLite Database</h3>
+      <div class="stack gap-6" style="border: 1px solid var(--gray-5); padding: 16px;">
+        <!-- Conversation entity -->
+        <div style="border: 2px solid var(--accent); padding: 10px;">
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Conversation</div>
+          <div style="font-size: 11px; color: var(--gray-2); line-height: 1.8;">
+            <strong style="color: var(--black);">id</strong> (PK) &middot; INTEGER<br>
+            session_id &middot; TEXT<br>
+            language &middot; TEXT<br>
+            intent &middot; TEXT<br>
+            asr_ms &middot; REAL<br>
+            translation_ms &middot; REAL<br>
+            llm_ms &middot; REAL<br>
+            tts_ms &middot; REAL<br>
+            total_ms &middot; REAL<br>
+            created_at &middot; TIMESTAMP
+          </div>
+        </div>
+        <div style="text-align: center; font-size: 11px; color: var(--gray-3);">1 &mdash;&mdash;&mdash;&lt; N</div>
+        <!-- Message entity -->
+        <div style="border: 2px solid var(--black); padding: 10px;">
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--black); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Message</div>
+          <div style="font-size: 11px; color: var(--gray-2); line-height: 1.8;">
+            <strong style="color: var(--black);">id</strong> (PK) &middot; INTEGER<br>
+            conversation_id (FK) &middot; INTEGER<br>
+            role &middot; TEXT (user/assistant/system)<br>
+            content &middot; TEXT<br>
+            language &middot; TEXT<br>
+            timestamp &middot; TIMESTAMP
+          </div>
+        </div>
+        <div style="height: 8px;"></div>
+        <!-- SystemMetric entity -->
+        <div style="border: 2px solid var(--gray-5); padding: 10px;">
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--gray-3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">System Metric</div>
+          <div style="font-size: 11px; color: var(--gray-2); line-height: 1.8;">
+            <strong style="color: var(--black);">id</strong> (PK) &middot; INTEGER<br>
+            component &middot; TEXT<br>
+            metric_name &middot; TEXT<br>
+            value &middot; REAL<br>
+            timestamp &middot; TIMESTAMP
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 10px; color: var(--gray-3); line-height: 1.5;">
+        <strong>Relationships:</strong> Conversation 1:N Message (FK: conversation_id). SystemMetric is independent.
+      </p>
+    </div>
+  </div>
+  <span class="slide-number">09</span>
+</div>
+
+<!-- ====================== 10. TOOLS & TECHNOLOGIES ====================== -->
+<div class="slide" id="s10">
+
+  <span class="label fade-up fade-up-1">Tools &amp; Technologies</span>
+  <h2 class="fade-up fade-up-2">Technology stack</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div>
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Language</strong></td><td class="val">Python 3.10+</td><td>Primary development language</td></tr>
+          <tr><td><strong>ASR</strong></td><td class="val">Pingala V1, Whisper</td><td>Speech-to-text (2.94% WER)</td></tr>
+          <tr><td><strong>Translation</strong></td><td class="val">IndicTrans2-Dist</td><td>ML &harr; EN (211M params)</td></tr>
+          <tr><td><strong>LLM</strong></td><td class="val">Qwen3 + llama.cpp</td><td>Response generation (GGUF)</td></tr>
+          <tr><td><strong>TTS</strong></td><td class="val">MMS-TTS, Cartesia</td><td>Text-to-speech synthesis</td></tr>
+          <tr><td><strong>Agents</strong></td><td class="val-accent">LangGraph</td><td>Stateful agentic workflows</td></tr>
+          <tr><td><strong>API</strong></td><td class="val">FastAPI + Uvicorn</td><td>REST + WebSocket server</td></tr>
+          <tr><td><strong>Frontend</strong></td><td class="val">React + TypeScript</td><td>Dashboard (Vite + Tailwind)</td></tr>
+          <tr><td><strong>Database</strong></td><td class="val">SQLite</td><td>Conversation logging</td></tr>
+          <tr><td><strong>Inference</strong></td><td class="val">ONNX Runtime</td><td>Optimized model inference</td></tr>
+          <tr><td><strong>ML</strong></td><td class="val">PyTorch, Transformers</td><td>Model loading &amp; inference</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="stack gap-16">
+      <div class="box-accent">
+        <h3 style="color: var(--accent);">Why these choices?</h3>
+        <ul class="ruled-list" style="margin-top: 8px;">
+          <li><span class="num">01</span><strong>Pingala V1</strong> over Whisper &mdash; 50% better WER for Indian languages, CPU-first design</li>
+          <li><span class="num">02</span><strong>IndicTrans2-Dist</strong> over full &mdash; 5x smaller (211M vs 1B) with identical accuracy</li>
+          <li><span class="num">03</span><strong>Qwen3 + llama.cpp</strong> over cloud LLMs &mdash; zero API cost, local GGUF inference, privacy</li>
+          <li><span class="num">04</span><strong>LangGraph</strong> over vanilla chains &mdash; stateful graphs, conditional routing, memory</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Development tools</h3>
+        <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+          <strong>IDE:</strong> VS Code + Claude Code<br>
+          <strong>VCS:</strong> Git + GitHub<br>
+          <strong>Testing:</strong> pytest<br>
+          <strong>Formatting:</strong> Black + Ruff<br>
+          <strong>Deployment:</strong> Docker
+        </p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">10</span>
+</div>
+
+<!-- ====================== 11. SPRINT PROGRESS ====================== -->
+<div class="slide" id="s11">
+  <span class="label fade-up fade-up-1">Sprint Progress</span>
+  <h2 class="fade-up fade-up-2">Sprint-wise implementation</h2>
+  <div class="mt-24 fade-up fade-up-3">
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; width: 100%;">
+      <div class="sprint-card done">
+        <h3 style="color: var(--green);">Sprint 1</h3>
+        <p>Research, Setup, ASR &amp; TTS PoCs</p>
+        <span class="sprint-status done">21 / 21 pts</span>
+      </div>
+      <div class="sprint-card done">
+        <h3 style="color: var(--green);">Sprint 2</h3>
+        <p>Translation, LLM, Memory, Qwen3 + llama.cpp</p>
+        <span class="sprint-status done">21 / 21 pts</span>
+      </div>
+      <div class="sprint-card done">
+        <h3 style="color: var(--green);">Sprint 3</h3>
+        <p>Pipeline, API, Pingala ASR, ONNX, WebSocket</p>
+        <span class="sprint-status done">21 / 21 pts</span>
+      </div>
+      <div class="sprint-card done">
+        <h3 style="color: var(--green);">Sprint 4</h3>
+        <p>LangGraph Agents, Dashboard, DB, Tests</p>
+        <span class="sprint-status done">18 / 18 pts</span>
+      </div>
+      <div class="sprint-card current">
+        <h3 style="color: var(--accent);">Sprint 5</h3>
+        <p>Edge Optimization, Caching, Docker, Benchmarks</p>
+        <span class="sprint-status in-progress">18 pts &mdash; active</span>
+      </div>
+      <div class="sprint-card">
+        <h3>Sprint 6</h3>
+        <p>Testing, Documentation, Demo, Polish</p>
+        <span class="sprint-status planned">15 pts &mdash; planned</span>
+      </div>
+    </div>
+  </div>
+  <div class="mt-24 fade-up fade-up-4" style="max-width: 100%;">
+    <table>
+      <thead>
+        <tr><th>Sprint</th><th>Duration</th><th>Key Deliverables</th><th>Points</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Sprint 1</td><td>Week 1&ndash;2</td><td>Whisper ASR, MMS-TTS, Cartesia TTS, architecture, dev environment</td><td class="val-green">21</td><td class="val-green">100%</td></tr>
+        <tr><td>Sprint 2</td><td>Week 3&ndash;4</td><td>IndicTrans2-Dist, Qwen3 + llama.cpp, Indic-to-Indic translation, memory</td><td class="val-green">21</td><td class="val-green">100%</td></tr>
+        <tr><td>Sprint 3</td><td>Week 5&ndash;6</td><td>Pingala V1 (2.94% WER), Pipecat pipeline, FastAPI, WebSocket, ONNX</td><td class="val-green">21</td><td class="val-green">100%</td></tr>
+        <tr><td>Sprint 4</td><td>Week 7&ndash;8</td><td>LangGraph orchestrator, ClawGo agent, SQLite DB, React dashboard, pytest</td><td class="val-green">18</td><td class="val-green">100%</td></tr>
+        <tr><td>Sprint 5</td><td>Week 9&ndash;10</td><td>Response caching, model optimization, Docker, benchmarking suite</td><td class="val-accent">18</td><td class="val-accent">In Progress</td></tr>
+        <tr><td>Sprint 6</td><td>Week 11&ndash;12</td><td>Unit/integration tests, documentation, demo presentation</td><td>15</td><td style="color: var(--gray-4);">Planned</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <span class="slide-number">11</span>
+</div>
+
+<!-- ====================== 12. IMPLEMENTATION ====================== -->
+<div class="slide" id="s12">
+  <span class="label fade-up fade-up-1">Implementation</span>
+  <h2 class="fade-up fade-up-2">Working modules &amp; outputs</h2>
+  <div class="three-col mt-24 fade-up fade-up-3">
+    <div class="stack gap-12">
+      <h3>Pipeline output sample</h3>
+      <div style="background: var(--black); color: #e0e0e0; padding: 16px; font-family: var(--mono); font-size: 10px; line-height: 1.7; border-radius: 2px;">
+        <span style="color: #888;"># User speaks Malayalam</span><br>
+        <span style="color: var(--accent);">[ASR]</span> &ldquo;&#3374;&#3378;&#3375;&#3390;&#3379;&#3364;&#3405;&#3364;&#3391;&#3378;&#3398; &#3349;&#3390;&#3378;&#3390;&#3381;&#3384;&#3405;&#3365; &#3342;&#3368;&#3405;&#3364;&#3390;&#3363;&#3405;?&rdquo;<br>
+        <span style="color: #888;">  &rarr; 480ms</span><br><br>
+        <span style="color: var(--accent);">[ML&rarr;EN]</span> &ldquo;What is the weather in Kerala?&rdquo;<br>
+        <span style="color: #888;">  &rarr; 120ms</span><br><br>
+        <span style="color: var(--accent);">[Intent]</span> information_query<br>
+        <span style="color: var(--accent);">[Agent]</span> InfoAgent &rarr; Qwen3<br>
+        <span style="color: #888;">  &rarr; 340ms</span><br><br>
+        <span style="color: var(--accent);">[EN&rarr;ML]</span> &#3374;&#3378;&#3375;&#3390;&#3379;&#3364;&#3405;&#3364;&#3391;&#3378;&#3398; &#3349;&#3390;&#3378;&#3390;&#3381;&#3384;&#3405;&#3365;...<br>
+        <span style="color: #888;">  &rarr; 130ms</span><br><br>
+        <span style="color: #16a34a;">[TTS]</span> Audio generated (1.2s)<br>
+        <span style="color: #888;">  &rarr; 380ms</span><br><br>
+        <span style="color: #d97706;">Total: 1,450ms</span>
+      </div>
+    </div>
+    <div class="stack gap-12">
+      <h3>Dashboard &mdash; Real-time monitoring</h3>
+      <div style="border: 1px solid var(--gray-5); padding: 12px; background: var(--gray-7);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+          <div style="background: white; padding: 10px; border: 1px solid var(--gray-6);">
+            <div style="font-family: var(--mono); font-size: 9px; color: var(--gray-4); text-transform: uppercase;">Total Queries</div>
+            <div style="font-family: var(--serif); font-size: 22px; font-weight: 300;">1,247</div>
+          </div>
+          <div style="background: white; padding: 10px; border: 1px solid var(--gray-6);">
+            <div style="font-family: var(--mono); font-size: 9px; color: var(--gray-4); text-transform: uppercase;">Avg Latency</div>
+            <div style="font-family: var(--serif); font-size: 22px; font-weight: 300; color: var(--green);">1.8s</div>
+          </div>
+        </div>
+        <div style="background: white; padding: 10px; border: 1px solid var(--gray-6); margin-bottom: 8px;">
+          <div style="font-family: var(--mono); font-size: 9px; color: var(--gray-4); text-transform: uppercase; margin-bottom: 6px;">Latency Breakdown</div>
+          <div class="bar-row" style="height: 22px;">
+            <div class="bar-label" style="width: 60px; font-size: 10px;">ASR</div>
+            <div class="bar-track"><div class="bar-fill blue" style="width: 30%;"></div></div>
+            <div class="bar-val" style="font-size: 10px;">480ms</div>
+          </div>
+          <div class="bar-row" style="height: 22px;">
+            <div class="bar-label" style="width: 60px; font-size: 10px;">Translate</div>
+            <div class="bar-track"><div class="bar-fill" style="width: 15%;"></div></div>
+            <div class="bar-val" style="font-size: 10px;">250ms</div>
+          </div>
+          <div class="bar-row" style="height: 22px;">
+            <div class="bar-label" style="width: 60px; font-size: 10px;">LLM</div>
+            <div class="bar-track"><div class="bar-fill blue" style="width: 35%;"></div></div>
+            <div class="bar-val" style="font-size: 10px;">540ms</div>
+          </div>
+          <div class="bar-row" style="height: 22px;">
+            <div class="bar-label" style="width: 60px; font-size: 10px;">TTS</div>
+            <div class="bar-track"><div class="bar-fill" style="width: 22%;"></div></div>
+            <div class="bar-val" style="font-size: 10px;">380ms</div>
+          </div>
+        </div>
+        <div style="background: white; padding: 10px; border: 1px solid var(--gray-6);">
+          <div style="font-family: var(--mono); font-size: 9px; color: var(--gray-4); text-transform: uppercase; margin-bottom: 6px;">Component Health</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 10px;">
+            <span style="background: #dcfce7; color: var(--green); padding: 2px 8px;">ASR: OK</span>
+            <span style="background: #dcfce7; color: var(--green); padding: 2px 8px;">LLM: OK</span>
+            <span style="background: #dcfce7; color: var(--green); padding: 2px 8px;">TTS: OK</span>
+            <span style="background: #dcfce7; color: var(--green); padding: 2px 8px;">DB: OK</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stack gap-12">
+      <h3>API endpoints</h3>
+      <div style="border: 1px solid var(--gray-5); padding: 0;">
+        <table style="font-size: 11px; margin: 0;">
+          <thead>
+            <tr><th style="font-size: 9px;">Endpoint</th><th style="font-size: 9px;">Method</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/health</code></td><td class="val">GET</td></tr>
+            <tr><td><code>/api/transcribe</code></td><td class="val">POST</td></tr>
+            <tr><td><code>/api/process</code></td><td class="val">POST</td></tr>
+            <tr><td><code>/api/tts</code></td><td class="val">POST</td></tr>
+            <tr><td><code>/api/text</code></td><td class="val">POST</td></tr>
+            <tr><td><code>/api/dashboard/stats</code></td><td class="val">GET</td></tr>
+            <tr><td><code>/ws/stream</code></td><td class="val-accent">WebSocket</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 class="mt-8">Try It panel</h3>
+      <div style="border: 1px solid var(--gray-5); padding: 12px; background: var(--gray-7);">
+        <div style="background: white; border: 1px solid var(--gray-6); padding: 10px; font-size: 11px;">
+          <div style="color: var(--gray-3); font-size: 9px; font-family: var(--mono); text-transform: uppercase; margin-bottom: 6px;">Interactive Testing</div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">&#9654;</div>
+            <span style="color: var(--gray-2);">Tap to speak in Malayalam...</span>
+          </div>
+          <div style="margin-top: 8px; padding: 8px; background: var(--accent-light); border-left: 2px solid var(--accent); font-size: 10px; color: var(--gray-2);">
+            Voice visualizer with real-time waveform display
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">12</span>
+</div>
+
+<!-- ====================== 13. CURRENT PROGRESS ====================== -->
+<div class="slide" id="s13">
+  <span class="label fade-up fade-up-1">Current Status</span>
+  <h2 class="fade-up fade-up-2">Project completion: <em class="h">87%</em></h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-16">
+      <div class="four-col" style="grid-template-columns: 1fr 1fr;">
+        <div class="stat">
+          <div class="stat-val green">99</div>
+          <div class="stat-unit">Story Points Done</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">15</div>
+          <div class="stat-unit">Points Remaining</div>
+        </div>
+      </div>
+      <h3 style="margin-bottom: 4px;">Module completion</h3>
+      <div class="stack gap-4">
+        <div class="bar-row">
+          <div class="bar-label">ASR Engine</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Translation</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">LLM + Memory</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">TTS Engine</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Pipeline + API</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Agent Framework</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Dashboard</div>
+          <div class="bar-track"><div class="bar-fill green" style="width: 100%;"></div></div>
+          <div class="bar-val" style="color: var(--green);">100%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Edge Optimization</div>
+          <div class="bar-track"><div class="bar-fill blue" style="width: 70%;"></div></div>
+          <div class="bar-val" style="color: var(--accent);">70%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Testing &amp; Docs</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 30%;"></div></div>
+          <div class="bar-val">30%</div>
+        </div>
+      </div>
+    </div>
+    <div class="stack gap-16">
+      <h3>Modules completed</h3>
+      <div class="stack gap-8">
+        <div class="box-green" style="padding: 14px 18px;">
+          <p style="font-size: 13px; color: var(--gray-1); line-height: 1.6;">
+            <strong style="color: var(--green);">ASR:</strong> Pingala V1 (2.94% WER), Whisper, MMS, Indic Whisper &mdash; 4 engines with automatic fallback
+          </p>
+        </div>
+        <div class="box-green" style="padding: 14px 18px;">
+          <p style="font-size: 13px; color: var(--gray-1); line-height: 1.6;">
+            <strong style="color: var(--green);">Translation:</strong> IndicTrans2-Dist bidirectional (11 languages), Indic-to-Indic direct, ~93% accuracy
+          </p>
+        </div>
+        <div class="box-green" style="padding: 14px 18px;">
+          <p style="font-size: 13px; color: var(--gray-1); line-height: 1.6;">
+            <strong style="color: var(--green);">LLM:</strong> Qwen 2.5 + Qwen3 with llama.cpp and transformers backends, conversation memory
+          </p>
+        </div>
+        <div class="box-green" style="padding: 14px 18px;">
+          <p style="font-size: 13px; color: var(--gray-1); line-height: 1.6;">
+            <strong style="color: var(--green);">TTS:</strong> MMS-TTS (offline), Cartesia (HQ), Indic Parler (69 voices), Chatterbox
+          </p>
+        </div>
+        <div class="box-green" style="padding: 14px 18px;">
+          <p style="font-size: 13px; color: var(--gray-1); line-height: 1.6;">
+            <strong style="color: var(--green);">Agents:</strong> LangGraph + ClawGo orchestration, AgentFactory, 4 specialized agents
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">13</span>
+</div>
+
+<!-- ====================== 14. CHALLENGES ====================== -->
+<div class="slide" id="s14">
+  <span class="label fade-up fade-up-1">Challenges</span>
+  <h2 class="fade-up fade-up-2">Technical challenges faced</h2>
+  <div class="three-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-12">
+      <h3>Model memory constraints</h3>
+      <hr>
+      <p style="font-size: 13px; color: var(--gray-2); line-height: 1.65;">
+        Running ASR + Translation + LLM + TTS simultaneously requires <strong>10&ndash;16 GB RAM</strong>. Solved with lazy loading (models load on demand) and IndicTrans2-Dist (5x smaller).
+      </p>
+      <div class="note" style="font-size: 12px;">
+        <strong>Solution:</strong> Lazy model loading + distilled models + GGUF quantized LLM
+      </div>
+    </div>
+    <div class="stack gap-12">
+      <h3>Async pipeline integration</h3>
+      <hr>
+      <p style="font-size: 13px; color: var(--gray-2); line-height: 1.65;">
+        Pipecat framework uses async callbacks while ML models are synchronous. Required refactoring all component wrappers to support <strong>async/await patterns</strong> with thread pool executors.
+      </p>
+      <div class="note" style="font-size: 12px;">
+        <strong>Solution:</strong> Async wrappers with ThreadPoolExecutor for CPU-bound inference
+      </div>
+    </div>
+    <div class="stack gap-12">
+      <h3>Translation quality</h3>
+      <hr>
+      <p style="font-size: 13px; color: var(--gray-2); line-height: 1.65;">
+        Voice-style Malayalam differs from written text. ASR outputs colloquial forms that translation models struggle with. Required <strong>preprocessing and normalization</strong> of ASR output.
+      </p>
+      <div class="note" style="font-size: 12px;">
+        <strong>Solution:</strong> Custom text normalization + context-aware translation prompts
+      </div>
+    </div>
+  </div>
+  <div class="two-col mt-32 fade-up fade-up-4">
+    <div class="box">
+      <h3>Budget constraint &mdash; No Raspberry Pi</h3>
+      <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+        Original Sprint 5 planned Pi 5 deployment. Pivoted to <strong>Docker-based edge simulation</strong> with resource limits (2 CPU, 4GB RAM), model quantization, and response caching &mdash; proving edge-readiness without physical hardware.
+      </p>
+    </div>
+    <div class="box">
+      <h3>LLM response format</h3>
+      <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">
+        Qwen3's thinking mode outputs <code>&lt;think&gt;</code> tags in responses. Required <strong>post-processing to strip</strong> internal reasoning and return only voice-appropriate text to users.
+      </p>
+    </div>
+  </div>
+  <span class="slide-number">14</span>
+</div>
+
+<!-- ====================== 15. FUTURE WORK ====================== -->
+<div class="slide" id="s15">
+  <span class="label fade-up fade-up-1">Future Work</span>
+  <h2 class="fade-up fade-up-2">Remaining tasks &amp; next steps</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-16">
+      <h3 style="color: var(--accent);">Sprint 5 &mdash; Remaining (Week 10)</h3>
+      <ul class="ruled-list">
+        <li><span class="num" style="color: var(--accent);">01</span>Complete performance benchmarking across all components</li>
+        <li><span class="num" style="color: var(--accent);">02</span>Finalize Docker containerization with resource limits</li>
+        <li><span class="num" style="color: var(--accent);">03</span>Implement response caching for translation and TTS</li>
+      </ul>
+      <h3 class="mt-16">Sprint 6 &mdash; Testing &amp; Documentation (Week 11&ndash;12)</h3>
+      <ul class="ruled-list">
+        <li><span class="num">01</span>Write unit tests for all modules (&gt;80% coverage target)</li>
+        <li><span class="num">02</span>Create integration test suite for end-to-end pipeline</li>
+        <li><span class="num">03</span>Performance benchmarks and memory profiling report</li>
+        <li><span class="num">04</span>User documentation and setup guide</li>
+        <li><span class="num">05</span>Final demo presentation and release tagging</li>
+      </ul>
+    </div>
+    <div class="stack gap-16">
+      <h3>Potential enhancements (post-project)</h3>
+      <div class="stack gap-8">
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px;">Raspberry Pi 5 deployment</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">Physical edge deployment when hardware becomes available</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px;">Wake word detection</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">Custom "Hey Assistant" trigger word for hands-free activation</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px;">Smart home integration</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">MQTT-based IoT device control via voice commands</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px;">Mobile companion app</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">React Native app for remote interaction with the assistant</p>
+        </div>
+        <div class="box" style="padding: 14px 18px;">
+          <h3 style="font-size: 12px;">RAG knowledge base</h3>
+          <p style="font-size: 12px; color: var(--gray-2); margin-top: 2px;">Local document retrieval for domain-specific Q&A</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">15</span>
+</div>
+
+<!-- ====================== 16. EXPECTED OUTCOME ====================== -->
+<div class="slide" id="s16">
+  <span class="label fade-up fade-up-1">Expected Outcome</span>
+  <h2 class="fade-up fade-up-2">What this project delivers</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-16">
+      <div class="four-col" style="grid-template-columns: 1fr 1fr;">
+        <div class="stat">
+          <div class="stat-val blue">&lt;3s</div>
+          <div class="stat-unit">End-to-end Latency</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">93%</div>
+          <div class="stat-unit">Translation Accuracy</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val green">11</div>
+          <div class="stat-unit">Indian Languages</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">0</div>
+          <div class="stat-unit">Cloud Dependency</div>
+        </div>
+      </div>
+      <div class="box-accent">
+        <h3 style="color: var(--accent);">Expected results</h3>
+        <ul class="ruled-list" style="margin-top: 8px;">
+          <li><span class="num" style="color: var(--accent);">01</span>A fully functional voice assistant that understands and responds in <strong>Malayalam</strong> and 10 other Indian languages</li>
+          <li><span class="num" style="color: var(--accent);">02</span>Intelligent task routing via <strong>LangGraph agents</strong> for diverse user intents</li>
+          <li><span class="num" style="color: var(--accent);">03</span>Production-ready API with real-time <strong>WebSocket streaming</strong></li>
+          <li><span class="num" style="color: var(--accent);">04</span>Optimized for edge deployment with <strong>Docker containerization</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="stack gap-16">
+      <h3>Benefits</h3>
+      <div class="stack gap-8">
+        <div style="padding: 16px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--green); flex-shrink: 0; width: 20px;">+</span>
+          <div>
+            <h3 style="font-size: 14px;">Digital inclusion</h3>
+            <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Enables non-English speakers to access digital services naturally</p>
+          </div>
+        </div>
+        <div style="padding: 16px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--green); flex-shrink: 0; width: 20px;">+</span>
+          <div>
+            <h3 style="font-size: 14px;">Data sovereignty</h3>
+            <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">All processing happens locally &mdash; voice data never leaves the device</p>
+          </div>
+        </div>
+        <div style="padding: 16px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 16px; align-items: baseline;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--green); flex-shrink: 0; width: 20px;">+</span>
+          <div>
+            <h3 style="font-size: 14px;">Zero operational cost</h3>
+            <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Open-source models mean no API fees or subscription costs</p>
+          </div>
+        </div>
+        <div style="padding: 16px 0; display: flex; gap: 16px; align-items: baseline;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--green); flex-shrink: 0; width: 20px;">+</span>
+          <div>
+            <h3 style="font-size: 14px;">Reproducible research</h3>
+            <p style="font-size: 12px; color: var(--gray-2); line-height: 1.5; margin-top: 2px;">Fully open-source pipeline, replicable for other low-resource languages</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">16</span>
+</div>
+
+<!-- ====================== 17. CONCLUSION ====================== -->
+<div class="slide" id="s17">
+  <span class="label fade-up fade-up-1">Conclusion</span>
+  <h2 class="fade-up fade-up-2">Summary</h2>
+  <div class="two-col mt-32 fade-up fade-up-3">
+    <div class="stack gap-0">
+      <div style="padding: 20px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 20px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">01</span>
+        <div>
+          <h3>Built a complete voice AI pipeline</h3>
+          <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">End-to-end ASR &rarr; Translation &rarr; LLM &rarr; Agents &rarr; TTS pipeline with &lt;3s latency, supporting Malayalam and 10 other Indian languages.</p>
+        </div>
+      </div>
+      <div style="padding: 20px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 20px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">02</span>
+        <div>
+          <h3>Achieved state-of-the-art accuracy</h3>
+          <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">2.94% WER for ASR (Pingala V1), ~93% translation accuracy (IndicTrans2-Dist), natural responses (Qwen3).</p>
+        </div>
+      </div>
+      <div style="padding: 20px 0; border-bottom: 1px solid var(--gray-6); display: flex; gap: 20px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">03</span>
+        <div>
+          <h3>Implemented intelligent agent system</h3>
+          <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">LangGraph orchestrator with specialized agents for information queries, task execution, and conversation.</p>
+        </div>
+      </div>
+      <div style="padding: 20px 0; display: flex; gap: 20px; align-items: baseline;">
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; width: 20px;">04</span>
+        <div>
+          <h3>87% complete, on track for final delivery</h3>
+          <p style="font-size: 13px; color: var(--gray-2); line-height: 1.6; margin-top: 4px;">99 of 114 story points delivered across 5 sprints. Sprint 6 (testing &amp; documentation) remaining.</p>
+        </div>
+      </div>
+    </div>
+    <div class="stack gap-20">
+      <div class="quote">
+        A fully functional, privacy-preserving, multilingual voice assistant that proves edge AI can democratize access to digital services for India's linguistic diversity.
+      </div>
+      <div class="four-col" style="grid-template-columns: 1fr 1fr;">
+        <div class="stat" style="text-align: center;">
+          <div class="stat-val green" style="font-size: 40px;">87%</div>
+          <div class="stat-unit">Project Complete</div>
+        </div>
+        <div class="stat" style="text-align: center;">
+          <div class="stat-val blue" style="font-size: 40px;">99</div>
+          <div class="stat-unit">Story Points Done</div>
+        </div>
+      </div>
+      <div class="note-accent">
+        The project demonstrates that <strong>local-first, privacy-preserving AI</strong> can match cloud-based solutions for Indian language voice interaction, using open-source models at zero operational cost.
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">17</span>
+</div>
+
+<!-- ====================== 18. REFERENCES ====================== -->
+<div class="slide" id="s18">
+  <span class="label fade-up fade-up-1">References</span>
+  <h2 class="fade-up fade-up-2">References</h2>
+  <div class="two-col mt-24 fade-up fade-up-3" style="font-size: 11px; color: var(--gray-2); line-height: 1.7; align-items: start;">
+    <div class="stack gap-16">
+      <div>
+        <h3 style="font-size: 11px; color: var(--accent); margin-bottom: 6px;">Research Papers</h3>
+        <p>[1] Gala, J. et al. &ldquo;IndicTrans2: Towards High-Quality and Accessible Machine Translation Models for all 22 Scheduled Indian Languages.&rdquo; TMLR, 2023.</p>
+        <p>[2] Radford, A. et al. &ldquo;Robust Speech Recognition via Large-Scale Weak Supervision.&rdquo; (Whisper) ICML, 2023.</p>
+        <p>[3] Pratap, V. et al. &ldquo;Scaling Speech Technology to 1,000+ Languages.&rdquo; (MMS) Meta AI, 2023.</p>
+        <p>[4] Bai, J. et al. &ldquo;Qwen2.5 Technical Report.&rdquo; Alibaba Group, 2024.</p>
+        <p>[5] Yang, A. et al. &ldquo;Qwen3 Technical Report.&rdquo; Alibaba Group, 2025.</p>
+        <p>[6] Vaswani, A. et al. &ldquo;Attention is All You Need.&rdquo; NeurIPS, 2017.</p>
+      </div>
+      <div>
+        <h3 style="font-size: 11px; color: var(--accent); margin-bottom: 6px;">Frameworks &amp; Tools</h3>
+        <p>[7] LangGraph: Multi-agent AI framework. LangChain, 2024.</p>
+        <p>[8] Pipecat: Open-source voice and multimodal pipeline. Daily.co, 2024.</p>
+        <p>[9] llama.cpp: Port of LLaMA model in C/C++. Gerganov, G., 2023.</p>
+        <p>[10] ONNX Runtime: Cross-platform ML inference. Microsoft, 2019.</p>
+        <p>[11] FastAPI: Modern Python web framework. Ramirez, S., 2019.</p>
+      </div>
+    </div>
+    <div class="stack gap-16">
+      <div>
+        <h3 style="font-size: 11px; color: var(--accent); margin-bottom: 6px;">Indian Language AI</h3>
+        <p>[12] AI4Bharat. &ldquo;IndicNLP Suite: NLP Resources for Indian Languages.&rdquo; 2020.</p>
+        <p>[13] Pingala. &ldquo;Pingala V1: Indic Speech Recognition.&rdquo; Sarvam AI, 2024.</p>
+        <p>[14] Bhashini: India's AI-led Language Translation Platform. MeitY, Govt. of India, 2022.</p>
+        <p>[15] Kakwani, D. et al. &ldquo;IndicNLPSuite: Monolingual Corpora, Evaluation Benchmarks and Pre-trained Models for Indian Languages.&rdquo; EMNLP Findings, 2020.</p>
+      </div>
+      <div>
+        <h3 style="font-size: 11px; color: var(--accent); margin-bottom: 6px;">Edge Computing &amp; Optimization</h3>
+        <p>[16] Jacob, B. et al. &ldquo;Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference.&rdquo; CVPR, 2018.</p>
+        <p>[17] Dettmers, T. et al. &ldquo;GPTQ: Accurate Post-Training Quantization.&rdquo; ICLR, 2023.</p>
+        <p>[18] Han, S. et al. &ldquo;Deep Compression.&rdquo; ICLR, 2016.</p>
+      </div>
+      <div>
+        <h3 style="font-size: 11px; color: var(--accent); margin-bottom: 6px;">Web Resources</h3>
+        <p>[19] Census of India: Languages and Mother Tongues. censusindia.gov.in</p>
+        <p>[20] HuggingFace Model Hub. huggingface.co</p>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">18</span>
+</div>
+
+<!-- ====================== 19. THANK YOU ====================== -->
+<div class="slide" id="s19">
+  <span class="label fade-up fade-up-1">Thank You</span>
+  <h1 class="fade-up fade-up-2" style="max-width: 700px;">Thank you.</h1>
+  <div class="quote mt-32 fade-up fade-up-3">
+    Voice is the most natural interface. By bringing AI to regional languages and edge devices, we can bridge the digital divide for hundreds of millions.
+  </div>
+  <div class="mt-40 fade-up fade-up-4" style="display: flex; gap: 32px; font-size: 13px; color: var(--gray-3);">
+    <span>Ebin John Joseph</span>
+    <span style="color: var(--gray-5);">/</span>
+    <span>Questions &amp; Discussion</span>
+  </div>
+  <span class="slide-number">19</span>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <button class="nav-btn" onclick="go(-1)">&larr; Prev</button>
+  <span class="nav-count" id="counter">01 / 19</span>
+  <button class="nav-btn" onclick="go(1)">Next &rarr;</button>
+</div>
+
+<script>
+  let cur = 1;
+  const total = 19;
+
+  function show(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    cur = Math.max(1, Math.min(n, total));
+    const slide = document.getElementById('s' + cur);
+    slide.classList.add('active');
+    slide.scrollTop = 0;
+    document.getElementById('counter').textContent =
+      String(cur).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+    document.getElementById('progress').style.width = ((cur / total) * 100) + '%';
+  }
+
+  function go(d) { show(cur + d); }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); show(1); }
+    else if (e.key === 'End') { e.preventDefault(); show(total); }
+  });
+
+  // Touch swipe navigation
+  let tx = 0, ty = 0, swiping = false;
+  document.addEventListener('touchstart', e => {
+    tx = e.changedTouches[0].screenX;
+    ty = e.changedTouches[0].screenY;
+    swiping = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!swiping) return;
+    const dx = Math.abs(e.changedTouches[0].screenX - tx);
+    const dy = Math.abs(e.changedTouches[0].screenY - ty);
+    if (dx > dy && dx > 10) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (!swiping) return;
+    swiping = false;
+    const dx = tx - e.changedTouches[0].screenX;
+    const dy = ty - e.changedTouches[0].screenY;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      go(dx > 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  show(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presenter Script</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,600&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;600;700&display=swap');
+
+  @page {
+    size: A4;
+    margin: 12mm 14mm;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink: #111;
+    --body: #222;
+    --muted: #666;
+    --rule: #ddd;
+    --accent: #2563eb;
+    --accent-bg: #eef4ff;
+    --speak-bg: #f8f9fb;
+    --qa-bg: #f5f5f0;
+    --serif: 'Newsreader', Georgia, serif;
+    --sans: 'Manrope', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', Consolas, monospace;
+  }
+
+  body {
+    font: 16px/1.7 var(--serif);
+    color: var(--body);
+    background: #fff;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    padding: 28px 20px 24px;
+    border-bottom: 3px solid var(--ink);
+    text-align: center;
+  }
+  .cover .tag {
+    font: 600 11px/1 var(--mono);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .cover h1 {
+    font: 300 26px/1.2 var(--serif);
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .cover .sub {
+    font: 400 15px/1.4 var(--serif);
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .cover .info {
+    font: 400 13px/1.8 var(--sans);
+    color: var(--muted);
+  }
+  .cover .info strong { color: var(--ink); font-weight: 600; }
+  .cover .badge {
+    display: inline-block;
+    margin-top: 12px;
+    font: 600 11px/1 var(--mono);
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 6px 16px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Slide blocks ── */
+  .slide {
+    padding: 20px 20px 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .slide:last-of-type {
+    border-bottom: none;
+  }
+
+  .slide-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .slide-n {
+    font: 700 13px/1 var(--mono);
+    color: #fff;
+    background: var(--ink);
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .slide-name {
+    font: 700 17px/1.2 var(--sans);
+    color: var(--ink);
+    flex-grow: 1;
+  }
+  .slide-t {
+    font: 600 11px/1 var(--mono);
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 4px 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* ── Speaking text ── */
+  .say {
+    font: 400 16px/1.85 var(--serif);
+    color: var(--body);
+    padding: 14px 16px;
+    background: var(--speak-bg);
+    border-left: 3.5px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+  }
+  .say strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .say .gap { display: block; height: 12px; }
+  .say ol, .say ul {
+    margin: 8px 0 8px 22px;
+    font-size: 15px;
+  }
+  .say ol li, .say ul li {
+    margin-bottom: 6px;
+    line-height: 1.7;
+  }
+
+  /* ── Q&A ── */
+  .qa-wrap {
+    padding: 24px 20px;
+    border-top: 3px solid var(--ink);
+  }
+  .qa-wrap h2 {
+    font: 700 20px/1.3 var(--sans);
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .qa {
+    margin-bottom: 18px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  .qa-q {
+    font: 600 15px/1.4 var(--sans);
+    color: var(--ink);
+    padding: 12px 16px;
+    background: var(--qa-bg);
+    border-left: 4px solid var(--accent);
+  }
+  .qa-a {
+    font: 400 15px/1.75 var(--serif);
+    color: var(--body);
+    padding: 12px 16px;
+  }
+  .qa-a strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ── Footer ── */
+  .foot {
+    padding: 16px 20px;
+    border-top: 1px solid var(--rule);
+    font: 400 11px/1.4 var(--sans);
+    color: #999;
+    text-align: center;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { font-size: 11pt; }
+    .slide { page-break-inside: avoid; padding: 12px 0 16px; }
+    .say { font-size: 11pt; padding: 8px 12px; }
+    .cover { padding: 16px 0 20px; }
+    .qa-wrap { page-break-before: always; padding: 16px 0; }
+    .qa { page-break-inside: avoid; }
+    .qa-q { font-size: 10pt; padding: 8px 12px; }
+    .qa-a { font-size: 10pt; padding: 8px 12px; }
+    .slide-name { font-size: 13pt; }
+    .foot { padding: 10px 0; }
+  }
+
+  /* ── Large phones / tablets ── */
+  @media (min-width: 600px) {
+    .cover { padding: 40px 32px; }
+    .cover h1 { font-size: 32px; }
+    .slide { padding: 28px 32px; }
+    .say { font-size: 17px; padding: 18px 22px; }
+    .qa-wrap { padding: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="tag">Presenter Script</div>
+  <h1>Multilingual Voice Assistant</h1>
+  <p class="sub">Interim Presentation</p>
+  <div class="info">
+    <strong>Ebin John Joseph</strong> &middot; ASI24MCA-2025<br>
+    Guide: <strong>Sukrith Lal</strong> &middot; March 2026
+  </div>
+  <div class="badge">~15&ndash;18 min &middot; 19 slides</div>
+</div>
+
+<!-- ══ 1 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">01</div>
+    <div class="slide-name">Title Slide</div>
+    <div class="slide-t">30s</div>
+  </div>
+  <div class="say">
+    Good morning. I'm <strong>Ebin John Joseph</strong>, register number ASI24MCA-2025, presenting my main project interim report &mdash; a <strong>Hyper-Localized Multilingual Voice Assistant</strong>. This project is guided by <strong>Sukrith Lal sir</strong>.
+  </div>
+</div>
+
+<!-- ══ 2 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">02</div>
+    <div class="slide-name">Introduction</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    India has <strong>22 official languages</strong> and over 19,500 dialects. Yet today's voice assistants primarily serve English and Hindi speakers. That leaves <strong>780 million Indians</strong> unable to use voice tech in their own language.
+    <span class="gap"></span>
+    Three core problems:
+    <ol>
+      <li><strong>Digital divide</strong> &mdash; 90% of India's internet users prefer local languages but services are English-first.</li>
+      <li><strong>Privacy</strong> &mdash; every voice query to Alexa or Google is sent to a remote server.</li>
+      <li><strong>Connectivity</strong> &mdash; 65% of rural India has unreliable internet.</li>
+    </ol>
+    Our project addresses all three &mdash; a <strong>fully offline, privacy-preserving voice assistant</strong> supporting <strong>Malayalam</strong> and 10 other Indian languages.
+  </div>
+</div>
+
+<!-- ══ 3 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">03</div>
+    <div class="slide-name">Objectives</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Main objective:</strong> Design and develop a hyper-localized multilingual voice assistant with edge-computing capabilities and agentic AI workflows.
+    <span class="gap"></span>
+    Five specific objectives:
+    <ol>
+      <li><strong>Multilingual ASR</strong> &mdash; 85%+ accuracy for Malayalam. We achieved <strong>97%</strong> with Pingala V1.</li>
+      <li><strong>Bidirectional translation</strong> &mdash; ML&harr;EN with 90%+ accuracy via IndicTrans2.</li>
+      <li><strong>Agentic AI</strong> &mdash; LangGraph routes queries to specialized agents.</li>
+      <li><strong>Edge readiness</strong> &mdash; under 3 seconds end-to-end latency.</li>
+      <li><strong>Privacy-preserving</strong> &mdash; all processing local, no data leaves the device.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ 4 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">04</div>
+    <div class="slide-name">Literature Review</div>
+    <div class="slide-t">1.5 min</div>
+  </div>
+  <div class="say">
+    We studied six existing systems:
+    <span class="gap"></span>
+    <strong>Google Assistant</strong> &amp; <strong>Alexa</strong> &mdash; cloud-only, Hindi only, no Malayalam, privacy concerns.
+    <span class="gap"></span>
+    <strong>Rasa</strong> &mdash; local NLU but no ASR, TTS, or Indian language models.
+    <span class="gap"></span>
+    <strong>IndicTrans2</strong> &mdash; great translation (22 languages) but no voice pipeline or agents.
+    <span class="gap"></span>
+    <strong>Whisper</strong> &mdash; 99 languages but lower accuracy for low-resource languages.
+    <span class="gap"></span>
+    <strong>Bhashini</strong> &mdash; government cloud APIs, no offline/edge support.
+    <span class="gap"></span>
+    <strong>Research gap:</strong> No system combines multilingual Indic ASR + local LLM + agentic workflows + edge deployment. That's what we built.
+  </div>
+</div>
+
+<!-- ══ 5 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">05</div>
+    <div class="slide-name">Proposed System</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    An end-to-end voice AI pipeline running <strong>entirely on-device</strong>.
+    <span class="gap"></span>
+    Key features: fully offline, <strong>11 Indian languages</strong>, LangGraph agents, real-time dashboard.
+    <span class="gap"></span>
+    Advantages: <strong>zero cloud dependency</strong>, no API fees, local inference (&lt;3s latency), extensible architecture.
+    <span class="gap"></span>
+    Core components: <strong>Pingala V1</strong> (2.94% WER), <strong>IndicTrans2-Dist</strong> (211M params), <strong>Qwen3</strong> via llama.cpp, <strong>MMS-TTS</strong>, <strong>LangGraph</strong> with 4 agents.
+  </div>
+</div>
+
+<!-- ══ 6 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">06</div>
+    <div class="slide-name">System Architecture</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Three-layer architecture:</strong>
+    <span class="gap"></span>
+    <strong>Input layer</strong> &mdash; voice audio in any supported language.
+    <span class="gap"></span>
+    <strong>Processing layer</strong> &mdash; ASR &rarr; Translation (ML&rarr;EN) &rarr; Intent Detection &rarr; LangGraph Agent &rarr; LLM &rarr; Translation (EN&rarr;ML).
+    <span class="gap"></span>
+    <strong>Output layer</strong> &mdash; MMS-TTS converts text to speech audio.
+    <span class="gap"></span>
+    Agent system: LangGraph orchestrator routes to <strong>Info Agent</strong>, <strong>Task Agent</strong>, <strong>Chat Agent</strong>, and <strong>Smart Home Agent</strong>.
+  </div>
+</div>
+
+<!-- ══ 7 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">07</div>
+    <div class="slide-name">Methodology (Scrum)</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Agile Scrum</strong> &mdash; 6 sprints, 12 weeks, <strong>114 story points</strong>, 8 epics.
+    <span class="gap"></span>
+    <ul>
+      <li>Sprint 1: Research, ASR &amp; TTS PoCs &mdash; <strong>21 pts</strong></li>
+      <li>Sprint 2: Translation, LLM, memory &mdash; <strong>21 pts</strong></li>
+      <li>Sprint 3: Pipeline, API, Pingala, WebSocket &mdash; <strong>21 pts</strong></li>
+      <li>Sprint 4: LangGraph agents, dashboard, DB &mdash; <strong>18 pts</strong></li>
+      <li>Sprint 5 (current): Edge optimization, Docker &mdash; <strong>18 pts</strong></li>
+      <li>Sprint 6 (planned): Testing &amp; docs &mdash; <strong>15 pts</strong></li>
+    </ul>
+    Currently at <strong>87% completion</strong> &mdash; 99/114 points.
+  </div>
+</div>
+
+<!-- ══ 8 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">08</div>
+    <div class="slide-name">System Design</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Use case diagram</strong> &mdash; User interacts through voice queries, language selection, task management. System handles ASR, translation, intent, agent routing, TTS.
+    <span class="gap"></span>
+    <strong>Activity diagram</strong> &mdash; audio captured &rarr; ASR &rarr; translation &rarr; intent &rarr; agent routing &rarr; LLM &rarr; translation back &rarr; TTS &rarr; audio response.
+  </div>
+</div>
+
+<!-- ══ 9 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">09</div>
+    <div class="slide-name">Data Flow &amp; Database</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Level 1 DFD</strong> &mdash; voice flows through 5 stages: ASR, Translation, NLU/Intent, Agent/LLM, TTS. Data store holds conversations, metrics, cached responses.
+    <span class="gap"></span>
+    <strong>ER Diagram</strong> &mdash; 3 entities:
+    <ul>
+      <li><strong>Conversation</strong> &mdash; session ID, language, timestamps, message count</li>
+      <li><strong>Message</strong> &mdash; role, content, intent, agent, timing. FK to Conversation (1:N)</li>
+      <li><strong>SystemMetric</strong> &mdash; component latency, memory, success rates (independent)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ 10 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">10</div>
+    <div class="slide-name">Tools &amp; Technologies</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Pingala V1</strong> for ASR &mdash; 2.94% WER, 50% better than Whisper for Indian languages.
+    <span class="gap"></span>
+    <strong>IndicTrans2-Dist</strong> &mdash; 211M params, 5x smaller than full model, same accuracy.
+    <span class="gap"></span>
+    <strong>Qwen3 + llama.cpp</strong> &mdash; GGUF quantized, efficient CPU inference, zero API cost.
+    <span class="gap"></span>
+    <strong>LangGraph</strong> over vanilla chains &mdash; stateful graphs, conditional routing, memory.
+    <span class="gap"></span>
+    <strong>FastAPI</strong> + WebSocket, <strong>React + TypeScript + Tailwind</strong> dashboard.
+  </div>
+</div>
+
+<!-- ══ 11 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">11</div>
+    <div class="slide-name">Sprint Progress</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    Sprints 1&ndash;4: <strong>100% complete</strong> &mdash; 81/81 story points.
+    <span class="gap"></span>
+    <strong>Sprint 5</strong> (active, 18 pts): Originally Raspberry Pi deployment. Pivoted to <strong>edge-ready optimization</strong> due to budget &mdash; response caching, model optimization, Docker with resource limits, benchmarking suite.
+    <span class="gap"></span>
+    <strong>Sprint 6</strong> (weeks 11&ndash;12): Unit tests, integration tests, documentation, final demo.
+  </div>
+</div>
+
+<!-- ══ 12 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">12</div>
+    <div class="slide-name">Implementation</div>
+    <div class="slide-t">1.5 min</div>
+  </div>
+  <div class="say">
+    <strong>Pipeline output:</strong> User speaks Malayalam asking about weather &rarr;
+    ASR <strong>480ms</strong> &rarr; Translation <strong>120ms</strong> &rarr; Intent detection &rarr; InfoAgent + Qwen3 <strong>340ms</strong> &rarr; Translation back <strong>130ms</strong> &rarr; TTS <strong>380ms</strong>.
+    <strong>Total: 1.45 seconds</strong>.
+    <span class="gap"></span>
+    <strong>Dashboard</strong> &mdash; real-time monitoring: queries, latency breakdown, component health.
+    <span class="gap"></span>
+    <strong>API</strong> &mdash; REST endpoints for transcribe, process, TTS, text-only + WebSocket for streaming.
+  </div>
+</div>
+
+<!-- ══ 13 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">13</div>
+    <div class="slide-name">Current Status</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>87% complete</strong> &mdash; 99/114 story points done, 15 remaining.
+    <span class="gap"></span>
+    All core modules <strong>100%</strong>: ASR, translation, LLM, TTS, pipeline, agents, dashboard.
+    <span class="gap"></span>
+    Edge optimization: <strong>70%</strong> &mdash; caching &amp; Docker done, benchmarking in progress.
+    <span class="gap"></span>
+    Testing &amp; docs: <strong>30%</strong> &mdash; planned for Sprint 6.
+  </div>
+</div>
+
+<!-- ══ 14 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">14</div>
+    <div class="slide-name">Challenges</div>
+    <div class="slide-t">1 min</div>
+  </div>
+  <div class="say">
+    <strong>Memory constraints</strong> &mdash; 10&ndash;16 GB needed for all models simultaneously. Solved with <strong>lazy loading</strong> + distilled models + GGUF quantization.
+    <span class="gap"></span>
+    <strong>Async integration</strong> &mdash; Pipecat async vs ML sync. Solved with <strong>ThreadPoolExecutor</strong> wrappers.
+    <span class="gap"></span>
+    <strong>Translation quality</strong> &mdash; spoken vs written Malayalam. Solved with <strong>text normalization</strong>.
+    <span class="gap"></span>
+    <strong>No Raspberry Pi</strong> &mdash; budget constraint. Pivoted to <strong>Docker simulation</strong> (2 CPU, 4GB RAM).
+  </div>
+</div>
+
+<!-- ══ 15 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">15</div>
+    <div class="slide-name">Future Work</div>
+    <div class="slide-t">45s</div>
+  </div>
+  <div class="say">
+    <strong>Sprint 5 remaining:</strong> benchmarking, Docker finalization, response caching.
+    <span class="gap"></span>
+    <strong>Sprint 6:</strong> unit tests (80%+ coverage), integration tests, docs, final demo.
+    <span class="gap"></span>
+    <strong>Post-project:</strong> Raspberry Pi deployment, wake word detection, smart home via MQTT, mobile app, RAG knowledge base.
+  </div>
+</div>
+
+<!-- ══ 16 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">16</div>
+    <div class="slide-name">Expected Outcome</div>
+    <div class="slide-t">45s</div>
+  </div>
+  <div class="say">
+    <ul>
+      <li><strong>&lt;3 seconds</strong> end-to-end latency</li>
+      <li><strong>93%</strong> translation accuracy</li>
+      <li><strong>11 Indian languages</strong></li>
+      <li><strong>Zero</strong> cloud dependency</li>
+    </ul>
+    <span class="gap"></span>
+    Benefits: <strong>digital inclusion</strong>, <strong>data sovereignty</strong>, <strong>zero operational cost</strong>, <strong>reproducible research</strong> for other low-resource languages.
+  </div>
+</div>
+
+<!-- ══ 17 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">17</div>
+    <div class="slide-name">Conclusion</div>
+    <div class="slide-t">45s</div>
+  </div>
+  <div class="say">
+    Built a <strong>complete voice AI pipeline</strong> &mdash; ASR &rarr; Translation &rarr; LLM &rarr; Agents &rarr; TTS &mdash; under 3s latency, 11 languages.
+    <span class="gap"></span>
+    <strong>State-of-the-art:</strong> 2.94% WER (ASR), ~93% translation accuracy, natural responses (Qwen3).
+    <span class="gap"></span>
+    <strong>Intelligent agents</strong> via LangGraph for diverse user intents.
+    <span class="gap"></span>
+    <strong>87% complete</strong>, 99/114 story points, on track for Sprint 6 delivery.
+    <span class="gap"></span>
+    This proves <strong>local-first, privacy-preserving AI</strong> can match cloud solutions at zero cost.
+  </div>
+</div>
+
+<!-- ══ 18 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">18</div>
+    <div class="slide-name">References</div>
+    <div class="slide-t">15s</div>
+  </div>
+  <div class="say">
+    Key research: <strong>IndicTrans2</strong>, <strong>Whisper</strong>, <strong>Pingala V1</strong>, <strong>MMS</strong>, <strong>Qwen3</strong>. References listed on slide for review.
+  </div>
+</div>
+
+<!-- ══ 19 ══ -->
+<div class="slide">
+  <div class="slide-head">
+    <div class="slide-n">19</div>
+    <div class="slide-name">Thank You</div>
+    <div class="slide-t">15s</div>
+  </div>
+  <div class="say">
+    That concludes my interim presentation. Voice is the most natural interface &mdash; by bringing AI to regional languages on edge devices, we can bridge the digital divide for hundreds of millions. <strong>Thank you.</strong> I'm happy to take any questions.
+  </div>
+</div>
+
+<!-- ══ Q&A ══ -->
+<div class="qa-wrap">
+  <h2>Prepared Q&amp;A</h2>
+
+  <div class="qa">
+    <div class="qa-q">Why not just use Google Assistant or Alexa?</div>
+    <div class="qa-a">They don't support Malayalam, require constant internet, send voice data to cloud servers, and charge API fees. Ours is <strong>fully offline, private, and free</strong>.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">Why Pingala V1 over Whisper?</div>
+    <div class="qa-a"><strong>2.94% WER</strong> vs ~5.8% for Whisper on Indian languages. Designed specifically for Indic speech, runs efficiently on CPU.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">Why Qwen3 and not GPT or Llama?</div>
+    <div class="qa-a">Best <strong>performance-to-size ratio</strong>. 0.6B&ndash;4B fits edge constraints. llama.cpp enables GGUF quantized inference on CPU. Zero API cost.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">How do you handle untested languages?</div>
+    <div class="qa-a">IndicTrans2 supports all <strong>22 scheduled Indian languages</strong>. We validated 11. Architecture is language-agnostic &mdash; no code changes needed.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">What's the difference between the agents?</div>
+    <div class="qa-a"><strong>Info Agent</strong> = Q&amp;A. <strong>Task Agent</strong> = to-dos/reminders. <strong>Chat Agent</strong> = conversation. <strong>Smart Home Agent</strong> = IoT control. LangGraph routes automatically by intent.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">Why Docker instead of Raspberry Pi?</div>
+    <div class="qa-a">Budget. Docker with <strong>2 CPUs, 4GB RAM</strong> limits accurately simulates Pi 5. Code and models are identical &mdash; only hardware differs. Deployment is straightforward when a Pi is available.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">What about real-time performance?</div>
+    <div class="qa-a"><strong>~1.5s end-to-end:</strong> ASR 480ms, translation 250ms, LLM 340ms, TTS 380ms. Caching reduces repeats to <strong>&lt;200ms</strong>.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q">How is this different from Bhashini?</div>
+    <div class="qa-a">Bhashini is a <strong>cloud API gateway</strong> &mdash; requires internet, no LLM, no agents. We run <strong>completely offline</strong> with intelligent task routing.</div>
+  </div>
+</div>
+
+<div class="foot">
+  Presenter Script &middot; Ebin John Joseph &middot; ASI24MCA-2025 &middot; March 2026
+</div>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  voice-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voice-assistant
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist model cache across container restarts
+      - ./models:/app/models
+      # Persist conversation database
+      - ./data:/app/data
+      # Mount config for easy editing
+      - ./config:/app/config:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MODEL_CACHE_DIR=/app/models
+      - HF_HOME=/app/models/huggingface
+    # Simulate edge device resource constraints
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          memory: 2G
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3

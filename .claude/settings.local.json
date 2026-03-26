@@ -33,7 +33,12 @@
       "Bash(venv/Scripts/python.exe:*)",
       "WebFetch(domain:ai.meta.com)",
       "WebFetch(domain:docs.cartesia.ai)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(cp:*)",
+      "Bash(where:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)"
     ]
   }
 }
