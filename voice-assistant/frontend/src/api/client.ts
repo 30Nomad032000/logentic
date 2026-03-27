@@ -5,6 +5,7 @@ import type {
   Conversation,
   TextResponse,
   TranscriptionResponse,
+  TasksResponse,
 } from "./types";
 
 async function fetchJSON<T>(url: string): Promise<T> {
@@ -61,6 +62,28 @@ export async function transcribeAudio(
   const res = await fetch("/api/transcribe", { method: "POST", body: formData });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
+}
+
+export function getTasks(): Promise<TasksResponse> {
+  return fetchJSON("/api/tasks");
+}
+
+export async function updateTaskStatus(
+  taskId: string,
+  status: "pending" | "done"
+): Promise<void> {
+  const formData = new FormData();
+  formData.append("status", status);
+  const res = await fetch(`/api/tasks/${taskId}`, {
+    method: "PATCH",
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
+export async function deleteTask(taskId: string): Promise<void> {
+  const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
 export async function synthesizeSpeech(

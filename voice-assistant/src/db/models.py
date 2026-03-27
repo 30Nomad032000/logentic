@@ -59,6 +59,23 @@ class Conversation:
 
 
 @dataclass
+class Task:
+    """A user task created by the task agent."""
+    id: str = ""
+    title: str = ""
+    status: str = "pending"  # pending, done
+    created_at: str = ""
+    completed_at: Optional[str] = None
+    source_input: str = ""  # original user utterance
+
+    def __post_init__(self):
+        if not self.id:
+            self.id = str(uuid.uuid4())
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
+
+
+@dataclass
 class SystemMetric:
     """A system performance metric snapshot."""
     id: str = ""

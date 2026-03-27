@@ -18,12 +18,12 @@ asr:
   # Meta MMS (1000+ languages, good for Indian languages)
   mms:
     model_id: "facebook/mms-1b-all"
-    device: "cpu"
+    device: "cuda"
 
   # Pingala V1 (CPU-first, 2.94% WER)
   pingala:
     model_id: "shunyalabs/pingala-v1-universal"
-    device: "cpu"  # CPU-optimized, no GPU needed
+    device: "cuda"
 
   # Whisper (legacy fallback)
   whisper:
@@ -38,16 +38,16 @@ tts:
 
   # MMS-TTS (Offline - Recommended for speed)
   mms:
-    device: "cpu"
+    device: "cuda"
 
   # Indic Parler-TTS (69 voices, emotion control)
   indic:
     variant: "mini"  # Options: full, mini (recommended for edge)
-    device: "cpu"
+    device: "cuda"
 
   # Chatterbox-Turbo (350M, low compute, 24kHz)
   chatterbox:
-    device: "cpu"
+    device: "cuda"
 
   # Cartesia (Online - High quality)
   cartesia:
@@ -69,7 +69,7 @@ tts:
 # Translation Configuration
 translation:
   engine: "indictrans2"
-  device: "cpu"
+  device: "cuda"
   model_variant: "dist"  # Options: full (1B), dist (~211M, 5x smaller, recommended)
   source_lang: "ml"  # Malayalam (user speaks)
   target_lang: "en"  # English (LLM processes)
@@ -79,7 +79,7 @@ translation:
 llm:
   engine: "qwen3"  # Options: qwen (2.5), qwen3 (recommended)
   model_size: "0.6b"  # Qwen3 options: 0.6b, 1.7b, 4b | Qwen2.5 options: 0.5b, 1.5b, 3b, 7b
-  device: "cpu"
+  device: "cuda"
   backend: "llamacpp"  # Options: llamacpp (recommended for edge), transformers
   max_new_tokens: 256
   temperature: 0.7
@@ -89,7 +89,7 @@ llm:
   llamacpp:
     n_ctx: 2048
     n_threads: 4
-    n_gpu_layers: 0  # 0 for CPU-only on Pi
+    n_gpu_layers: -1  # -1 to offload all layers to GPU
     quantization: "Q8_0"  # Options: Q4_K_M, Q5_K_M, Q8_0 (using Q8_0 for Qwen3-0.6B)
 
 # Inference Engine Configuration

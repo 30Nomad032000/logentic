@@ -58,12 +58,22 @@ export interface ConversationsResponse {
   total: number;
 }
 
+export interface SearchSource {
+  title: string;
+  url: string;
+  snippet?: string;
+}
+
 export interface TextResponse {
   input: string;
   intent: string;
   response: string;
   language: string;
   agent?: string;
+  sources?: SearchSource[];
+  thinking?: string;
+  translated_input?: string;
+  english_response?: string;
   translation_ms?: number;
   llm_ms?: number;
   total_ms?: number;
@@ -81,4 +91,16 @@ export interface ProcessAudioResponse {
   intent: string;
   response_text: string;
   language: string;
+}
+
+export interface TaskItem {
+  id: string;
+  title: string;
+  status: "pending" | "done";
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface TasksResponse {
+  tasks: TaskItem[];
 }

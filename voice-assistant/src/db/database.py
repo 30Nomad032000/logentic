@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional, List
 from datetime import datetime
 
-from .models import Conversation, Message, SystemMetric
+from .models import Conversation, Message, SystemMetric, Task
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,20 @@ class Database:
                 value REAL NOT NULL,
                 metadata TEXT DEFAULT '{}'
             );
+
+            CREATE TABLE IF NOT EXISTS tasks (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT NOT NULL,
+                completed_at TEXT,
+                source_input TEXT DEFAULT ''
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_tasks_status
+                ON tasks(status);
+            CREATE INDEX IF NOT EXISTS idx_tasks_created
+                ON tasks(created_at);
 
             CREATE INDEX IF NOT EXISTS idx_messages_conversation
                 ON messages(conversation_id);
@@ -215,6 +229,49 @@ class Database:
             )
             for r in rows
         ]
+
+    # ── Tasks ──
+
+    def save_task(self, task: Task) -> str:
+        """Save a task to the database."""
+        self.conn.execute(
+            """INSERT OR REPLACE INTO tasks
+               (id, title, status, created_at, completed_at, source_input)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (task.id, task.title, task.status, task.created_at,
+             task.completed_at, task.source_input),
+        )
+        self.conn.commit()
+        return task.id
+
+    def list_tasks(self, status: Optional[str] = None, limit: int = 50) -> List[Task]:
+        """List tasks, optionally filtered by status."""
+        query = "SELECT * FROM tasks"
+        params: list = []
+        if status:
+            query += " WHERE status = ?"
+            params.append(status)
+        query += " ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+        rows = self.conn.execute(query, params).fetchall()
+        return [
+            Task(
+                id=r["id"], title=r["title"], status=r["status"],
+                created_at=r["created_at"], completed_at=r["completed_at"],
+                source_input=r["source_input"],
+            )
+            for r in rows
+        ]
+
+    def update_task_status(self, task_id: str, status: str) -> bool:
+        """Update a task's status. Returns True if found."""
+        completed_at = datetime.utcnow().isoformat() if status == "done" else None
+        cur = self.conn.execute(
+            "UPDATE tasks SET status = ?, completed_at = ? WHERE id = ?",
+            (status, completed_at, task_id),
+        )
+        self.conn.commit()
+        return cur.rowcount > 0
 
     # ── System Metrics ──
 

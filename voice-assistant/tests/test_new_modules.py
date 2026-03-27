@@ -229,13 +229,14 @@ class TestOrchestratorFallbackResponses:
         assert "chat_agent" in AGENT_PROMPTS
 
     def test_orchestrator_llm_respond_fallback(self):
-        """Without LLM, _llm_respond should return a fallback string."""
+        """Without LLM, _llm_respond should return (fallback_str, empty_thinking)."""
         from src.agents import AgentOrchestrator
         orch = AgentOrchestrator(llm=None)
         orch.setup()
-        result = orch._llm_respond("test input", "info_agent")
-        assert isinstance(result, str)
-        assert len(result) > 0
+        response, thinking = orch._llm_respond("test input", "info_agent")
+        assert isinstance(response, str)
+        assert len(response) > 0
+        assert thinking == ""
 
 
 class TestASRPackageInit:

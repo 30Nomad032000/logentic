@@ -297,6 +297,46 @@ async def dashboard_devices():
     return {"devices": get_connected_devices()}
 
 
+# ── Tasks ──
+
+@app.get("/api/tasks")
+async def list_tasks(status: Optional[str] = None):
+    """List tasks, optionally filtered by status (pending/done)."""
+    tasks = db.list_tasks(status=status)
+    return {
+        "tasks": [
+            {
+                "id": t.id,
+                "title": t.title,
+                "status": t.status,
+                "created_at": t.created_at,
+                "completed_at": t.completed_at,
+            }
+            for t in tasks
+        ]
+    }
+
+
+@app.patch("/api/tasks/{task_id}")
+async def update_task(task_id: str, status: str = Form(...)):
+    """Update a task's status (pending/done)."""
+    if status not in ("pending", "done"):
+        raise HTTPException(status_code=400, detail="Status must be 'pending' or 'done'")
+    if not db.update_task_status(task_id, status):
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"ok": True, "id": task_id, "status": status}
+
+
+@app.delete("/api/tasks/{task_id}")
+async def delete_task(task_id: str):
+    """Delete a task by ID."""
+    cur = db.conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    db.conn.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"ok": True, "id": task_id}
+
+
 # ── Helper: log conversation to DB ──
 
 def _log_conversation(
@@ -380,8 +420,14 @@ async def transcribe_audio(
             tmp.write(content)
             tmp_path = tmp.name
 
-        result = asr_engine.transcribe(tmp_path, language=language)
-        Path(tmp_path).unlink()
+        # Noise reduction before ASR
+        from src.asr.denoise import denoise_audio
+        clean_path = denoise_audio(tmp_path)
+
+        result = asr_engine.transcribe(clean_path, language=language)
+        Path(tmp_path).unlink(missing_ok=True)
+        if clean_path != tmp_path:
+            Path(clean_path).unlink(missing_ok=True)
 
         return TranscriptionResponse(
             text=result["text"],
@@ -419,13 +465,19 @@ async def process_audio(
             tmp.write(content)
             tmp_path = tmp.name
 
-        asr_result = asr_engine.transcribe(tmp_path, language=language)
+        # Noise reduction before ASR
+        from src.asr.denoise import denoise_audio
+        clean_path = denoise_audio(tmp_path)
+
+        asr_result = asr_engine.transcribe(clean_path, language=language)
         transcription = asr_result["text"]
         detected_lang = asr_result["language"]
 
         agent_result = orchestrator.process(transcription, detected_lang)
 
-        Path(tmp_path).unlink()
+        Path(tmp_path).unlink(missing_ok=True)
+        if clean_path != tmp_path:
+            Path(clean_path).unlink(missing_ok=True)
 
         response_text = agent_result.get("response", "")
         intent = agent_result.get("intent", "unknown")
@@ -507,8 +559,14 @@ async def websocket_stream_endpoint(websocket: WebSocket):
                 tmp_path = tmp.name
 
             try:
+                # Noise reduction before ASR
+                from src.asr.denoise import denoise_audio
+                clean_path = denoise_audio(tmp_path)
+
                 if asr_engine:
-                    asr_result = asr_engine.transcribe(tmp_path)
+                    asr_result = asr_engine.transcribe(clean_path)
+                    if clean_path != tmp_path:
+                        Path(clean_path).unlink(missing_ok=True)
                     transcription = asr_result["text"]
 
                     if orchestrator and transcription.strip():
@@ -608,7 +666,7 @@ async def process_text(
             total_ms=total_ms,
         )
 
-        return {
+        response_data = {
             "input": original_input,
             "intent": intent,
             "response": final_response,
@@ -618,6 +676,18 @@ async def process_text(
             "llm_ms": round(llm_ms, 1),
             "total_ms": round(total_ms, 1),
         }
+        # Include translated texts for display when input is non-English
+        if language != "en" and english_input != original_input:
+            response_data["translated_input"] = english_input
+        if language != "en" and english_response and english_response != final_response:
+            response_data["english_response"] = english_response
+        sources = result.get("sources", [])
+        if sources:
+            response_data["sources"] = sources
+        thinking = result.get("thinking", "")
+        if thinking:
+            response_data["thinking"] = thinking
+        return response_data
 
     except Exception as e:
         logger.error(f"Text processing failed: {e}")

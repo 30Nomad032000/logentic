@@ -43,7 +43,10 @@
       "WebFetch(domain:edgex.ai)",
       "WebFetch(domain:maclookup.app)",
       "WebFetch(domain:zread.ai)",
-      "WebFetch(domain:dev.to)"
+      "WebFetch(domain:dev.to)",
+      "Bash(git reset:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ]
   }
 }

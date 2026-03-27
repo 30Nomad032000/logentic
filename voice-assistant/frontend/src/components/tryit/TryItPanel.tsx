@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type KeyboardEvent } from "react";
 import { postText, transcribeAudio, synthesizeSpeech } from "../../api/client";
+import type { SearchSource } from "../../api/types";
 import { useRefresh } from "../../DashboardDataLoader";
 import { useAudioRecorder } from "../../hooks/useAudioRecorder";
 import { Card } from "@/components/common/Card";
@@ -43,7 +44,13 @@ export function TryItPanel() {
     intent: string;
     language: string;
     agent?: string;
+    sources?: SearchSource[];
+    thinking?: string;
+    translatedInput?: string;
+    englishResponse?: string;
   } | null>(null);
+  const [thinkingOpen, setThinkingOpen] = useState(false);
+  const [translationOpen, setTranslationOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<PipelineStage>("idle");
   const [stageTimes, setStageTimes] = useState<StageTime>({});
@@ -102,7 +109,13 @@ export function TryItPanel() {
         intent: data.intent || "-",
         language: responseLang,
         agent: data.agent,
+        sources: data.sources,
+        thinking: data.thinking,
+        translatedInput: data.translated_input,
+        englishResponse: data.english_response,
       });
+      setThinkingOpen(false);
+      setTranslationOpen(false);
 
       // Stage 3: TTS
       setStage("tts");
@@ -157,7 +170,13 @@ export function TryItPanel() {
         intent: data.intent || "-",
         language: data.language,
         agent: data.agent,
+        sources: data.sources,
+        thinking: data.thinking,
+        translatedInput: data.translated_input,
+        englishResponse: data.english_response,
       });
+      setThinkingOpen(false);
+      setTranslationOpen(false);
       setStageTimes({ processing_ms: Math.round(procMs), total_ms: Math.round(procMs) });
       setStage("done");
       setTimeout(refresh, 500);
@@ -385,7 +404,140 @@ export function TryItPanel() {
                   </div>
                 );
               })()}
+              {/* LLM Thinking panel */}
+              {response.thinking && (
+                <div className="mb-2">
+                  <button
+                    onClick={() => setThinkingOpen((v) => !v)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-[rgba(232,164,74,0.15)] bg-[rgba(232,164,74,0.04)] text-[#e8a44a] font-mono text-[10.5px] font-semibold tracking-[0.04em] uppercase cursor-pointer transition-all duration-200 hover:border-[rgba(232,164,74,0.3)] hover:bg-[rgba(232,164,74,0.08)]"
+                  >
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="opacity-70"
+                    >
+                      <path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4.5-3 5.7V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.3C6.2 13.5 5 11.4 5 9a7 7 0 0 1 7-7z" />
+                      <line x1="10" y1="22" x2="14" y2="22" />
+                    </svg>
+                    LLM Thinking
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      className={`transition-transform duration-200 ${thinkingOpen ? "rotate-180" : ""}`}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                  {thinkingOpen && (
+                    <div className="mt-1.5 px-3 py-2.5 rounded-md border border-[rgba(232,164,74,0.1)] bg-[rgba(232,164,74,0.03)] max-h-[200px] overflow-y-auto">
+                      <pre className="text-[11px] text-[#9a9488] whitespace-pre-wrap font-mono leading-relaxed">
+                        {response.thinking}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mt-1">{response.text}</div>
+              {/* Translation panel (shown when input is non-English) */}
+              {(response.translatedInput || response.englishResponse) && (
+                <div className="mt-2">
+                  <button
+                    onClick={() => setTranslationOpen((v) => !v)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-[rgba(46,204,113,0.15)] bg-[rgba(46,204,113,0.04)] text-[rgba(46,204,113,0.8)] font-mono text-[10.5px] font-semibold tracking-[0.04em] uppercase cursor-pointer transition-all duration-200 hover:border-[rgba(46,204,113,0.3)] hover:bg-[rgba(46,204,113,0.08)]"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+                      <path d="M5 8l6 6" /><path d="M4 14l6-6 2-3" /><path d="M2 5h12" /><path d="M7 2h1" />
+                      <path d="M22 22l-5-10-5 10" /><path d="M14 18h6" />
+                    </svg>
+                    Translation
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      className={`transition-transform duration-200 ${translationOpen ? "rotate-180" : ""}`}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                  {translationOpen && (
+                    <div className="mt-1.5 px-3 py-2.5 rounded-md border border-[rgba(46,204,113,0.1)] bg-[rgba(46,204,113,0.03)] space-y-2">
+                      {response.translatedInput && (
+                        <div>
+                          <div className="font-mono text-[9.5px] font-semibold text-[rgba(46,204,113,0.5)] uppercase tracking-[0.08em] mb-0.5">
+                            Input (translated to English)
+                          </div>
+                          <p className="text-[11.5px] text-[#b8b2a8] leading-relaxed">{response.translatedInput}</p>
+                        </div>
+                      )}
+                      {response.englishResponse && (
+                        <div>
+                          <div className="font-mono text-[9.5px] font-semibold text-[rgba(46,204,113,0.5)] uppercase tracking-[0.08em] mb-0.5">
+                            Response (English, before translation)
+                          </div>
+                          <p className="text-[11.5px] text-[#b8b2a8] leading-relaxed">{response.englishResponse}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Web search sources */}
+              {response.sources && response.sources.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-[rgba(255,200,120,0.06)]">
+                  <div className="font-mono text-[10px] font-semibold text-[rgba(52,152,219,0.7)] uppercase tracking-[0.08em] mb-2 flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    Web Search Results ({response.sources.length})
+                  </div>
+                  <div className="space-y-2">
+                    {response.sources.map((src, i) => (
+                      <div
+                        key={i}
+                        className="bg-[rgba(52,152,219,0.04)] border border-[rgba(52,152,219,0.1)] rounded-md px-3 py-2.5 transition-all duration-200 hover:border-[rgba(52,152,219,0.25)] hover:bg-[rgba(52,152,219,0.07)]"
+                      >
+                        <a
+                          href={src.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-[11.5px] font-semibold text-[rgba(52,152,219,0.9)] hover:text-[rgb(52,152,219)] transition-colors flex items-center gap-1.5"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                          {src.title}
+                        </a>
+                        {src.snippet && (
+                          <p className="text-[11px] text-[#8a8478] mt-1 leading-relaxed line-clamp-2">
+                            {src.snippet}
+                          </p>
+                        )}
+                        {src.url && (
+                          <span className="text-[9.5px] text-[#555049] mt-0.5 block truncate">
+                            {src.url}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-4 mt-2.5 font-mono text-[11px] text-[#8a8478]">
                 <span>Intent: {INTENT_LABELS[response.intent] || response.intent}</span>
                 <span>Language: {response.language}</span>
@@ -393,8 +545,28 @@ export function TryItPanel() {
               </div>
             </>
           ) : (
-            <div className="font-mono text-[10px] font-semibold text-[#8a8478] uppercase tracking-[0.08em] mb-1.5">
-              {sending ? "Processing..." : "Response will appear here"}
+            <div>
+              {sending ? (
+                <div className="space-y-2.5">
+                  <div className="font-mono text-[10px] font-semibold text-[#e8a44a] uppercase tracking-[0.08em] flex items-center gap-2">
+                    <span className="inline-block w-3 h-3 border-2 border-[#e8a44a] border-t-transparent rounded-full animate-spin" />
+                    Processing...
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-[rgba(52,152,219,0.04)] border border-[rgba(52,152,219,0.08)] rounded-md animate-pulse">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(52,152,219,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <span className="font-mono text-[11px] text-[rgba(52,152,219,0.6)]">
+                      Searching the web for relevant information...
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="font-mono text-[10px] font-semibold text-[#8a8478] uppercase tracking-[0.08em] mb-1.5">
+                  Response will appear here
+                </div>
+              )}
             </div>
           )}
         </div>

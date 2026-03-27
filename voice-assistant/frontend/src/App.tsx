@@ -5,8 +5,8 @@ import { StatsRow } from "./components/stats/StatsRow";
 import { ComponentHealth } from "./components/health/ComponentHealth";
 import { LatencyBreakdown } from "./components/latency/LatencyBreakdown";
 import { TryItPanel } from "./components/tryit/TryItPanel";
-import { LanguageDistribution } from "./components/languages/LanguageDistribution";
 import { ConversationLog } from "./components/conversations/ConversationLog";
+import { TaskPanel } from "./components/tasks/TaskPanel";
 import { DashboardDataLoader } from "./DashboardDataLoader";
 
 export function App() {
@@ -19,7 +19,7 @@ export function App() {
           <ComponentHealth />
           <LatencyBreakdown />
           <TryItPanel />
-          <LanguageDistribution />
+          <TaskPanel />
           <FullWidth>
             <ConversationLog />
           </FullWidth>

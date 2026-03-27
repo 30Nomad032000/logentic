@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export interface AudioRecorderState {
   isRecording: boolean;
@@ -18,6 +18,26 @@ export function useAudioRecorder(): AudioRecorderState {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const warmStreamRef = useRef<MediaStream | null>(null);
+
+  // Pre-acquire mic on mount so it's ready instantly when recording starts
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((s) => {
+        // Mute the tracks so the mic isn't "hot" until recording
+        s.getAudioTracks().forEach((t) => (t.enabled = false));
+        warmStreamRef.current = s;
+      })
+      .catch(() => {
+        // Permission denied — will retry on first record click
+      });
+
+    return () => {
+      warmStreamRef.current?.getTracks().forEach((t) => t.stop());
+      warmStreamRef.current = null;
+    };
+  }, []);
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -25,7 +45,14 @@ export function useAudioRecorder(): AudioRecorderState {
     chunksRef.current = [];
 
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Reuse warm stream or request a new one
+      let mediaStream = warmStreamRef.current;
+      if (!mediaStream || mediaStream.getAudioTracks().every((t) => t.readyState === "ended")) {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        warmStreamRef.current = mediaStream;
+      }
+      // Un-mute the tracks
+      mediaStream.getAudioTracks().forEach((t) => (t.enabled = true));
       setStream(mediaStream);
 
       // Prefer WAV-compatible mime types, fall back to whatever is available
@@ -45,12 +72,13 @@ export function useAudioRecorder(): AudioRecorderState {
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
         setAudioBlob(blob);
-        // Stop all tracks to release the microphone
-        mediaStream.getTracks().forEach((t) => t.stop());
+        // Mute tracks instead of stopping — keeps stream warm for next use
+        mediaStream!.getAudioTracks().forEach((t) => (t.enabled = false));
         setStream(null);
       };
 
-      recorder.start();
+      // Use 250ms timeslice so data arrives in small chunks (reduces start-of-audio loss)
+      recorder.start(250);
       setIsRecording(true);
     } catch (e) {
       const msg = e instanceof DOMException && e.name === "NotAllowedError"
