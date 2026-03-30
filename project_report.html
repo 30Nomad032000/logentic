@@ -49,19 +49,35 @@
     position: relative;
   }
 
-  /* ── Running header / footer (screen preview only — PDF uses Puppeteer templates) ── */
+  /* ── Running header / footer (screen preview only) ── */
   .page::before {
     content: "Hyper-Localized Multilingual Voice Assistant";
     position: absolute;
-    top: 0.12in;
+    top: 0.45in;
     left: var(--margin-left);
+    right: var(--margin-right);
     font-family: var(--body-font);
     font-size: 9pt;
     color: #555;
     font-style: italic;
+    border-bottom: 0.5px solid #aaa;
+    padding-bottom: 4pt;
+  }
+  .page::after {
+    content: "Department of Computer Applications – ASIET";
+    position: absolute;
+    bottom: 0.4in;
+    left: var(--margin-left);
+    font-family: var(--body-font);
+    font-size: 9pt;
+    color: #555;
   }
   .page .page-number {
-    display: none; /* hidden in HTML — Puppeteer adds page numbers in PDF */
+    position: absolute;
+    bottom: 0.4in;
+    right: var(--margin-right);
+    font-size: 9pt;
+    color: #555;
   }
 
   /* ── Headings ── */
@@ -227,21 +243,20 @@
   .small { font-size: 10pt; }
   .page-break { page-break-before: always; }
 
-  /* ── Print styles ── */
+  /* ── Print styles: .page divs become invisible, Puppeteer handles pagination ── */
   @media print {
     body { background: #fff; margin: 0; padding: 0; }
     .page {
-      margin: 0;
-      padding: 0;
-      box-shadow: none;
-      width: auto;
-      min-height: 0;
+      display: contents;  /* wrapper vanishes, children flow as if .page didn't exist */
     }
-    .page::before { display: none; } /* Puppeteer handles header */
+    .page::before, .page::after { display: none; }
+    .page .page-number { display: none; }
     pre { font-size: 7.5pt; }
     table { page-break-inside: avoid; }
     .figure, .screenshot { page-break-inside: avoid; }
-    h1, h2, h3 { page-break-after: avoid; }
+    h1 { page-break-before: always; page-break-after: avoid; }
+    h1:first-child { page-break-before: auto; }
+    h2, h3 { page-break-after: avoid; }
   }
   @page { size: A4; margin: 0; }
 </style>
