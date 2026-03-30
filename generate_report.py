@@ -75,12 +75,70 @@ const path = require("path");
 
   const pdfPath = """ + repr(PDF_PATH.replace("\\", "/")) + """;
   console.log("Generating PDF: " + pdfPath);
+
+  // Header: text + top border line of the content rectangle
+  const headerTemplate = `
+    <style>
+      .hdr {
+        width: 100%; font-size: 9px;
+        font-family: 'Times New Roman', Georgia, serif;
+        color: #555; margin: 0; padding: 0;
+      }
+      .hdr-text {
+        padding: 6px 14px 5px 14px;
+        font-style: italic;
+      }
+      .hdr-line {
+        margin: 0 14px;
+        border-bottom: 1px solid #000;
+      }
+    </style>
+    <div class="hdr">
+      <div class="hdr-text">Hyper-Localized Multilingual Voice Assistant</div>
+      <div class="hdr-line"></div>
+    </div>
+  `;
+
+  // Footer: bottom border line + text + page number
+  const footerTemplate = `
+    <style>
+      .ftr {
+        width: 100%; font-size: 9px;
+        font-family: 'Times New Roman', Georgia, serif;
+        color: #555; margin: 0; padding: 0;
+      }
+      .ftr-line {
+        margin: 0 14px;
+        border-top: 1px solid #000;
+      }
+      .ftr-text {
+        padding: 5px 14px 6px 14px;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+    <div class="ftr">
+      <div class="ftr-line"></div>
+      <div class="ftr-text">
+        <span>Department of Computer Applications &ndash; ASIET</span>
+        <span><span class="pageNumber"></span></span>
+      </div>
+    </div>
+  `;
+
   await page.pdf({
     path: pdfPath,
     format: "A4",
     printBackground: true,
-    margin: { top: "0", bottom: "0", left: "0", right: "0" },
-    displayHeaderFooter: false,
+    displayHeaderFooter: true,
+    headerTemplate: headerTemplate,
+    footerTemplate: footerTemplate,
+    margin: {
+      top: "0.85in",
+      bottom: "0.75in",
+      left: "1in",
+      right: "1in",
+    },
   });
 
   console.log("PDF generated successfully!");

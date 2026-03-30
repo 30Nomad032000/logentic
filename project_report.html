@@ -49,47 +49,19 @@
     position: relative;
   }
 
-  /* ── Content border frame (injected via JS into each .page) ── */
-  .border-frame {
-    position: absolute;
-    top: 0.68in;
-    bottom: 0.55in;
-    left: 0.75in;
-    right: 0.75in;
-    border: 1px solid #000;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ── Running header / footer (positioned OUTSIDE the content border) ── */
+  /* ── Running header / footer (screen preview only — PDF uses Puppeteer templates) ── */
   .page::before {
     content: "Hyper-Localized Multilingual Voice Assistant";
     position: absolute;
-    top: 0.35in;
-    left: 0.8in;
-    right: 0.8in;
+    top: 0.12in;
+    left: var(--margin-left);
     font-family: var(--body-font);
     font-size: 9pt;
     color: #555;
     font-style: italic;
-    border-bottom: 0.5px solid #aaa;
-    padding-bottom: 4pt;
-  }
-  .page::after {
-    content: "Department of Computer Applications – ASIET";
-    position: absolute;
-    bottom: 0.28in;
-    left: 0.8in;
-    font-family: var(--body-font);
-    font-size: 9pt;
-    color: #555;
   }
   .page .page-number {
-    position: absolute;
-    bottom: 0.28in;
-    right: 0.8in;
-    font-size: 9pt;
-    color: #555;
+    display: none; /* hidden in HTML — Puppeteer adds page numbers in PDF */
   }
 
   /* ── Headings ── */
@@ -257,15 +229,19 @@
 
   /* ── Print styles ── */
   @media print {
-    body { background: #fff; }
+    body { background: #fff; margin: 0; padding: 0; }
     .page {
       margin: 0;
-      padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+      padding: 0;
       box-shadow: none;
-      page-break-after: always;
+      width: auto;
+      min-height: 0;
     }
-    .page:last-child { page-break-after: auto; }
+    .page::before { display: none; } /* Puppeteer handles header */
     pre { font-size: 7.5pt; }
+    table { page-break-inside: avoid; }
+    .figure, .screenshot { page-break-inside: avoid; }
+    h1, h2, h3 { page-break-after: avoid; }
   }
   @page { size: A4; margin: 0; }
 </style>
@@ -2829,13 +2805,5 @@ docker-compose up -d
 
 </div>
 
-<script>
-// Inject border frame into every page
-document.querySelectorAll('.page').forEach(function(page) {
-  var frame = document.createElement('div');
-  frame.className = 'border-frame';
-  page.appendChild(frame);
-});
-</script>
 </body>
 </html>
