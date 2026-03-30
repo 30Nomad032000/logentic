@@ -1,7 +1,7 @@
 /**
- * Puppeteer script to capture dashboard screenshots from the running server.
+ * Puppeteer script to capture REAL dashboard screenshots from the running server.
  * Run: node capture_screenshots.js
- * Requires: npm install puppeteer (already in package.json)
+ * Requires: npm install puppeteer
  * Requires: Server running at http://localhost:8000
  */
 
@@ -38,94 +38,51 @@ async function main() {
   // Let React render and data load
   await delay(4000);
 
-  // 1. Full dashboard screenshot
-  console.log("  -> screenshot_dashboard.png");
+  // 1. Full dashboard screenshot (top section, no scroll needed)
+  console.log("  -> screenshot_dashboard_full.png");
   await page.screenshot({
-    path: path.join(OUT, "screenshot_dashboard.png"),
+    path: path.join(OUT, "screenshot_dashboard_full.png"),
     clip: { x: 0, y: 0, width: 1400, height: 900 },
   });
 
-  // 2. Full page screenshot
+  // 2. Full page scrollable screenshot
   console.log("  -> screenshot_dashboard_fullpage.png");
   await page.screenshot({
     path: path.join(OUT, "screenshot_dashboard_fullpage.png"),
     fullPage: true,
   });
 
-  // 3. Top section (stats cards)
-  console.log("  -> screenshot_stats.png");
-  await page.screenshot({
-    path: path.join(OUT, "screenshot_stats.png"),
-    clip: { x: 0, y: 0, width: 1400, height: 300 },
-  });
+  // 3. Scroll DOWN past the header (header is ~60px tall) and capture mid section
+  // Get the actual page height first
+  const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+  console.log("  Page body height: " + bodyHeight + "px");
 
-  // 4. Scroll to middle and capture
+  // Scroll to show content below the header bar
   console.log("  -> screenshot_dashboard_mid.png");
-  await page.evaluate(() => window.scrollTo(0, 400));
-  await delay(1000);
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await delay(1500);
   await page.screenshot({
     path: path.join(OUT, "screenshot_dashboard_mid.png"),
     clip: { x: 0, y: 0, width: 1400, height: 900 },
   });
 
-  // 5. Scroll to bottom
+  // 4. Scroll further to bottom section
   console.log("  -> screenshot_dashboard_bottom.png");
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await delay(1000);
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await delay(1500);
   await page.screenshot({
     path: path.join(OUT, "screenshot_dashboard_bottom.png"),
     clip: { x: 0, y: 0, width: 1400, height: 900 },
   });
 
-  // 6. Try clicking on tabs if they exist
-  try {
-    // Conversations tab
-    const convTab = await page.$('[value="conversations"], [data-value="conversations"]');
-    if (convTab) {
-      await convTab.click();
-      await delay(2000);
-      console.log("  -> screenshot_conversations.png");
-      await page.screenshot({
-        path: path.join(OUT, "screenshot_conversations.png"),
-        clip: { x: 0, y: 200, width: 1400, height: 700 },
-      });
-    }
-
-    // Health tab
-    const healthTab = await page.$('[value="health"], [data-value="health"]');
-    if (healthTab) {
-      await healthTab.click();
-      await delay(2000);
-      console.log("  -> screenshot_health_latency.png");
-      await page.screenshot({
-        path: path.join(OUT, "screenshot_health_latency.png"),
-        clip: { x: 0, y: 200, width: 1400, height: 700 },
-      });
-    }
-
-    // Try-it / Tasks tab
-    const tryitTab = await page.$('[value="tryit"], [data-value="tryit"]');
-    if (tryitTab) {
-      await tryitTab.click();
-      await delay(2000);
-      console.log("  -> screenshot_tryit_tasks.png");
-      await page.screenshot({
-        path: path.join(OUT, "screenshot_tryit_tasks.png"),
-        clip: { x: 0, y: 200, width: 1400, height: 700 },
-      });
-    }
-  } catch (e) {
-    console.log("  (some tabs not found, skipping: " + e.message + ")");
-  }
-
-  // 7. Narrow viewport for responsive view
+  // 5. Narrow viewport (mobile)
   console.log("  -> screenshot_dashboard_narrow.png");
   await page.setViewport({ width: 768, height: 1024, deviceScaleFactor: 2 });
   await page.goto(BASE, { waitUntil: "networkidle2", timeout: 30000 });
   await delay(3000);
   await page.screenshot({
     path: path.join(OUT, "screenshot_dashboard_narrow.png"),
-    fullPage: false,
+    clip: { x: 0, y: 0, width: 768, height: 1024 },
   });
 
   await browser.close();

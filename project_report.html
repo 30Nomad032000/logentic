@@ -49,30 +49,45 @@
     position: relative;
   }
 
-  /* ── Running header / footer ── */
+  /* ── Content border frame (injected via JS into each .page) ── */
+  .border-frame {
+    position: absolute;
+    top: 0.68in;
+    bottom: 0.55in;
+    left: 0.75in;
+    right: 0.75in;
+    border: 1px solid #000;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Running header / footer (positioned OUTSIDE the content border) ── */
   .page::before {
     content: "Hyper-Localized Multilingual Voice Assistant";
     position: absolute;
-    top: 0.45in;
-    left: var(--margin-left);
+    top: 0.35in;
+    left: 0.8in;
+    right: 0.8in;
     font-family: var(--body-font);
     font-size: 9pt;
     color: #555;
     font-style: italic;
+    border-bottom: 0.5px solid #aaa;
+    padding-bottom: 4pt;
   }
   .page::after {
     content: "Department of Computer Applications – ASIET";
     position: absolute;
-    bottom: 0.45in;
-    left: var(--margin-left);
+    bottom: 0.28in;
+    left: 0.8in;
     font-family: var(--body-font);
     font-size: 9pt;
     color: #555;
   }
   .page .page-number {
     position: absolute;
-    bottom: 0.45in;
-    right: var(--margin-right);
+    bottom: 0.28in;
+    right: 0.8in;
     font-size: 9pt;
     color: #555;
   }
@@ -705,6 +720,12 @@
     <tr><td>Code Quality</td><td>Black (formatter), Ruff (linter), pytest (testing)</td></tr>
   </tbody>
 </table>
+
+</div>
+
+<!-- Page 14 continued -->
+<div class="page">
+<span class="page-number">14</span>
 
 <p><b>Network Connectivity</b></p>
 <table>
@@ -2672,14 +2693,9 @@ docker-compose up -d
 
 <h2>11.2 Screenshots of Forms, Reports, Diagrams</h2>
 
-<p class="screenshot-caption">Dashboard — Main View</p>
+<p class="screenshot-caption">Dashboard — Full Page View</p>
 <div class="screenshot">
-  <img src="report_assets/screenshot_dashboard.png" alt="Dashboard Main View">
-</div>
-
-<p class="screenshot-caption">Dashboard — Full Page</p>
-<div class="screenshot">
-  <img src="report_assets/screenshot_dashboard_full.png" alt="Dashboard Full Page">
+  <img src="report_assets/screenshot_dashboard_full.png" alt="Dashboard Full Page View">
 </div>
 
 </div>
@@ -2688,19 +2704,14 @@ docker-compose up -d
 <div class="page">
 <span class="page-number">64</span>
 
-<p class="screenshot-caption">Dashboard — Conversation Logs</p>
+<p class="screenshot-caption">Dashboard — Conversation History &amp; Agent Routing</p>
 <div class="screenshot">
-  <img src="report_assets/screenshot_conversations.png" alt="Conversation Logs">
+  <img src="report_assets/screenshot_dashboard_mid.png" alt="Conversations and Agent Routing">
 </div>
 
-<p class="screenshot-caption">Dashboard — Health &amp; Latency Monitoring</p>
+<p class="screenshot-caption">Dashboard — Mobile / Narrow Viewport</p>
 <div class="screenshot">
-  <img src="report_assets/screenshot_health_latency.png" alt="Health and Latency">
-</div>
-
-<p class="screenshot-caption">Dashboard — Statistics Overview</p>
-<div class="screenshot">
-  <img src="report_assets/screenshot_stats.png" alt="Statistics">
+  <img src="report_assets/screenshot_dashboard_narrow.png" alt="Dashboard Narrow View">
 </div>
 
 </div>
@@ -2709,19 +2720,9 @@ docker-compose up -d
 <div class="page">
 <span class="page-number">65</span>
 
-<p class="screenshot-caption">Dashboard — Try-It Panel &amp; Task Management</p>
+<p class="screenshot-caption">Dashboard — Bottom Section (Try-It &amp; Conversations)</p>
 <div class="screenshot">
-  <img src="report_assets/screenshot_tryit_tasks.png" alt="Try It and Tasks">
-</div>
-
-<p class="screenshot-caption">Dashboard — Middle Section (Agent Routing Display)</p>
-<div class="screenshot">
-  <img src="report_assets/screenshot_dashboard_mid.png" alt="Dashboard Middle">
-</div>
-
-<p class="screenshot-caption">Dashboard — Bottom Section (Performance Metrics)</p>
-<div class="screenshot">
-  <img src="report_assets/screenshot_dashboard_bottom.png" alt="Dashboard Bottom">
+  <img src="report_assets/screenshot_dashboard_bottom.png" alt="Dashboard Bottom Section">
 </div>
 
 </div>
@@ -2828,5 +2829,13 @@ docker-compose up -d
 
 </div>
 
+<script>
+// Inject border frame into every page
+document.querySelectorAll('.page').forEach(function(page) {
+  var frame = document.createElement('div');
+  frame.className = 'border-frame';
+  page.appendChild(frame);
+});
+</script>
 </body>
 </html>
