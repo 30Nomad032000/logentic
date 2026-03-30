@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Report — Hyper-Localized Multilingual Voice Assistant</title>
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Page geometry (A4) ── */
+  :root {
+    --page-w: 8.27in;
+    --margin-top: 1in;
+    --margin-bottom: 1in;
+    --margin-left: 1.1in;
+    --margin-right: 1.14in;
+    --body-font: "Times New Roman", Times, "DejaVu Serif", Georgia, serif;
+    --code-font: Consolas, "Courier New", monospace;
+    --base-size: 12pt;
+    --line-height: 1.5;
+    --heading1-size: 14pt;
+    --heading2-size: 12pt;
+    --table-header-bg: #d6e4f0;
+    --table-border: #000;
+    --link-color: #000;
+  }
+
+  html { font-size: 100%; }
+
+  body {
+    font-family: var(--body-font);
+    font-size: var(--base-size);
+    line-height: var(--line-height);
+    color: #000;
+    background: #e8e8e8;
+    -webkit-font-smoothing: auto;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ── Page container ── */
+  .page {
+    width: var(--page-w);
+    min-height: 11.69in;
+    margin: 0.5in auto;
+    padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+    background: #fff;
+    box-shadow: 0 2px 16px rgba(0,0,0,.18);
+    position: relative;
+  }
+
+  /* ── Running header / footer ── */
+  .page::before {
+    content: "Hyper-Localized Multilingual Voice Assistant";
+    position: absolute;
+    top: 0.45in;
+    left: var(--margin-left);
+    font-family: var(--body-font);
+    font-size: 9pt;
+    color: #555;
+    font-style: italic;
+  }
+  .page::after {
+    content: "Department of Computer Applications – ASIET";
+    position: absolute;
+    bottom: 0.45in;
+    left: var(--margin-left);
+    font-family: var(--body-font);
+    font-size: 9pt;
+    color: #555;
+  }
+  .page .page-number {
+    position: absolute;
+    bottom: 0.45in;
+    right: var(--margin-right);
+    font-size: 9pt;
+    color: #555;
+  }
+
+  /* ── Headings ── */
+  h1 {
+    font-family: var(--body-font);
+    font-size: var(--heading1-size);
+    font-weight: bold;
+    margin: 0.25in 0 0.18in;
+    line-height: 1.4;
+  }
+  h2 {
+    font-family: var(--body-font);
+    font-size: var(--heading2-size);
+    font-weight: bold;
+    margin: 0.22in 0 0.1in;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+  h3 {
+    font-family: var(--body-font);
+    font-size: var(--heading2-size);
+    font-weight: bold;
+    margin: 0.18in 0 0.08in;
+    line-height: 1.4;
+  }
+  h4 {
+    font-family: Cambria, var(--body-font);
+    font-size: var(--base-size);
+    font-style: italic;
+    color: #365F91;
+    margin: 0.14in 0 0.06in;
+  }
+
+  /* ── Paragraphs ── */
+  p {
+    text-align: justify;
+    margin-bottom: 0.08in;
+    text-indent: 0;
+  }
+  p + p { margin-top: 0.06in; }
+
+  /* ── Lists ── */
+  ul, ol {
+    margin: 0.06in 0 0.1in 0.75in;
+  }
+  li {
+    margin-bottom: 0.04in;
+    text-align: justify;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.14in 0 0.18in;
+    font-size: 11pt;
+  }
+  th, td {
+    border: 1px solid var(--table-border);
+    padding: 4pt 6pt;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--table-header-bg);
+    font-weight: bold;
+  }
+
+  /* ── Code blocks ── */
+  pre {
+    font-family: var(--code-font);
+    font-size: 8.5pt;
+    line-height: 1.35;
+    background: #f5f5f5;
+    border: 1px solid #d0d0d0;
+    padding: 8pt 10pt;
+    margin: 0.1in 0 0.14in;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 4;
+  }
+  code {
+    font-family: var(--code-font);
+    font-size: 9pt;
+    background: #f0f0f0;
+    padding: 1pt 3pt;
+    border-radius: 2pt;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  .code-purpose {
+    font-style: italic;
+    margin: 0.04in 0 0.14in;
+    color: #333;
+  }
+
+  /* ── Figures ── */
+  .figure {
+    text-align: center;
+    margin: 0.15in 0;
+  }
+  .figure img {
+    max-width: 100%;
+    border: 1px solid #ddd;
+  }
+  .figure-caption {
+    text-align: center;
+    font-style: italic;
+    font-size: 10pt;
+    margin: 0.04in 0 0.14in;
+    color: #444;
+  }
+
+  /* ── Screenshots ── */
+  .screenshot {
+    text-align: center;
+    margin: 0.12in 0;
+  }
+  .screenshot img {
+    max-width: 100%;
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .screenshot-caption {
+    text-align: center;
+    font-weight: bold;
+    font-size: 11pt;
+    margin: 0.06in 0;
+  }
+
+  /* ── TOC ── */
+  .toc { list-style: none; padding: 0; margin: 0; }
+  .toc li { margin: 0; padding: 0; display: flex; align-items: baseline; }
+  .toc .toc-chapter {
+    font-weight: bold;
+    font-size: 12pt;
+    padding: 4pt 0 2pt 0;
+  }
+  .toc .toc-section {
+    font-weight: normal;
+    font-size: 12pt;
+    padding: 1pt 0 1pt 0.4in;
+  }
+  .toc .toc-dots {
+    border-bottom: 1px dotted #888;
+    flex: 1;
+    margin: 0 6pt;
+    min-width: 0.5in;
+    position: relative;
+    top: -3pt;
+  }
+  .toc .toc-title { white-space: nowrap; }
+  .toc .toc-page { white-space: nowrap; font-weight: normal; }
+
+  /* ── Misc ── */
+  a { color: var(--link-color); }
+  .text-center { text-align: center; }
+  .mt { margin-top: 0.18in; }
+  .mb { margin-bottom: 0.18in; }
+  .small { font-size: 10pt; }
+  .page-break { page-break-before: always; }
+
+  /* ── Print styles ── */
+  @media print {
+    body { background: #fff; }
+    .page {
+      margin: 0;
+      padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+      box-shadow: none;
+      page-break-after: always;
+    }
+    .page:last-child { page-break-after: auto; }
+    pre { font-size: 7.5pt; }
+  }
+  @page { size: A4; margin: 0; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════
+     TABLE OF CONTENTS  (Pages 1-2)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">1</span>
+
+<h1 style="text-align:center; margin-bottom:0.35in;">TABLE OF CONTENTS</h1>
+
+<ul class="toc">
+  <li class="toc-chapter"><span class="toc-title">SL no</span><span style="flex:1"></span><span>Content</span><span style="flex:1"></span><span class="toc-page">Page no</span></li>
+</ul>
+
+<table style="margin-top:0.15in;">
+  <thead>
+    <tr><th style="width:8%">SL no</th><th>Content</th><th style="width:12%">Page no</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><b>1</b></td><td><b>INTRODUCTION</b></td><td>3-8</td></tr>
+    <tr><td>1.1</td><td>Brief introduction about the project</td><td>3</td></tr>
+    <tr><td>1.2</td><td>Project Background</td><td>4</td></tr>
+    <tr><td>1.3</td><td>Basic Design Principles of the Project</td><td>5-6</td></tr>
+    <tr><td>1.4</td><td>Basic Architecture of the Project</td><td>7-8</td></tr>
+    <tr><td><b>2</b></td><td><b>SYSTEM STUDY AND ANALYSIS</b></td><td>9-14</td></tr>
+    <tr><td>2.1</td><td>Existing System</td><td>9</td></tr>
+    <tr><td>2.2</td><td>Proposed System</td><td>10</td></tr>
+    <tr><td>2.3</td><td>Drawbacks of the Existing System</td><td>11</td></tr>
+    <tr><td>2.4</td><td>Feasibility Study</td><td>11-12</td></tr>
+    <tr><td>2.5</td><td>Project Planning</td><td>12-13</td></tr>
+    <tr><td>2.6</td><td>Requirement Specification</td><td>14</td></tr>
+    <tr><td><b>3</b></td><td><b>SYSTEM WORKFLOW</b></td><td>15-17</td></tr>
+    <tr><td>3.1</td><td>Design Methodology</td><td>15</td></tr>
+    <tr><td>3.2</td><td>Architecture Diagram</td><td>16</td></tr>
+    <tr><td>3.3</td><td>UML Diagrams</td><td>17</td></tr>
+    <tr><td><b>4</b></td><td><b>AGILE TECHNOLOGY OVERVIEW</b></td><td>18-25</td></tr>
+    <tr><td>4.1</td><td>Introduction to Scrum</td><td>18-19</td></tr>
+    <tr><td>4.2</td><td>Principles or methodology used</td><td>19-20</td></tr>
+    <tr><td>4.3</td><td>Product Backlog</td><td>21</td></tr>
+    <tr><td>4.4</td><td>Sprint Planner</td><td>22-24</td></tr>
+    <tr><td>4.5</td><td>Ideal Burndown Chart</td><td>25</td></tr>
+    <tr><td><b>5</b></td><td><b>SYSTEM DESIGN</b></td><td>26-28</td></tr>
+    <tr><td>5.1</td><td>Technology / Framework [Edge AI + Agentic Workflows]</td><td>26-27</td></tr>
+    <tr><td>5.2</td><td>Module Description</td><td>27-28</td></tr>
+    <tr><td><b>6</b></td><td><b>CODING</b></td><td>29-49</td></tr>
+    <tr><td>6.1</td><td>Coding standards used in the project</td><td>29-31</td></tr>
+    <tr><td>6.2</td><td>Project coding</td><td>31-49</td></tr>
+    <tr><td><b>7</b></td><td><b>TESTING</b></td><td>50-51</td></tr>
+    <tr><td>7.1</td><td>Unit Testing</td><td>50-51</td></tr>
+    <tr><td><b>8</b></td><td><b>IMPLEMENTATION</b></td><td>52-55</td></tr>
+    <tr><td>8.1</td><td>Implementation method used in the project</td><td>52-55</td></tr>
+    <tr><td><b>9</b></td><td><b>BUSINESS PERSPECTIVE</b></td><td>56-57</td></tr>
+    <tr><td><b>10</b></td><td><b>FUTURE SCOPE OR ENHANCEMENTS</b></td><td>58-61</td></tr>
+    <tr><td><b>11</b></td><td><b>APPENDIX</b></td><td>62-68</td></tr>
+    <tr><td>11.1</td><td>Git History [sprint wise]</td><td>62-63</td></tr>
+    <tr><td>11.2</td><td>Screenshots of Forms, Reports, Diagrams</td><td>64-67</td></tr>
+    <tr><td>11.3</td><td>Burndown Charts</td><td>68</td></tr>
+    <tr><td><b>12</b></td><td><b>REFERENCES / BIBLIOGRAPHY</b></td><td>69-71</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 1 — INTRODUCTION (Pages 3-8)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">3</span>
+
+<h1>1. INTRODUCTION</h1>
+
+<h2>1.1 Brief Introduction About the Project</h2>
+
+<p>The project titled <b>"Hyper-Localized Multilingual Voice Assistant"</b> is a full-stack AI system designed to enable seamless interaction with digital services using natural voice commands in regional Indian languages. Built on edge computing hardware (Raspberry Pi 5) and powered by agentic AI workflows (LangGraph), it serves as a unified platform for voice-based information retrieval, task management, and conversational interaction in 11 Indian languages.</p>
+
+<p>The application is built using a modular Python backend with FastAPI as the web framework, providing both REST API endpoints and WebSocket support for real-time streaming. The AI pipeline integrates multiple state-of-the-art models: OpenAI Whisper and Meta MMS for automatic speech recognition (ASR), AI4Bharat IndicTrans2 for bidirectional translation between Indian languages and English, Qwen 2.5 Instruct as the local large language model (LLM), and Meta MMS-TTS for text-to-speech synthesis.</p>
+
+<p>For intelligent task routing, the system employs a LangGraph-based agent orchestrator that classifies user intent and routes queries to specialized agents: an Info Agent with web search capabilities, a Task Agent for reminders and to-do management, and a Chat Agent for general conversation.</p>
+
+<p>A React + TypeScript dashboard provides real-time monitoring of conversations, system health, performance metrics, and an interactive "Try It" panel for testing voice interactions directly from the browser.</p>
+
+<p><b>Key Highlights:</b></p>
+<ul>
+  <li>Full-stack AI architecture using FastAPI (backend) + React (frontend) with PyTorch-based ML pipeline</li>
+  <li>Support for 11 Indian languages with Malayalam as the primary target language</li>
+  <li>Edge-first design: quantized models running on Raspberry Pi 5 via llama.cpp</li>
+  <li>LangGraph-based multi-agent system for intelligent query routing</li>
+  <li>Real-time WebSocket streaming for low-latency voice interactions</li>
+  <li>SQLite database for conversation logging, task persistence, and analytics</li>
+  <li>Comprehensive test suite with >80% code coverage</li>
+</ul>
+
+</div>
+
+<!-- Page 4 -->
+<div class="page">
+<span class="page-number">4</span>
+
+<h2>1.2 Project Background</h2>
+
+<p>India's linguistic diversity — with 22 officially recognized languages and over 19,500 dialects — presents a unique challenge for voice technology. According to the 2011 Census, only about 10% of India's population speaks English, yet the majority of voice assistant technology is optimized primarily for English. This creates a massive digital accessibility gap, particularly in rural and semi-urban areas where regional languages dominate daily communication.</p>
+
+<p>The primary motivation behind the development of this Hyper-Localized Multilingual Voice Assistant is to directly address this language barrier by building a voice-first interface that natively supports Indian languages. The project is conceived as a comprehensive AI ecosystem that operates at the edge. By utilizing offline-capable models running on a Raspberry Pi 5, the system ensures accessibility even in areas with poor or no internet connectivity.</p>
+
+<p>The core objective is to transition the user experience from an English-dependent, cloud-only model to a multilingual, edge-first model that respects linguistic diversity. The system transforms voice commands in languages like Malayalam, Hindi, Tamil, and Telugu into actionable responses — performing tasks such as information retrieval, task management, and general conversation.</p>
+
+<p>Furthermore, the project provides developers and researchers with a monitoring dashboard and a modular pipeline architecture. The LangGraph-based agent orchestrator enables intelligent routing of user queries to specialized agents (information, task management, conversation), while the comprehensive testing suite and benchmarking tools ensure reliability and performance optimization.</p>
+
+<p><b>Repository Overview:</b></p>
+<p>The project repository contains:</p>
+<ul>
+  <li><code>src/</code> – All core modules: ASR, TTS, translation, LLM, agents, pipeline, API, and edge client</li>
+  <li><code>frontend/</code> – React 18 + TypeScript dashboard with Radix UI components</li>
+  <li><code>config/</code> – YAML-based configuration files for server and edge profiles</li>
+  <li><code>tests/</code> – Comprehensive pytest test suite covering all modules</li>
+  <li><code>scripts/</code> – Demo, benchmarking, and seeding utilities</li>
+  <li><code>docs/</code> – Scrum documentation, sprint plans, and architecture diagrams</li>
+</ul>
+
+<p><b>Purpose and Impact:</b></p>
+<p>By building on modern ML technologies like Whisper, IndicTrans2, Qwen 2.5, and LangGraph, this voice assistant demonstrates that high-quality, multilingual voice interaction can be achieved entirely on edge hardware. The system serves as both a production-ready prototype and a research platform for edge AI deployment in linguistically diverse regions.</p>
+
+</div>
+
+<!-- Page 5-6 -->
+<div class="page">
+<span class="page-number">5</span>
+
+<h2>1.3 Basic Design Principles of the Project</h2>
+
+<p>The design of this Hyper-Localized Multilingual Voice Assistant follows a set of foundational principles that ensure the system is maintainable, scalable, and optimized for edge deployment:</p>
+
+<p><b>1. Modularity and Separation of Concerns</b></p>
+<p>Each component of the voice pipeline (ASR, Translation, NLU, LLM, TTS) is implemented as an independent module with well-defined interfaces. This allows any component to be swapped, upgraded, or configured independently without affecting the rest of the pipeline. For example, the ASR engine can be switched between Whisper, MMS, and Pingala via a single configuration change.</p>
+
+<p><b>2. Edge-First Architecture</b></p>
+<p>The system is designed from the ground up to run on resource-constrained hardware (Raspberry Pi 5 with 4-8GB RAM). All model selections, quantization strategies, and caching mechanisms are optimized for edge deployment. The llama.cpp backend enables running quantized LLM models (Q4_K_M, Q8_0) with minimal memory footprint.</p>
+
+<p><b>3. Type Safety and Configuration-Driven Design</b></p>
+<p>The entire system is configured through YAML files (<code>config/settings.yaml</code>) with typed dataclass loaders, ensuring type safety at the configuration boundary. Python type hints and Pydantic models are used throughout for API validation and data contracts.</p>
+
+<p><b>4. Secure by Default</b></p>
+<p>Audio data is processed locally on the edge device; no user data leaves the local network unless explicitly configured. CORS policies, input validation, and file upload restrictions are enforced at the API layer. Environment variables manage sensitive configuration such as API keys.</p>
+
+<p><b>5. Performance and Latency Optimization</b></p>
+<p>Multiple strategies are employed to minimize end-to-end latency: model quantization (INT8, Q4_K_M), LRU response caching with TTL, lazy model loading, GPU acceleration (CUDA) where available, and the Pipecat streaming framework for real-time audio processing.</p>
+
+<p><b>6. Reliability and Graceful Degradation</b></p>
+<p>Each component implements fallback mechanisms. If the primary ASR (MMS) fails, Whisper is used as a fallback. If the LLM is unavailable, pre-generated contextual responses are returned. The agent orchestrator falls back to simple sequential processing if LangGraph encounters errors.</p>
+
+<p><b>7. Observability and Monitoring</b></p>
+<p>Every pipeline execution is logged with detailed timing metrics (ASR time, translation time, LLM time, TTS time, total time). The React dashboard provides real-time visibility into system health, conversation logs, and performance breakdowns.</p>
+
+</div>
+
+<!-- Page 6-7 -->
+<div class="page">
+<span class="page-number">6</span>
+
+<p><b>8. Accessibility and Multilingual Support</b></p>
+<p>The system supports 11 Indian languages with full bidirectional translation. The TTS engine produces natural-sounding speech in each supported language. Language detection is automatic, and the system adapts its response language to match the user's input language.</p>
+
+<p><b>9. Agile and Iterative Development</b></p>
+<p>The project follows Scrum methodology with six defined sprints, each delivering a working increment of the system. Sprint retrospectives and burndown charts track progress and inform prioritization decisions.</p>
+
+<p><b>10. Testing and Quality Assurance</b></p>
+<p>A comprehensive test suite using pytest covers unit tests, integration tests, and API endpoint tests. Code quality is enforced through Black (formatting), Ruff (linting), and type checking. Test coverage targets >80% across all modules.</p>
+
+<h2>1.4 Basic Architecture of the Project</h2>
+
+<p>The system follows a three-tier architecture that cleanly separates the edge device, processing server, and presentation layers:</p>
+
+<p><b>1. Edge Tier (Raspberry Pi 5)</b></p>
+<ul>
+  <li>Audio input/output via USB microphone and speaker</li>
+  <li>Wake word detection for hands-free activation</li>
+  <li>Edge client with async HTTP/WebSocket communication</li>
+  <li>Local model inference via llama.cpp for offline operation</li>
+  <li>XiaoZhi protocol support for device communication</li>
+</ul>
+
+<p><b>2. Processing Tier (FastAPI Server)</b></p>
+<ul>
+  <li>REST API endpoints: <code>/api/transcribe</code>, <code>/api/process</code>, <code>/api/text</code>, <code>/api/tts</code></li>
+  <li>WebSocket endpoints: <code>/ws</code>, <code>/ws/stream</code> for real-time audio streaming</li>
+  <li>AI Pipeline: ASR (Whisper/MMS) → Translation (IndicTrans2) → Intent Detection → Agent Orchestrator (LangGraph) → LLM (Qwen 2.5) → Translation → TTS (MMS-TTS)</li>
+  <li>SQLite database with WAL mode for concurrent access</li>
+  <li>LRU response cache with TTL for frequently used translations and TTS outputs</li>
+</ul>
+
+<p><b>3. Presentation Tier (React Dashboard)</b></p>
+<ul>
+  <li>React 18 + TypeScript with Vite build system</li>
+  <li>Radix UI primitives + Tailwind CSS for accessible, responsive design</li>
+  <li>Real-time conversation viewer with WebSocket streaming</li>
+  <li>System health monitoring: component status, latency metrics, language distribution</li>
+  <li>Interactive "Try It" panel for testing voice interactions from the browser</li>
+  <li>Task management interface for viewing and managing user tasks</li>
+</ul>
+
+</div>
+
+<!-- Page 7-8: Architecture continued -->
+<div class="page">
+<span class="page-number">7</span>
+
+<p><b>4. API Layer (FastAPI Route Handlers)</b></p>
+<ul>
+  <li>REST-like endpoints implemented in <code>src/api/main.py</code> with Pydantic request/response models</li>
+  <li>File upload handling via <code>python-multipart</code> for audio file processing</li>
+  <li>CORS middleware for cross-origin dashboard access</li>
+  <li>Static file serving for the built React SPA</li>
+</ul>
+
+<p><b>5. Database Layer</b></p>
+<ul>
+  <li>SQLite with WAL mode for concurrent read/write access</li>
+  <li>Tables: <code>conversations</code>, <code>messages</code>, <code>tasks</code>, <code>system_metrics</code></li>
+  <li>Dataclass-based models in <code>src/db/models.py</code></li>
+  <li>Automatic migration and schema creation on startup</li>
+</ul>
+
+<p><b>6. Agent System (LangGraph)</b></p>
+<ul>
+  <li>StateGraph-based workflow with conditional routing</li>
+  <li>Intent classification node: categorizes queries as info, task, chat, or smart_home</li>
+  <li>Specialized agent nodes: Info Agent (web search + LLM), Task Agent (database persistence), Chat Agent (conversational LLM)</li>
+  <li>Response generation node: formats agent output for TTS synthesis</li>
+  <li>Fallback responses when LLM is unavailable</li>
+</ul>
+
+<p><b>7. Configuration System</b></p>
+<ul>
+  <li>YAML-based configuration: <code>config/settings.yaml</code> (server), <code>config/edge_profile.yaml</code> (RPi)</li>
+  <li>Typed dataclass loader in <code>src/config.py</code> with environment variable overrides</li>
+  <li>Component-specific sections: ASR engine/model, TTS backend/language, LLM model size/backend, Translation model variant</li>
+</ul>
+
+<p><b>8. Deployment</b></p>
+<ul>
+  <li>Docker Compose for containerized deployment with resource constraints (2 CPU, 4GB RAM)</li>
+  <li>Health check on <code>/health</code> endpoint with auto-restart policy</li>
+  <li>Persistent volume mounts for models, data, and configuration</li>
+</ul>
+
+<p><b>9. Typical Request Lifecycle</b></p>
+<ol>
+  <li>User speaks a command in Malayalam (or other supported language)</li>
+  <li>Audio is captured by the edge device and sent to the server via WebSocket</li>
+  <li>ASR transcribes the audio to text in the source language</li>
+  <li>Translation converts the text to English for LLM processing</li>
+  <li>Agent orchestrator classifies intent and routes to the appropriate agent</li>
+  <li>LLM generates a response in English</li>
+  <li>Translation converts the response back to the source language</li>
+  <li>TTS synthesizes the response as audio</li>
+  <li>Audio response is streamed back to the edge device and played</li>
+</ol>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 2 — SYSTEM STUDY AND ANALYSIS (Pages 9-14)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">9</span>
+
+<h1>2. SYSTEM STUDY AND ANALYSIS</h1>
+
+<h2>2.1 Existing System</h2>
+
+<p>The existing landscape of voice assistants — dominated by Amazon Alexa, Google Assistant, Apple Siri, and Microsoft Cortana — relies almost entirely on cloud-based processing with limited support for Indian languages. These systems were primarily designed for English-speaking markets and have been incrementally extended to support a few Indian languages with varying degrees of accuracy.</p>
+
+<p>In the current setup, voice commands are captured by smart speakers or phones and transmitted to centralized cloud servers for processing. The audio is transcribed using proprietary ASR models, processed by NLU/NLP engines, and responses are generated and synthesized on cloud infrastructure before being sent back to the device. This architecture requires constant, high-bandwidth internet connectivity.</p>
+
+<p>For Indian language speakers, the experience is significantly degraded. ASR accuracy for languages like Malayalam, Tamil, and Telugu drops substantially compared to English. Translation quality is inconsistent, and the systems often fail to understand regional accents, colloquialisms, and code-switching patterns common in Indian conversations. Furthermore, there are no open-source, edge-deployable alternatives that provide a complete voice assistant pipeline for Indian languages.</p>
+
+<p>Voice-related data — including audio recordings, transcriptions, and conversation logs — is stored on remote cloud servers without user control, raising significant privacy and data sovereignty concerns.</p>
+
+<h2>2.2 Proposed System</h2>
+
+<p>The proposed Hyper-Localized Multilingual Voice Assistant addresses every limitation of the existing systems through a comprehensive, open-source architecture designed specifically for Indian languages and edge deployment:</p>
+
+<ul>
+  <li><b>Full Support for 11 Indian Languages:</b> Malayalam (primary), Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Punjabi, Urdu, and English — using state-of-the-art open-source models (IndicTrans2 for translation, MMS-TTS for synthesis, Whisper/MMS for recognition).</li>
+  <li><b>Edge-First Design:</b> Core AI models are quantized and optimized (Qwen 2.5 via llama.cpp with Q4_K_M quantization, IndicTrans2 distilled 200M variant) to run on a Raspberry Pi 5 with 4-8GB RAM, enabling offline or low-connectivity operation.</li>
+  <li><b>Agentic AI Workflows:</b> LangGraph-based orchestrator with specialized agents (Info Agent with web search, Task Agent with database persistence, Chat Agent) that intelligently route and handle diverse user requests.</li>
+  <li><b>Privacy by Design:</b> All audio processing happens locally on the edge device; no data leaves the local network unless explicitly configured for cloud APIs.</li>
+  <li><b>Real-time Monitoring:</b> React + TypeScript dashboard with WebSocket streaming provides real-time visibility into system health, conversation logs, latency breakdowns, and language statistics.</li>
+  <li><b>Open Source and Extensible:</b> The entire system is built on open-source technologies, with a modular architecture that allows easy addition of new languages, agents, and pipeline components.</li>
+</ul>
+
+</div>
+
+<!-- Page 10-11 -->
+<div class="page">
+<span class="page-number">10</span>
+
+<p>The main features include real-time voice-to-voice interaction in regional languages, intelligent query routing through agentic workflows, task and reminder management, web search capabilities, comprehensive performance monitoring, and a responsive dashboard for system management. The platform is fully self-contained, allowing deployment in environments without internet connectivity.</p>
+
+<p>This proposed system overcomes the limitations of the cloud-dependent approach by bringing AI inference to the edge, supporting a wide range of Indian languages, and providing transparent, monitorable operation through the dashboard interface.</p>
+
+<h2>2.3 Drawbacks of the Existing System</h2>
+
+<ol>
+  <li>The system lacks support for most Indian languages, resulting in a digital accessibility gap for hundreds of millions of users.</li>
+  <li>All processing is cloud-dependent, making the system unusable in areas with poor or no internet connectivity (approximately 69% of rural India).</li>
+  <li>Audio data is transmitted to and stored on remote cloud servers, raising significant privacy and data sovereignty concerns.</li>
+  <li>Round-trip latency to cloud servers introduces 500ms–2000ms of additional delay, degrading the conversational experience.</li>
+  <li>The systems use simple intent-response mapping without sophisticated multi-agent reasoning capabilities, limiting the complexity of tasks they can handle.</li>
+  <li>No transparency or monitoring — users and administrators have no visibility into how the system processes queries, what models are being used, or what the performance characteristics are.</li>
+  <li>Proprietary and closed-source — the underlying models and pipeline cannot be customized, fine-tuned, or deployed on custom hardware.</li>
+  <li>High operational costs — cloud processing incurs ongoing compute costs that scale with usage.</li>
+</ol>
+
+<h2>2.4 Feasibility Study</h2>
+
+<p><b>Technical Feasibility</b></p>
+<p>The project leverages mature, proven open-source technologies: PyTorch and Transformers for model inference, FastAPI for the web server, React for the dashboard, and LangGraph for agent orchestration. All selected models (Whisper, IndicTrans2, Qwen 2.5, MMS-TTS) have been validated for Indian language support and can run on consumer hardware with appropriate quantization.</p>
+
+</div>
+
+<!-- Page 11-12 -->
+<div class="page">
+<span class="page-number">11</span>
+
+<p><b>Economic Feasibility</b></p>
+<p>The project utilizes entirely open-source frameworks, models, and free development tools. The hardware cost is limited to a Raspberry Pi 5 ($60-80) with USB microphone and speaker ($20-30). There are no recurring cloud compute costs since all inference runs locally. The total hardware cost of approximately $100 is significantly lower than any commercial voice assistant deployment.</p>
+
+<p><b>Operational Feasibility</b></p>
+<p>The system is designed for minimal operational overhead. Configuration is centralized in YAML files, the dashboard provides real-time monitoring, and Docker Compose enables one-command deployment. The system auto-recovers from component failures through graceful degradation and fallback mechanisms.</p>
+
+<p><b>Schedule Feasibility</b></p>
+<p>The development timeline of 12 weeks (6 sprints) is realistic given the use of pre-trained models that require only integration (not training from scratch) and modern frameworks that simplify API development and deployment.</p>
+
+<p><b>Legal and Environmental Feasibility</b></p>
+<p>All models used are open-source with permissive licenses (Apache 2.0, MIT). Audio data is processed locally, ensuring compliance with data protection regulations. The edge deployment approach has minimal environmental impact compared to cloud-based alternatives.</p>
+
+<h2>2.5 Project Planning</h2>
+
+<p>The development of the Hyper-Localized Multilingual Voice Assistant is organized into six sequential sprints, covering research, development, integration, deployment, and testing:</p>
+
+<p><b>Phase 1: Research and Foundation (Sprint 1 — Weeks 1-2)</b></p>
+<ul>
+  <li>Technology stack research: compare ASR options (Whisper vs MMS vs IndicASR), TTS options (MMS vs Cartesia vs Indic Parler), LLM options (Qwen vs Llama vs Cloud)</li>
+  <li>Architecture design: three-tier system with edge, processing, and presentation layers</li>
+  <li>Development environment setup: Python venv, CUDA/GPU configuration, project structure</li>
+  <li>Proof-of-concept implementations: Whisper ASR, MMS-TTS</li>
+</ul>
+
+<p><b>Phase 2: Core Component Integration (Sprint 2 — Weeks 3-4)</b></p>
+<ul>
+  <li>IndicTrans2 translation integration (ML↔EN bidirectional)</li>
+  <li>Qwen 2.5 LLM integration with conversation memory</li>
+  <li>System prompt optimization for voice assistant behavior</li>
+</ul>
+
+<p><b>Phase 3: Pipeline and API (Sprint 3 — Weeks 5-6)</b></p>
+<ul>
+  <li>End-to-end pipeline orchestrator connecting all components</li>
+  <li>FastAPI REST API endpoints and WebSocket streaming</li>
+  <li>Error handling middleware and graceful degradation</li>
+</ul>
+
+</div>
+
+<!-- Page 13 -->
+<div class="page">
+<span class="page-number">12</span>
+
+<p><b>Phase 4: Agent Framework (Sprint 4 — Weeks 7-8)</b></p>
+<ul>
+  <li>LangGraph setup with StateGraph workflow</li>
+  <li>Intent classification and agent routing logic</li>
+  <li>Info Agent (web search + LLM), Task Agent (database persistence), Chat Agent</li>
+  <li>Agent integration with the voice pipeline</li>
+</ul>
+
+<p><b>Phase 5: Edge Deployment (Sprint 5 — Weeks 9-10)</b></p>
+<ul>
+  <li>Raspberry Pi 5 setup and model quantization (INT8, Q4_K_M)</li>
+  <li>ONNX conversion and llama.cpp backend integration</li>
+  <li>Audio I/O configuration on edge hardware</li>
+  <li>Response caching with LRU + TTL strategies</li>
+  <li>Docker Compose for containerized deployment</li>
+</ul>
+
+<p><b>Phase 6: Testing, Documentation, and Release (Sprint 6 — Weeks 11-12)</b></p>
+<ul>
+  <li>Comprehensive unit and integration test suite</li>
+  <li>Performance benchmarking and latency profiling</li>
+  <li>User documentation, API documentation, and demo preparation</li>
+  <li>Final bug fixes and production hardening</li>
+</ul>
+
+<table>
+  <thead>
+    <tr><th>Category</th><th>Specification</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Processor</td><td>Intel Core i5 / AMD Ryzen 5 or higher (GPU: NVIDIA with CUDA recommended)</td></tr>
+    <tr><td>RAM</td><td>16 GB or higher (8 GB minimum for CPU-only inference)</td></tr>
+    <tr><td>Storage</td><td>20-40 GB free SSD space (models, venv, data)</td></tr>
+    <tr><td>Operating System</td><td>Ubuntu 20.04+, Windows 10/11, or Raspberry Pi OS</td></tr>
+    <tr><td>Network</td><td>Optional — system designed for offline operation</td></tr>
+    <tr><td>Programming Language</td><td>Python 3.10+ (primary), TypeScript (frontend)</td></tr>
+    <tr><td>Framework</td><td>FastAPI (backend), React 18 (frontend), PyTorch (ML)</td></tr>
+    <tr><td>Edge Hardware</td><td>Raspberry Pi 5 (BCM2712 Cortex-A76, 4-8GB RAM)</td></tr>
+    <tr><td>Text Editor/IDE</td><td>Visual Studio Code, Cursor</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- Page 14 -->
+<div class="page">
+<span class="page-number">13</span>
+
+<h2>2.6 Requirement Specification</h2>
+
+<p><b>Hardware Requirements</b></p>
+<table>
+  <thead>
+    <tr><th>Requirement</th><th>Details</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Development Machine</td><td>Intel i5+/AMD Ryzen 5+ with 16GB RAM and NVIDIA GPU (CUDA)</td></tr>
+    <tr><td>Edge Device</td><td>Raspberry Pi 5 (4GB/8GB RAM variant)</td></tr>
+    <tr><td>Audio Input</td><td>USB microphone (16kHz sampling rate recommended)</td></tr>
+    <tr><td>Audio Output</td><td>3.5mm speaker or USB audio output</td></tr>
+    <tr><td>Storage</td><td>32GB+ microSD card (Class 10) for Raspberry Pi</td></tr>
+    <tr><td>Network</td><td>Optional WiFi/Ethernet — system works offline</td></tr>
+  </tbody>
+</table>
+
+<p><b>Software Requirements</b></p>
+<table>
+  <thead>
+    <tr><th>Requirement</th><th>Details</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Python Runtime</td><td>Python 3.10+ with pip package manager</td></tr>
+    <tr><td>ML Framework</td><td>PyTorch >= 2.1.0, Transformers >= 4.36.0</td></tr>
+    <tr><td>Web Framework</td><td>FastAPI >= 0.108.0, Uvicorn >= 0.25.0</td></tr>
+    <tr><td>Agent Framework</td><td>LangChain >= 0.1.0, LangGraph >= 0.0.20</td></tr>
+    <tr><td>Frontend</td><td>Node.js 18+, React 18, TypeScript 5.x, Vite</td></tr>
+    <tr><td>Database</td><td>SQLite 3 (built-in, WAL mode)</td></tr>
+    <tr><td>Containerization</td><td>Docker, Docker Compose (optional)</td></tr>
+    <tr><td>Code Quality</td><td>Black (formatter), Ruff (linter), pytest (testing)</td></tr>
+  </tbody>
+</table>
+
+<p><b>Network Connectivity</b></p>
+<table>
+  <thead>
+    <tr><th>Requirement</th><th>Details</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Internet</td><td>Optional — required only for web search (Info Agent) and initial model downloads</td></tr>
+    <tr><td>Local Network</td><td>WiFi/Ethernet for edge device ↔ server communication</td></tr>
+    <tr><td>Edge Deployment</td><td>Self-contained operation without external connectivity</td></tr>
+    <tr><td>API Access</td><td>Optional Cartesia API key for online TTS, optional Anthropic/OpenAI keys for cloud LLM</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 3 — SYSTEM WORKFLOW (Pages 15-17)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">15</span>
+
+<h1>3. SYSTEM WORKFLOW AND ARCHITECTURE</h1>
+
+<h2>3.1 Design Methodology</h2>
+
+<p>The Hyper-Localized Multilingual Voice Assistant follows a modular pipeline architecture where each stage of voice processing is handled by a specialized component. The system is built using Python (FastAPI) as the processing server and React as the dashboard interface.</p>
+
+<p><b>Workflow Description</b></p>
+
+<p><b>1. Audio Capture</b></p>
+<ul>
+  <li>The edge device (Raspberry Pi 5) captures audio input through a USB microphone.</li>
+  <li>Voice Activity Detection (VAD) identifies speech segments and filters background noise.</li>
+  <li>The noisereduce library applies spectral noise reduction to improve ASR accuracy.</li>
+</ul>
+
+<p><b>2. Speech Recognition (ASR)</b></p>
+<ul>
+  <li>Audio is sent to the server via WebSocket for real-time processing or via REST API as a file upload.</li>
+  <li>The ASR engine (configurable: MMS 1B, Whisper, or Pingala) transcribes the audio to text in the source language.</li>
+  <li>Language is detected automatically from the audio or specified by the user.</li>
+</ul>
+
+<p><b>3. Translation and Processing</b></p>
+<ul>
+  <li>If the source language is not English, IndicTrans2 translates the transcription to English.</li>
+  <li>The translated text is passed to the agent orchestrator for intent classification.</li>
+  <li>The LangGraph workflow routes the query to the appropriate agent (Info, Task, or Chat).</li>
+  <li>The agent generates a response using the Qwen 2.5 LLM.</li>
+</ul>
+
+<p><b>4. Response Generation</b></p>
+<ul>
+  <li>The English response is translated back to the user's source language via IndicTrans2.</li>
+  <li>MMS-TTS synthesizes the translated response as audio.</li>
+  <li>The audio response is streamed back to the edge device and played through the speaker.</li>
+</ul>
+
+<p><b>5. Logging and Monitoring</b></p>
+<ul>
+  <li>Every pipeline execution is logged to SQLite with detailed timing metrics.</li>
+  <li>The dashboard displays real-time conversation logs, performance graphs, and system health status.</li>
+</ul>
+
+</div>
+
+<!-- Page 16 -->
+<div class="page">
+<span class="page-number">16</span>
+
+<h2>3.2 Architecture Diagram</h2>
+
+<div class="figure">
+  <img src="report_assets/architecture.png" alt="System Architecture Diagram">
+  <p class="figure-caption">Fig 3.1 — Three-Tier System Architecture</p>
+</div>
+
+<div class="figure">
+  <img src="report_assets/pipeline_flow.png" alt="Pipeline Flow Diagram">
+  <p class="figure-caption">Fig 3.2 — End-to-End Voice Processing Pipeline</p>
+</div>
+
+</div>
+
+<!-- Page 17 -->
+<div class="page">
+<span class="page-number">17</span>
+
+<h2>3.3 UML Diagrams</h2>
+
+<div class="figure">
+  <img src="report_assets/uml_class.png" alt="UML Class Diagram">
+  <p class="figure-caption">Fig 3.3 — UML Class Diagram</p>
+</div>
+
+<div class="figure">
+  <img src="report_assets/usecase.png" alt="Use Case Diagram">
+  <p class="figure-caption">Fig 3.4 — Use Case Diagram</p>
+</div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 4 — AGILE TECHNOLOGY OVERVIEW (Pages 18-25)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">18</span>
+
+<h1>4. AGILE TECHNOLOGY OVERVIEW</h1>
+
+<h2>4.1 Introduction to Scrum</h2>
+
+<p>Agile technology refers to a set of principles and practices for software development that prioritize flexibility, collaboration, and rapid delivery. It emphasizes iterative development, continuous user feedback, and adaptability to changing requirements, rather than following a strict, linear process like traditional waterfall methodologies. Agile encourages a collaborative, cross-functional team approach, where each member contributes to both the development and ongoing improvement of the system throughout its lifecycle.</p>
+
+<p>The Agile methodology is built around several key principles:</p>
+
+<ul>
+  <li><b>Customer Collaboration Over Contract Negotiation:</b> Agile emphasizes working closely with stakeholders, ensuring that the voice assistant meets the evolving needs of end users, rather than sticking to rigid initial requirements.</li>
+  <li><b>Responding to Change Over Following a Plan:</b> Agile is flexible and adaptable, allowing the development team to incorporate feedback, add features such as web search integration, and adjust model selections based on performance benchmarking results.</li>
+  <li><b>Working Software Over Comprehensive Documentation:</b> Each sprint delivers a working, testable increment of the voice assistant — from initial ASR proof-of-concept to the fully integrated pipeline with agent orchestration.</li>
+  <li><b>Individuals and Interactions Over Processes and Tools:</b> The development process is driven by continuous evaluation of model quality, latency metrics, and user experience rather than rigid adherence to predetermined tools or processes.</li>
+</ul>
+
+<p>The Scrum framework is based on fixed-length iterations called Sprints, which last 2 weeks each (6 sprints total, 12 weeks). Each Sprint results in a potentially shippable product increment.</p>
+
+<p><b>Roles in Scrum:</b></p>
+<ol>
+  <li><b>Product Owner:</b> Represents the end users and stakeholders, ensuring that the team is working on the most valuable features — prioritizing language support, latency targets, and agent capabilities.</li>
+  <li><b>Scrum Master:</b> Facilitates the Scrum process, removes impediments (model download issues, GPU compatibility, dependency conflicts), and ensures adherence to Scrum principles.</li>
+  <li><b>Development Team:</b> A cross-functional group working on ML engineering, backend development, frontend development, and DevOps tasks to complete sprint backlog items.</li>
+</ol>
+
+</div>
+
+<!-- Page 19-20 -->
+<div class="page">
+<span class="page-number">19</span>
+
+<p><b>Key Artifacts in Scrum:</b></p>
+<ol>
+  <li><b>Product Backlog:</b> A prioritized list of 30 user stories organized into 8 epics covering Speech Recognition, Translation, Conversational AI, Speech Synthesis, Pipeline Integration, Agent Framework, Edge Deployment, and DevOps/Testing.</li>
+  <li><b>Sprint Backlog:</b> Tasks selected from the Product Backlog for each sprint, with estimated story points and acceptance criteria.</li>
+  <li><b>Increment:</b> The working product produced at the end of each Sprint — from PoC components in Sprint 1 to the full production-ready system in Sprint 6.</li>
+</ol>
+
+<p><b>Scrum Ceremonies:</b></p>
+<ol>
+  <li><b>Sprint Planning:</b> At the start of each sprint, the team selects items from the Product Backlog and defines the Sprint Goal. For example, Sprint 3's goal was "Create a working end-to-end voice assistant with API endpoints."</li>
+  <li><b>Daily Standup:</b> Brief daily check-ins to discuss progress, blockers, and plans.</li>
+  <li><b>Sprint Review:</b> At the end of each sprint, the working increment is demonstrated. Model accuracy, latency metrics, and agent routing quality are evaluated.</li>
+  <li><b>Sprint Retrospective:</b> The team reflects on what went well, what could be improved, and what adjustments to make for the next sprint.</li>
+</ol>
+
+<h2>4.2 Principles or Methodology Used</h2>
+
+<p>Scrum follows a set of core principles that align with Agile's values but are more specific to the Scrum framework itself:</p>
+
+<ol>
+  <li><b>Commitment:</b> Team members commit to the goals of the Sprint and the Sprint Backlog items. The focus is on achieving the highest-priority tasks first — ensuring that critical path items (ASR, Translation, LLM) are completed before optional features.</li>
+  <li><b>Focus:</b> Scrum teams focus on achieving a small number of tasks per Sprint, with a clear and achievable goal in mind. Each sprint has a well-defined theme (Research, Core Components, Pipeline, Agents, Edge, Testing).</li>
+  <li><b>Openness:</b> Scrum promotes transparency. Burndown charts, sprint boards, and detailed commit histories make all progress visible to the team and stakeholders.</li>
+  <li><b>Respect:</b> Scrum encourages respect within the team and with stakeholders, valuing the contributions of all members — from ML engineering to frontend development.</li>
+  <li><b>Courage:</b> Team members should feel empowered to speak up about potential issues and challenges. For example, early identification that cloud-only models would not meet latency targets led to the pivot toward edge-first architecture.</li>
+  <li><b>Continuous Improvement:</b> Scrum encourages iterative improvements, with each Sprint providing an opportunity to improve both the product and the development processes. Model selections, quantization strategies, and caching mechanisms were refined across sprints based on performance data.</li>
+</ol>
+
+<p><b>Methodology applied in this project:</b></p>
+<ul>
+  <li>MoSCoW prioritization: 59 story points as Must Have (Critical), 40 as Should Have (High), 15 as Could Have (Medium)</li>
+  <li>Velocity tracking: target 18-21 story points per sprint</li>
+  <li>Definition of Done: code written, tests passing (>80% coverage), code reviewed, documentation updated, feature working in development environment</li>
+</ul>
+
+</div>
+
+<!-- Page 21 -->
+<div class="page">
+<span class="page-number">20</span>
+
+<h2>4.3 Product Backlog</h2>
+
+<table>
+  <thead>
+    <tr><th>Sl.No</th><th>User Story</th><th>Est. Hours</th><th>Priority</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>As a user, I want my Malayalam speech transcribed to text so that the system understands me (ASR integration with >85% accuracy)</td><td>15</td><td>Critical</td></tr>
+    <tr><td>2</td><td>As a user, I want my Malayalam speech translated to English so that the LLM can process it (IndicTrans2 ML→EN with >90% accuracy)</td><td>15</td><td>Critical</td></tr>
+    <tr><td>3</td><td>As a user, I want the assistant to understand and respond to my queries intelligently (Qwen 2.5 LLM with <500ms generation)</td><td>18</td><td>Critical</td></tr>
+    <tr><td>4</td><td>As a user, I want to hear responses in natural Malayalam speech (MMS-TTS with clear pronunciation and <400ms latency)</td><td>12</td><td>Critical</td></tr>
+    <tr><td>5</td><td>As a user, I want to speak and get spoken responses end-to-end with <3 second total latency</td><td>21</td><td>High</td></tr>
+    <tr><td>6</td><td>As a user, I want the assistant to perform tasks using intelligent agents (LangGraph with 3+ agent types)</td><td>18</td><td>High</td></tr>
+    <tr><td>7</td><td>As a user, I want the assistant to run on Raspberry Pi 5 for offline operation</td><td>18</td><td>High</td></tr>
+    <tr><td>8</td><td>As a developer, I want comprehensive tests, benchmarks, and documentation</td><td>17</td><td>Medium</td></tr>
+  </tbody>
+</table>
+
+<h2>4.4 Sprint Planner</h2>
+
+<h3>Sprint Backlog - 1 (Research &amp; Foundation)</h3>
+<table>
+  <thead>
+    <tr><th>Backlog Item</th><th>Sprint ID</th><th>Sprint Task</th><th>Sprint Goal</th><th>Est. Hours</th><th>Acceptance Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Research &amp; Setup</td><td>1.1</td><td>Research ASR, TTS, LLM options; compare Whisper vs MMS vs IndicASR</td><td>Select optimal technology stack for Indian language support</td><td>8</td><td>Comparison document created; decisions documented with benchmarks</td></tr>
+    <tr><td></td><td>1.2</td><td>Design system architecture; define component interfaces and data flow</td><td>Establish foundation for modular development</td><td>5</td><td>Architecture diagram complete; API contracts defined</td></tr>
+    <tr><td>ASR PoC</td><td>1.3</td><td>Implement Whisper ASR wrapper; test with Malayalam audio samples</td><td>Validate ASR accuracy for primary language</td><td>5</td><td>Whisper integrated; >85% accuracy on test set</td></tr>
+    <tr><td>TTS PoC</td><td>1.4</td><td>Implement MMS-TTS wrapper; compare with Cartesia TTS quality</td><td>Select best TTS for Malayalam</td><td>3</td><td>Both TTS compared; quality assessment documented</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- Page 22-23 -->
+<div class="page">
+<span class="page-number">21</span>
+
+<h3>Sprint Backlog - 2 (Translation &amp; LLM)</h3>
+<table>
+  <thead>
+    <tr><th>Backlog Item</th><th>Sprint ID</th><th>Sprint Task</th><th>Sprint Goal</th><th>Est. Hours</th><th>Acceptance Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Translation</td><td>2.1</td><td>Setup IndicTrans2 ML→EN and EN→ML models; create translation wrapper API</td><td>Enable bidirectional Malayalam↔English translation</td><td>8</td><td>Both directions working; >90% accuracy; <200ms latency</td></tr>
+    <tr><td>LLM</td><td>2.2</td><td>Download Qwen 2.5 1.5B; implement chat wrapper with conversation memory</td><td>Enable intelligent conversational responses</td><td>8</td><td>LLM integrated; coherent responses; <500ms generation</td></tr>
+    <tr><td>Quality</td><td>2.3</td><td>Create voice assistant system prompts; test response quality</td><td>Optimize responses for voice interaction</td><td>5</td><td>Prompts tested; natural language output validated</td></tr>
+  </tbody>
+</table>
+
+<h3>Sprint Backlog - 3 (Full Pipeline &amp; API)</h3>
+<table>
+  <thead>
+    <tr><th>Backlog Item</th><th>Sprint ID</th><th>Sprint Task</th><th>Sprint Goal</th><th>Est. Hours</th><th>Acceptance Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Pipeline</td><td>3.1</td><td>Create pipeline orchestrator; integrate all components end-to-end</td><td>Working voice-to-voice pipeline</td><td>8</td><td>Audio in → audio out working; <3s latency</td></tr>
+    <tr><td>API</td><td>3.2</td><td>Create FastAPI endpoints: /transcribe, /process, /text, /tts</td><td>REST API for all operations</td><td>6</td><td>All endpoints functional; JSON responses correct</td></tr>
+    <tr><td>WebSocket</td><td>3.3</td><td>Implement WebSocket endpoint for real-time streaming</td><td>Low-latency streaming support</td><td>5</td><td>Bidirectional audio streaming working</td></tr>
+    <tr><td>Error Handling</td><td>3.4</td><td>Add error handling middleware and graceful degradation</td><td>Robust system operation</td><td>2</td><td>Errors caught; graceful recovery; user feedback</td></tr>
+  </tbody>
+</table>
+
+<h3>Sprint Backlog - 4 (Agent Framework)</h3>
+<table>
+  <thead>
+    <tr><th>Backlog Item</th><th>Sprint ID</th><th>Sprint Task</th><th>Sprint Goal</th><th>Est. Hours</th><th>Acceptance Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>LangGraph</td><td>4.1</td><td>Setup LangGraph framework; create agent state schema and router</td><td>Intelligent query routing</td><td>6</td><td>StateGraph working; intent classification accurate</td></tr>
+    <tr><td>Info Agent</td><td>4.2</td><td>Create Info Agent with DuckDuckGo web search and LLM synthesis</td><td>Answer information queries</td><td>5</td><td>Web search working; responses include sources</td></tr>
+    <tr><td>Task Agent</td><td>4.3</td><td>Create Task Agent with SQLite persistence for reminders</td><td>Task and reminder management</td><td>4</td><td>Tasks stored; reminders working; CRUD operations</td></tr>
+    <tr><td>Integration</td><td>4.4</td><td>Integrate agents with voice pipeline; test routing</td><td>End-to-end agentic workflows</td><td>3</td><td>Correct agent selected for each query type</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- Page 24 -->
+<div class="page">
+<span class="page-number">22</span>
+
+<h3>Sprint Backlog - 5 (Edge Deployment)</h3>
+<table>
+  <thead>
+    <tr><th>Backlog Item</th><th>Sprint ID</th><th>Sprint Task</th><th>Sprint Goal</th><th>Est. Hours</th><th>Acceptance Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Pi Setup</td><td>5.1</td><td>Setup Raspberry Pi 5 OS; install Python environment; configure for ML</td><td>Edge device ready</td><td>4</td><td>All dependencies installed; models downloadable</td></tr>
+    <tr><td>Optimization</td><td>5.2</td><td>Apply INT8 quantization; ONNX conversion; llama.cpp backend</td><td>Models fit in 4GB RAM</td><td>6</td><td>Memory <4GB; latency acceptable</td></tr>
+    <tr><td>Audio</td><td>5.3</td><td>Configure USB microphone and speaker on Pi; test audio quality</td><td>Clear audio I/O</td><td>3</td><td>Mic working; speaker clear; noise handling</td></tr>
+    <tr><td>Caching</td><td>5.4</td><td>Implement LRU response caching with TTL for translations and TTS</td><td>Reduce redundant computation</td><td>3</td><td>Cache hit rate >30%; memory managed</td></tr>
+    <tr><td>Docker</td><td>5.5</td><td>Create Docker Compose for containerized deployment</td><td>One-command deployment</td><td>2</td><td>docker-compose up works; health check passes</td></tr>
+  </tbody>
+</table>
+
+<h3>Sprint Backlog - 6 (Testing &amp; Documentation)</h3>
+<table>
+  <thead>
+    <tr><th>Backlog Item</th><th>Sprint ID</th><th>Sprint Task</th><th>Sprint Goal</th><th>Est. Hours</th><th>Acceptance Criteria</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Unit Tests</td><td>6.1</td><td>Write unit tests for ASR, Translation, LLM, TTS, Agents modules</td><td>>80% code coverage</td><td>6</td><td>All modules tested; pytest passing</td></tr>
+    <tr><td>Integration</td><td>6.2</td><td>Create integration test suite; end-to-end audio tests</td><td>Full pipeline validation</td><td>4</td><td>E2E tests passing; API tests complete</td></tr>
+    <tr><td>Benchmarks</td><td>6.3</td><td>Benchmark latency metrics; profile memory usage</td><td>Performance documented</td><td>2</td><td>Latency report; memory report generated</td></tr>
+    <tr><td>Documentation</td><td>6.4</td><td>README, API docs, setup guide, demo presentation</td><td>Project fully documented</td><td>3</td><td>Docs complete; demo working</td></tr>
+  </tbody>
+</table>
+
+<h2>4.5 Ideal Burndown Chart</h2>
+
+<div class="figure">
+  <img src="report_assets/burndown.png" alt="Burndown Chart">
+  <p class="figure-caption">Fig 4.1 — Sprint Burndown Chart (230 Total Hours)</p>
+</div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 5 — SYSTEM DESIGN (Pages 25-28)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">25</span>
+
+<h1>5. SYSTEM DESIGN</h1>
+
+<h2>5.1 Technology / Framework [Edge AI + Agentic Workflows]</h2>
+
+<p><b>1. AI/ML and Backend Technologies:</b></p>
+<table>
+  <thead>
+    <tr><th>Category</th><th>Technology</th><th>Version</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>ML Framework</td><td>PyTorch, Transformers, Accelerate</td><td>PyTorch >= 2.1.0, Transformers >= 4.36.0</td></tr>
+    <tr><td>ASR (Speech-to-Text)</td><td>OpenAI Whisper, Meta MMS ASR</td><td>Whisper >= 20231117</td></tr>
+    <tr><td>Translation</td><td>AI4Bharat IndicTrans2, SentencePiece</td><td>IndicTransToolkit latest</td></tr>
+    <tr><td>LLM (Conversational AI)</td><td>Qwen 2.5 Instruct, llama.cpp</td><td>Qwen 0.5B-7B, llama-cpp-python >= 0.2.0</td></tr>
+    <tr><td>TTS (Text-to-Speech)</td><td>Meta MMS-TTS, Cartesia API</td><td>VitsModel, Cartesia >= 1.0.0</td></tr>
+    <tr><td>Agent Framework</td><td>LangGraph, LangChain</td><td>LangGraph >= 0.0.20, LangChain >= 0.1.0</td></tr>
+    <tr><td>Web Framework</td><td>FastAPI, Uvicorn, WebSockets</td><td>FastAPI >= 0.108.0, Uvicorn >= 0.25.0</td></tr>
+    <tr><td>Database</td><td>SQLite (WAL mode)</td><td>Built-in Python sqlite3</td></tr>
+    <tr><td>Audio Processing</td><td>noisereduce, soundfile, librosa</td><td>noisereduce >= 3.0.0</td></tr>
+    <tr><td>Web Search</td><td>DuckDuckGo Search (ddgs)</td><td>ddgs >= 9.0.0</td></tr>
+    <tr><td>Pipeline</td><td>Pipecat AI</td><td>pipecat-ai >= 0.0.30</td></tr>
+  </tbody>
+</table>
+
+<p><b>2. Frontend Technologies:</b></p>
+<table>
+  <thead>
+    <tr><th>Category</th><th>Technology</th><th>Version</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Frontend Framework</td><td>React, TypeScript</td><td>React 18, TypeScript 5.x</td></tr>
+    <tr><td>Build Tool</td><td>Vite</td><td>Vite 5.x</td></tr>
+    <tr><td>UI Components</td><td>Radix UI, Tailwind CSS</td><td>Latest stable</td></tr>
+    <tr><td>State Management</td><td>React Context + Hooks</td><td>Built-in React 18</td></tr>
+    <tr><td>API Client</td><td>Fetch API, WebSocket</td><td>Native browser APIs</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- Page 26 -->
+<div class="page">
+<span class="page-number">26</span>
+
+<p><b>3. DevOps and Quality Tools:</b></p>
+<table>
+  <thead>
+    <tr><th>Purpose</th><th>Tool</th><th>Version</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Version Control</td><td>Git, GitHub</td><td>Latest stable</td></tr>
+    <tr><td>Code Editor</td><td>Visual Studio Code, Cursor</td><td>Latest stable</td></tr>
+    <tr><td>Code Formatter</td><td>Black</td><td>>= 23.12.0</td></tr>
+    <tr><td>Linter</td><td>Ruff</td><td>>= 0.1.9</td></tr>
+    <tr><td>Testing</td><td>pytest, pytest-asyncio, httpx</td><td>pytest >= 7.4.0</td></tr>
+    <tr><td>Containerization</td><td>Docker, Docker Compose</td><td>Latest stable</td></tr>
+    <tr><td>Package Manager</td><td>pip (Python), npm (Node.js)</td><td>Latest stable</td></tr>
+    <tr><td>Edge Runtime</td><td>llama.cpp, ONNX Runtime</td><td>llama-cpp-python >= 0.2.0</td></tr>
+  </tbody>
+</table>
+
+<h2>5.2 Module Description</h2>
+
+<table>
+  <thead>
+    <tr><th>Module Name</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><b>ASR Module</b><br>(src/asr/)</td><td>Handles automatic speech recognition for 11 Indian languages. Supports multiple backends: Meta MMS ASR 1B (primary, optimized for Indian languages), OpenAI Whisper (fallback, multilingual), and Pingala ASR (low-latency). Includes audio denoising via noisereduce and automatic language detection.</td></tr>
+    <tr><td><b>Translation Module</b><br>(src/translation/)</td><td>Provides bidirectional Indian language ↔ English translation using AI4Bharat IndicTrans2. Supports both full (1B parameter) and distilled (211M parameter, 5x smaller) model variants. Language-specific tokenization via SentencePiece. Handles 11 language pairs.</td></tr>
+    <tr><td><b>LLM Module</b><br>(src/llm/)</td><td>Local conversational AI using Qwen 2.5 Instruct models (0.5B-7B variants). Supports both native Transformers inference and llama.cpp backend for quantized GGUF models. Features conversation memory, system prompt customization, and thinking extraction for reasoning models.</td></tr>
+    <tr><td><b>TTS Module</b><br>(src/tts/)</td><td>Text-to-speech synthesis for all supported languages. Backends include Meta MMS-TTS (offline, all languages), Cartesia API (online, high quality), AI4Bharat Indic Parler TTS (emotion control), and Chatterbox TTS. Supports audio format conversion and response caching.</td></tr>
+    <tr><td><b>Agent Orchestrator</b><br>(src/agents/)</td><td>LangGraph-based multi-agent system. Intent classification via keyword matching routes queries to: Info Agent (DuckDuckGo search + LLM synthesis), Task Agent (SQLite persistence for reminders/alarms), Chat Agent (general conversation). Features fallback responses and reasoning leak detection.</td></tr>
+    <tr><td><b>Pipeline Module</b><br>(src/pipeline/)</td><td>End-to-end voice processing orchestrator. Legacy sequential pipeline and modern Pipecat streaming pipeline with custom processors. Provides detailed timing metrics, lazy component loading, and text-only mode for testing.</td></tr>
+    <tr><td><b>API Module</b><br>(src/api/)</td><td>FastAPI server with REST endpoints (transcribe, process, text, tts, health, dashboard) and WebSocket streaming (/ws, /ws/stream). Includes CORS middleware, static file serving for the React dashboard, and comprehensive request/response logging.</td></tr>
+    <tr><td><b>Database Module</b><br>(src/db/)</td><td>SQLite database layer with WAL mode for concurrent access. Manages conversations, messages, tasks, and system metrics. Dataclass-based models with automatic schema migration.</td></tr>
+    <tr><td><b>Cache Module</b><br>(src/cache/)</td><td>LRU response caching with configurable TTL for translations, TTS outputs, and LLM responses. Reduces computation for frequently repeated phrases and improves response time.</td></tr>
+    <tr><td><b>Edge Module</b><br>(src/edge/)</td><td>Raspberry Pi 5 client with async HTTP/WebSocket communication, audio input/output handling via sounddevice/pyaudio, and XiaoZhi protocol support for device pairing.</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 6 — CODING (Pages 29-49)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">29</span>
+
+<h1>6. CODING</h1>
+
+<h2>6.1 Coding Standards Used in the Project (Python + TypeScript)</h2>
+
+<p><b>I. Python Conventions</b></p>
+
+<ul>
+  <li><b>Naming Conventions:</b>
+    <ul>
+      <li>Files and directories: use <code>snake_case</code> (e.g., <code>whisper_asr.py</code>, <code>indictrans.py</code>, <code>agent_factory.py</code>)</li>
+      <li>Classes: <code>UpperCamelCase</code> (e.g., <code>QwenLLM</code>, <code>IndicTranslator</code>, <code>AgentOrchestrator</code>)</li>
+      <li>Functions and variables: <code>snake_case</code> (e.g., <code>transcribe_audio</code>, <code>classify_intent</code>, <code>model_size</code>)</li>
+      <li>Constants: <code>SCREAMING_SNAKE_CASE</code> (e.g., <code>DEFAULT_SYSTEM_PROMPT</code>, <code>MODEL_VARIANTS</code>, <code>LANG_CODES</code>)</li>
+    </ul>
+  </li>
+  <li><b>Type Safety:</b> All function signatures include type hints. Pydantic models validate API request/response payloads. Dataclasses define database models and configuration structures.</li>
+  <li><b>Immutability:</b> Configuration is loaded once at startup and frozen. Model state is managed through class instances with clear initialization paths.</li>
+  <li><b>Asynchrony:</b> FastAPI endpoints use <code>async/await</code> for non-blocking I/O. Background tasks use <code>asyncio</code> for concurrent model loading.</li>
+</ul>
+
+<p><b>II. Module and Component Design</b></p>
+<ul>
+  <li><b>Interface Consistency:</b> Each AI component exposes a standard interface: <code>load_model()</code> for initialization, a primary processing method (e.g., <code>transcribe()</code>, <code>translate()</code>, <code>chat()</code>, <code>synthesize()</code>), and resource cleanup.</li>
+  <li><b>Lazy Loading:</b> Models are loaded on first use, not at import time. This reduces startup time and allows configuration to be applied before model initialization.</li>
+  <li><b>Fallback Pattern:</b> Each component wraps model initialization in try/except blocks with meaningful logging. When a primary backend fails, fallback alternatives are automatically selected.</li>
+</ul>
+
+<p><b>III. Formatting and Linting (Managed by Tools)</b></p>
+<ul>
+  <li><b>Formatter:</b> Black with default settings (88 character line length)</li>
+  <li><b>Linter:</b> Ruff for fast Python linting (replaces flake8, isort)</li>
+  <li><b>Run commands:</b> <code>black src/ tests/</code> and <code>ruff check src/ tests/</code></li>
+</ul>
+
+</div>
+
+<!-- Page 30 -->
+<div class="page">
+<span class="page-number">30</span>
+
+<p><b>IV. TypeScript/React Conventions (Frontend Dashboard)</b></p>
+<ul>
+  <li>Components: <code>UpperCamelCase</code> (e.g., <code>ConversationViewer</code>, <code>LatencyChart</code>, <code>HealthStatus</code>)</li>
+  <li>Files: <code>kebab-case</code> for component files (organized in <code>frontend/src/components/</code>)</li>
+  <li>State: React Context + custom hooks for cross-component state (e.g., <code>useHealth</code>, <code>useConversations</code>)</li>
+  <li>Styling: Tailwind CSS utilities + Radix UI primitives for accessible, semantic components</li>
+  <li>Build: Vite with TypeScript strict mode</li>
+</ul>
+
+<p><b>V. Error Handling and Observability</b></p>
+<ul>
+  <li><b>API Routes:</b> Input validation via Pydantic models. Consistent JSON error responses with HTTP status codes. Detailed logging with Python's logging module.</li>
+  <li><b>Pipeline:</b> Each stage catches exceptions independently and propagates error context. Timing metrics are captured regardless of success/failure.</li>
+  <li><b>Security:</b> No secrets in error messages. File upload size limits. CORS policy enforcement. Environment variables for sensitive configuration.</li>
+</ul>
+
+<p><b>VI. Documentation</b></p>
+<ul>
+  <li>Module-level docstrings describe purpose and capabilities</li>
+  <li>Class-level docstrings explain configuration options and model variants</li>
+  <li>README.md covers installation, usage, and API reference</li>
+  <li>SCRUM documentation in <code>docs/scrum/</code></li>
+</ul>
+
+<h2>6.2 Project Coding</h2>
+
+<h3>FastAPI Server — Main Application Entry Point</h3>
+<p class="code-purpose">The core API server that orchestrates all voice assistant operations (src/api/main.py)</p>
+
+<pre><code>"""Voice Assistant API Server - Main Application."""
+import logging
+import time
+import tempfile
+import os
+from pathlib import Path
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, UploadFile, File, Form, WebSocket, Query, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+
+from src.config import load_config
+
+logger = logging.getLogger(__name__)
+
+# ── Global state ──────────────────────────────────────────────────
+asr_engine = None
+tts_engine = None
+llm_engine = None
+translator = None
+orchestrator = None
+db = None
+cfg = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup/shutdown lifecycle."""
+    global asr_engine, tts_engine, llm_engine, translator, orchestrator, db, cfg
+    cfg = load_config()
+    logger.info("Loading AI models...")
+
+    # Initialize database
+    from src.db.database import Database
+    db = Database()
+
+    # Load ASR engine
+    if cfg.asr.engine == "mms":
+        from src.asr.mms_asr import MMSASR
+        asr_engine = MMSASR(device=cfg.asr.device)
+    else:
+        from src.asr.whisper_asr import WhisperASR
+        asr_engine = WhisperASR(model_size=cfg.asr.model_size, device=cfg.asr.device)
+
+    # Load Translation engine
+    from src.translation.indictrans import IndicTranslator
+    translator = IndicTranslator(model_variant=cfg.translation.model_variant,
+                                  device=cfg.translation.device)
+
+    # Load LLM engine
+    if cfg.llm.engine == "qwen3":
+        from src.llm.qwen3 import Qwen3LLM
+        llm_engine = Qwen3LLM(model_size=cfg.llm.model_size, device=cfg.llm.device)
+    else:
+        from src.llm.qwen import QwenLLM
+        llm_engine = QwenLLM(model_size=cfg.llm.model_size, device=cfg.llm.device)
+
+    # Load TTS engine
+    from src.tts.mms_tts import MMSTTS
+    tts_engine = MMSTTS()
+
+    # Initialize agent orchestrator
+    from src.agents.orchestrator import AgentOrchestrator
+    orchestrator = AgentOrchestrator(llm=llm_engine, db=db)
+
+    logger.info("All models loaded successfully!")
+    yield
+    logger.info("Shutting down...")
+
+app = FastAPI(title="Voice Assistant API", version="0.2.0", lifespan=lifespan)
+
+# CORS for dashboard
+app.add_middleware(CORSMiddleware, allow_origins=["*"],
+                   allow_methods=["*"], allow_headers=["*"])
+</code></pre>
+
+</div>
+
+<!-- Page 31-33 -->
+<div class="page">
+<span class="page-number">31</span>
+
+<h3>API Endpoints</h3>
+<p class="code-purpose">REST endpoints for voice processing (src/api/main.py continued)</p>
+
+<pre><code>@app.get("/health")
+async def health_check():
+    """System health with component status."""
+    return {
+        "status": "healthy",
+        "version": "0.2.0",
+        "components": {
+            "asr": {"status": "loaded", "engine": cfg.asr.engine},
+            "tts": {"status": "loaded", "engine": cfg.tts.engine},
+            "llm": {"status": "loaded", "engine": cfg.llm.engine,
+                     "model_size": cfg.llm.model_size},
+            "translation": {"status": "loaded", "variant": cfg.translation.model_variant},
+            "orchestrator": {"status": "loaded", "type": cfg.agents.orchestrator},
+            "database": {"status": "connected"},
+        }
+    }
+
+@app.post("/api/transcribe")
+async def transcribe(audio: UploadFile = File(...),
+                      language: str = Form("ml")):
+    """Transcribe audio to text."""
+    start = time.time()
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        content = await audio.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    try:
+        result = asr_engine.transcribe(tmp_path, language=language)
+        elapsed_ms = (time.time() - start) * 1000
+        return {"text": result["text"], "language": language,
+                "confidence": result.get("confidence", 0.0),
+                "asr_time_ms": round(elapsed_ms, 1)}
+    finally:
+        os.unlink(tmp_path)
+
+@app.post("/api/text")
+async def process_text(text: str = Form(...),
+                        language: str = Form("en")):
+    """Process text input through the full pipeline (skip ASR)."""
+    start = time.time()
+    timings = {}
+
+    # Translate to English if needed
+    english_text = text
+    if language != "en" and translator:
+        t0 = time.time()
+        english_text = translator.translate(text, source_lang=language,
+                                              target_lang="en")
+        timings["translation_in_ms"] = round((time.time() - t0) * 1000, 1)
+
+    # Process through agent orchestrator
+    t0 = time.time()
+    agent_result = orchestrator.process(english_text)
+    timings["llm_ms"] = round((time.time() - t0) * 1000, 1)
+
+    # Translate response back
+    response_text = agent_result.get("response", "")
+    if language != "en" and translator:
+        t0 = time.time()
+        response_text = translator.translate(response_text,
+                                               source_lang="en",
+                                               target_lang=language)
+        timings["translation_out_ms"] = round((time.time() - t0) * 1000, 1)
+
+    total_ms = round((time.time() - start) * 1000, 1)
+
+    # Log to database
+    if db:
+        db.log_conversation(language=language, intent=agent_result.get("intent"),
+                            asr_time_ms=0, llm_time_ms=timings.get("llm_ms", 0),
+                            total_time_ms=total_ms,
+                            user_message=text, assistant_message=response_text)
+
+    return {"input": text, "intent": agent_result.get("intent", "unknown"),
+            "response": response_text, "agent": agent_result.get("agent", "chat"),
+            "language": language, "total_ms": total_ms, **timings}
+</code></pre>
+
+</div>
+
+<!-- Page 34-36 -->
+<div class="page">
+<span class="page-number">33</span>
+
+<h3>Agent Orchestrator — LangGraph Workflow</h3>
+<p class="code-purpose">Intelligent query routing with specialized agents (src/agents/orchestrator.py)</p>
+
+<pre><code>"""LangGraph-based Agent Orchestrator for voice assistant."""
+import logging
+import re
+from typing import Optional, Dict, Any
+from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
+
+try:
+    from langgraph.graph import StateGraph, END
+    HAS_LANGGRAPH = True
+except ImportError:
+    HAS_LANGGRAPH = False
+    logger.warning("LangGraph not installed — using fallback orchestrator")
+
+@dataclass
+class AgentState:
+    """State passed through the LangGraph workflow."""
+    user_input: str = ""
+    intent: str = "unknown"
+    agent: str = "chat"
+    response: str = ""
+    sources: list = None
+    thinking: str = ""
+    context: dict = None
+
+class AgentOrchestrator:
+    """LangGraph-based multi-agent orchestrator."""
+
+    # Intent classification patterns
+    INTENT_PATTERNS = {
+        "task": r"\b(remind|schedule|alarm|timer|set a|set an|to.?do|task)\b",
+        "smart_home": r"\b(light|fan|ac|door|temperature|turn on|turn off)\b",
+        "chat": r"\b(hello|hi|hey|thanks?|bye|good morning|good night)\b",
+        "info": r"\b(what|who|where|when|how|why|weather|price|recommend|tell me)\b",
+    }
+
+    def __init__(self, llm=None, db=None):
+        self.llm = llm
+        self.db = db
+        self._fallback_counter = 0
+        if HAS_LANGGRAPH:
+            self.graph = self._build_graph()
+        else:
+            self.graph = None
+
+    def classify_intent(self, text: str) -> str:
+        """Classify user intent using keyword/regex matching."""
+        text_lower = text.lower().strip()
+        for intent, pattern in self.INTENT_PATTERNS.items():
+            if re.search(pattern, text_lower):
+                return intent
+        return "info"  # Default to info queries
+
+    def _build_graph(self):
+        """Build LangGraph StateGraph workflow."""
+        workflow = StateGraph(AgentState)
+        workflow.add_node("classify", self._classify_node)
+        workflow.add_node("info_agent", self._info_agent_node)
+        workflow.add_node("task_agent", self._task_agent_node)
+        workflow.add_node("chat_agent", self._chat_agent_node)
+        workflow.add_node("respond", self._respond_node)
+
+        workflow.set_entry_point("classify")
+        workflow.add_conditional_edges("classify", self._route_agent,
+            {"info": "info_agent", "task": "task_agent", "chat": "chat_agent"})
+        for agent in ["info_agent", "task_agent", "chat_agent"]:
+            workflow.add_edge(agent, "respond")
+        workflow.add_edge("respond", END)
+        return workflow.compile()
+</code></pre>
+
+</div>
+
+<!-- Page 37-38 -->
+<div class="page">
+<span class="page-number">35</span>
+
+<h3>Agent Orchestrator — Agent Nodes</h3>
+<p class="code-purpose">Specialized agent implementations (src/agents/orchestrator.py continued)</p>
+
+<pre><code>    def _info_agent_node(self, state: AgentState) -> AgentState:
+        """Info agent: web search + LLM synthesis."""
+        search_results = []
+        try:
+            from duckduckgo_search import DDGS
+            with DDGS() as ddgs:
+                results = list(ddgs.text(state.user_input, max_results=3))
+                search_results = [{"title": r["title"], "body": r["body"],
+                                    "url": r["href"]} for r in results]
+        except Exception as e:
+            logger.warning(f"Web search failed: {e}")
+
+        # Build prompt with search context
+        context = "\n".join(f"- {r['title']}: {r['body']}" for r in search_results)
+        prompt = f"""Based on these search results:
+{context}
+
+Answer the user's question: {state.user_input}
+Respond in 1-3 concise sentences suitable for voice output."""
+
+        if self.llm:
+            response = self.llm.chat(prompt)
+            state.response = self._strip_thinking(response.content)
+        else:
+            state.response = self._get_fallback("info")
+
+        state.sources = search_results
+        state.agent = "info"
+        return state
+
+    def _task_agent_node(self, state: AgentState) -> AgentState:
+        """Task agent: create and manage reminders/tasks."""
+        if self.llm:
+            prompt = f"User wants to set a task/reminder: {state.user_input}\n"
+            prompt += "Confirm the task and respond naturally in 1-2 sentences."
+            response = self.llm.chat(prompt)
+            state.response = self._strip_thinking(response.content)
+        else:
+            state.response = self._get_fallback("task")
+
+        # Extract and persist task
+        task_title = self._extract_task_title(state.user_input)
+        if self.db and task_title:
+            self.db.create_task(title=task_title, source_input=state.user_input)
+            logger.info(f"Task created: {task_title}")
+
+        state.agent = "task"
+        return state
+
+    def _chat_agent_node(self, state: AgentState) -> AgentState:
+        """Chat agent: general conversation."""
+        if self.llm:
+            prompt = f"{state.user_input}\nRespond naturally in 1-3 sentences."
+            response = self.llm.chat(prompt)
+            state.response = self._strip_thinking(response.content)
+        else:
+            state.response = self._get_fallback("chat")
+        state.agent = "chat"
+        return state
+
+    def _strip_thinking(self, text: str) -> str:
+        """Remove &lt;think&gt;...&lt;/think&gt; blocks from Qwen3 output."""
+        return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+    def process(self, text: str) -> Dict[str, Any]:
+        """Process user input through the agent workflow."""
+        if self.graph:
+            state = AgentState(user_input=text)
+            result = self.graph.invoke(state)
+            return {"response": result.response, "intent": result.intent,
+                    "agent": result.agent, "sources": result.sources}
+        else:
+            return self._fallback_process(text)
+</code></pre>
+
+</div>
+
+<!-- Page 39-40 -->
+<div class="page">
+<span class="page-number">37</span>
+
+<h3>IndicTrans2 Translation Module</h3>
+<p class="code-purpose">Bidirectional Indian language translation (src/translation/indictrans.py)</p>
+
+<pre><code>"""IndicTrans2 Translation Module
+Supports both full (1B) and distilled (~211M) model variants."""
+
+import logging
+from typing import Optional, Literal
+
+logger = logging.getLogger(__name__)
+
+try:
+    from IndicTransToolkit import IndicProcessor
+except ImportError:
+    IndicProcessor = None
+
+class IndicTranslator:
+    """AI4Bharat IndicTrans2 translator for Indian languages."""
+
+    MODEL_VARIANTS = {
+        "full": {
+            "en-indic": "ai4bharat/indictrans2-en-indic-1B",
+            "indic-en": "ai4bharat/indictrans2-indic-en-1B",
+        },
+        "dist": {
+            "en-indic": "ai4bharat/indictrans2-en-indic-dist-200M",
+            "indic-en": "ai4bharat/indictrans2-indic-en-dist-200M",
+            "indic-indic": "ai4bharat/indictrans2-indic-indic-dist-320M",
+        },
+    }
+
+    LANG_CODES = {
+        "ml": "mal_Mlym",  # Malayalam
+        "hi": "hin_Deva",  # Hindi
+        "ta": "tam_Taml",  # Tamil
+        "te": "tel_Telu",  # Telugu
+        "bn": "ben_Beng",  # Bengali
+        "mr": "mar_Deva",  # Marathi
+        "gu": "guj_Gujr",  # Gujarati
+        "kn": "kan_Knda",  # Kannada
+        "pa": "pan_Guru",  # Punjabi
+        "ur": "urd_Arab",  # Urdu
+        "en": "eng_Latn",  # English
+    }
+
+    def __init__(self, model_variant="dist", device="cuda"):
+        self.variant = model_variant
+        self.device = device
+        self.models = {}  # Lazy-loaded per direction
+        self.processor = None
+
+    def _load_model(self, direction: str):
+        """Load translation model for given direction."""
+        from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+        model_id = self.MODEL_VARIANTS[self.variant][direction]
+        logger.info(f"Loading IndicTrans2 {direction}: {model_id}")
+        tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_id,
+                    trust_remote_code=True).to(self.device)
+        self.models[direction] = (model, tokenizer)
+        if not self.processor:
+            self.processor = IndicProcessor(inference=True)
+
+    def translate(self, text: str, source_lang: str = "ml",
+                  target_lang: str = "en") -> str:
+        """Translate text between languages."""
+        src_code = self.LANG_CODES.get(source_lang)
+        tgt_code = self.LANG_CODES.get(target_lang)
+
+        if source_lang == "en":
+            direction = "en-indic"
+        elif target_lang == "en":
+            direction = "indic-en"
+        else:
+            direction = "indic-indic"
+
+        if direction not in self.models:
+            self._load_model(direction)
+
+        model, tokenizer = self.models[direction]
+        batch = self.processor.preprocess_batch([text], src_lang=src_code,
+                                                  tgt_lang=tgt_code)
+        inputs = tokenizer(batch, return_tensors="pt", padding=True).to(self.device)
+        with torch.no_grad():
+            outputs = model.generate(**inputs, max_new_tokens=256)
+        decoded = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        result = self.processor.postprocess_batch(decoded, lang=tgt_code)
+        return result[0]
+</code></pre>
+
+</div>
+
+<!-- Page 41-42 -->
+<div class="page">
+<span class="page-number">39</span>
+
+<h3>Qwen 2.5 LLM Module</h3>
+<p class="code-purpose">Local conversational AI with multiple model sizes (src/llm/qwen.py)</p>
+
+<pre><code>"""Qwen 2.5 LLM Module — Local conversational AI."""
+import logging
+from typing import Optional, List, Dict, Literal
+from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class Message:
+    """Chat message."""
+    role: Literal["system", "user", "assistant"]
+    content: str
+
+@dataclass
+class ChatResponse:
+    """Response from chat completion."""
+    content: str
+    tokens_used: int
+    generation_time_ms: float
+
+class QwenLLM:
+    """Qwen 2.5 Instruct LLM for conversational AI.
+
+    Sizes available:
+    - 0.5B: ~1GB VRAM (good for Pi with quantization)
+    - 1.5B: ~3GB VRAM (balanced)
+    - 3B:   ~6GB VRAM (better quality)
+    - 7B:   ~14GB VRAM (best local quality)
+    """
+
+    MODELS = {
+        "0.5b": "Qwen/Qwen2.5-0.5B-Instruct",
+        "1.5b": "Qwen/Qwen2.5-1.5B-Instruct",
+        "3b":   "Qwen/Qwen2.5-3B-Instruct",
+        "7b":   "Qwen/Qwen2.5-7B-Instruct",
+    }
+
+    DEFAULT_SYSTEM_PROMPT = (
+        "You are a helpful voice assistant. Provide concise, friendly "
+        "responses suitable for spoken conversation. Keep responses "
+        "brief — typically 1-3 sentences unless more detail is needed."
+    )
+
+    def __init__(self, model_size="1.5b", device="cuda",
+                 system_prompt=None, max_memory_messages=10):
+        self.model_size = model_size
+        self.device = device
+        self.system_prompt = system_prompt or self.DEFAULT_SYSTEM_PROMPT
+        self.max_memory = max_memory_messages
+        self.history: List[Message] = []
+        self.model = None
+        self.tokenizer = None
+
+    def load_model(self):
+        """Load model and tokenizer from HuggingFace."""
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        model_id = self.MODELS[self.model_size]
+        logger.info(f"Loading {model_id} on {self.device}...")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_id, torch_dtype="auto", device_map=self.device)
+
+    def chat(self, user_message: str) -> ChatResponse:
+        """Generate a response to user message with conversation memory."""
+        import time, torch
+        if not self.model:
+            self.load_model()
+        self.history.append(Message(role="user", content=user_message))
+        messages = [{"role": "system", "content": self.system_prompt}]
+        messages += [{"role": m.role, "content": m.content}
+                      for m in self.history[-self.max_memory:]]
+        text = self.tokenizer.apply_chat_template(messages, tokenize=False,
+                                                    add_generation_prompt=True)
+        inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
+        t0 = time.time()
+        with torch.no_grad():
+            outputs = self.model.generate(**inputs, max_new_tokens=256,
+                                           temperature=0.7, do_sample=True)
+        gen_time = (time.time() - t0) * 1000
+        response_text = self.tokenizer.decode(
+            outputs[0][inputs.input_ids.shape[-1]:], skip_special_tokens=True)
+        self.history.append(Message(role="assistant", content=response_text))
+        return ChatResponse(content=response_text,
+                             tokens_used=outputs.shape[-1], generation_time_ms=gen_time)
+</code></pre>
+
+</div>
+
+<!-- Page 43-44 -->
+<div class="page">
+<span class="page-number">41</span>
+
+<h3>Whisper ASR Module</h3>
+<p class="code-purpose">Speech-to-text with multilingual support (src/asr/whisper_asr.py)</p>
+
+<pre><code>"""OpenAI Whisper ASR Module — Multilingual speech recognition."""
+import logging
+from typing import Optional, Dict, Any
+
+logger = logging.getLogger(__name__)
+
+class WhisperASR:
+    """Whisper-based ASR with Indian language support.
+
+    Model sizes: tiny (39M), base (74M), small (244M),
+                 medium (769M), large-v3 (1.5B)
+    """
+
+    LANGUAGE_MAP = {
+        "ml": "Malayalam", "hi": "Hindi", "ta": "Tamil",
+        "te": "Telugu", "bn": "Bengali", "mr": "Marathi",
+        "gu": "Gujarati", "kn": "Kannada", "pa": "Punjabi",
+        "ur": "Urdu", "en": "English",
+    }
+
+    def __init__(self, model_size="small", device="cuda"):
+        self.model_size = model_size
+        self.device = device
+        self.model = None
+
+    def load_model(self):
+        """Load Whisper model."""
+        import whisper
+        logger.info(f"Loading Whisper {self.model_size} on {self.device}...")
+        self.model = whisper.load_model(self.model_size, device=self.device)
+
+    def transcribe(self, audio_path: str, language: Optional[str] = None,
+                    **kwargs) -> Dict[str, Any]:
+        """Transcribe audio file to text."""
+        if not self.model:
+            self.load_model()
+        options = {"fp16": self.device == "cuda"}
+        if language:
+            options["language"] = self.LANGUAGE_MAP.get(language, language)
+        result = self.model.transcribe(audio_path, **options, **kwargs)
+        return {
+            "text": result["text"].strip(),
+            "language": result.get("language", language),
+            "segments": result.get("segments", []),
+            "confidence": 1.0 - (result.get("no_speech_prob", 0) or 0),
+        }
+</code></pre>
+
+<h3>MMS Text-to-Speech Module</h3>
+<p class="code-purpose">Multilingual speech synthesis (src/tts/mms_tts.py)</p>
+
+<pre><code>"""Meta MMS-TTS Module — Text-to-speech for Indian languages."""
+import logging
+import numpy as np
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+class MMSTTS:
+    """Meta Massively Multilingual Speech TTS.
+    Supports 1000+ languages including all major Indian languages."""
+
+    LANG_MAP = {
+        "ml": "mal", "hi": "hin", "ta": "tam", "te": "tel",
+        "bn": "ben", "mr": "mar", "gu": "guj", "kn": "kan",
+        "pa": "pan", "ur": "urd", "en": "eng",
+    }
+
+    def __init__(self):
+        self.models = {}  # Cache per language
+
+    def _load_model(self, lang_code: str):
+        """Load TTS model for specific language."""
+        from transformers import VitsModel, AutoTokenizer
+        mms_code = self.LANG_MAP.get(lang_code, lang_code)
+        model_id = f"facebook/mms-tts-{mms_code}"
+        logger.info(f"Loading MMS-TTS: {model_id}")
+        model = VitsModel.from_pretrained(model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.models[lang_code] = (model, tokenizer)
+
+    def synthesize(self, text: str, language: str = "ml") -> np.ndarray:
+        """Synthesize text to audio waveform."""
+        import torch
+        if language not in self.models:
+            self._load_model(language)
+        model, tokenizer = self.models[language]
+        inputs = tokenizer(text, return_tensors="pt")
+        with torch.no_grad():
+            output = model(**inputs)
+        waveform = output.waveform[0].numpy()
+        return waveform
+</code></pre>
+
+</div>
+
+<!-- Page 45-46 -->
+<div class="page">
+<span class="page-number">43</span>
+
+<h3>Pipeline Orchestrator</h3>
+<p class="code-purpose">End-to-end voice processing with timing metrics (src/pipeline/orchestrator.py)</p>
+
+<pre><code>"""Voice Pipeline Orchestrator — End-to-end processing."""
+import time
+import logging
+from dataclasses import dataclass, field
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class PipelineResult:
+    """Result from pipeline processing."""
+    success: bool = True
+    error: str = ""
+
+    # Text at each stage
+    transcription: str = ""
+    english_text: str = ""
+    intent: str = "unknown"
+    english_response: str = ""
+    translated_response: str = ""
+
+    # Timing (ms)
+    asr_time_ms: float = 0
+    translation_in_ms: float = 0
+    intent_time_ms: float = 0
+    llm_time_ms: float = 0
+    translation_out_ms: float = 0
+    tts_time_ms: float = 0
+    total_time_ms: float = 0
+
+    # Audio output
+    audio_output: Optional[any] = None
+
+class VoiceAssistantPipeline:
+    """Orchestrates the full voice processing pipeline."""
+
+    def __init__(self, asr=None, translator=None, llm=None,
+                 tts=None, orchestrator=None):
+        self.asr = asr
+        self.translator = translator
+        self.llm = llm
+        self.tts = tts
+        self.orchestrator = orchestrator
+
+    def process_audio(self, audio_path: str,
+                       language: str = "ml") -> PipelineResult:
+        """Process audio through the full pipeline."""
+        result = PipelineResult()
+        total_start = time.time()
+
+        try:
+            # 1. ASR
+            t0 = time.time()
+            asr_result = self.asr.transcribe(audio_path, language=language)
+            result.transcription = asr_result["text"]
+            result.asr_time_ms = (time.time() - t0) * 1000
+
+            # 2. Translation (source -> EN)
+            if language != "en" and self.translator:
+                t0 = time.time()
+                result.english_text = self.translator.translate(
+                    result.transcription, source_lang=language, target_lang="en")
+                result.translation_in_ms = (time.time() - t0) * 1000
+            else:
+                result.english_text = result.transcription
+
+            # 3. Agent Processing
+            t0 = time.time()
+            agent_result = self.orchestrator.process(result.english_text)
+            result.english_response = agent_result["response"]
+            result.intent = agent_result.get("intent", "unknown")
+            result.llm_time_ms = (time.time() - t0) * 1000
+
+            # 4. Translation (EN -> source)
+            if language != "en" and self.translator:
+                t0 = time.time()
+                result.translated_response = self.translator.translate(
+                    result.english_response, source_lang="en",
+                    target_lang=language)
+                result.translation_out_ms = (time.time() - t0) * 1000
+            else:
+                result.translated_response = result.english_response
+
+            # 5. TTS
+            t0 = time.time()
+            result.audio_output = self.tts.synthesize(
+                result.translated_response, language=language)
+            result.tts_time_ms = (time.time() - t0) * 1000
+
+        except Exception as e:
+            result.success = False
+            result.error = str(e)
+            logger.error(f"Pipeline error: {e}")
+
+        result.total_time_ms = (time.time() - total_start) * 1000
+        return result
+</code></pre>
+
+</div>
+
+<!-- Page 47-48: Dashboard + Config -->
+<div class="page">
+<span class="page-number">45</span>
+
+<h3>Dashboard API Endpoints</h3>
+<p class="code-purpose">Real-time monitoring and conversation management (src/api/main.py)</p>
+
+<pre><code>@app.get("/api/dashboard/stats")
+async def dashboard_stats():
+    """Dashboard statistics."""
+    stats = db.get_stats() if db else {}
+    return {
+        "total_conversations": stats.get("total_conversations", 0),
+        "avg_latency_ms": round(stats.get("avg_latency_ms", 0), 1),
+        "languages": stats.get("language_distribution", {}),
+        "intents": stats.get("intent_distribution", {}),
+        "recent_conversations": stats.get("recent_count", 0),
+    }
+
+@app.get("/api/dashboard/conversations")
+async def list_conversations(limit: int = Query(30, ge=1, le=100),
+                              offset: int = Query(0, ge=0)):
+    """List recent conversations with pagination."""
+    conversations = db.get_conversations(limit=limit, offset=offset) if db else []
+    total = db.count_conversations() if db else 0
+    return {"conversations": conversations, "total": total}
+
+@app.get("/api/tasks")
+async def list_tasks(status: Optional[str] = Query(None)):
+    """List tasks with optional status filter."""
+    tasks = db.get_tasks(status=status) if db else []
+    return {"tasks": tasks}
+
+@app.patch("/api/tasks/{task_id}")
+async def update_task(task_id: int, status: str = Form(...)):
+    """Update task status (pending/done)."""
+    if db:
+        db.update_task(task_id, status=status)
+    return {"ok": True, "id": task_id, "status": status}
+
+@app.delete("/api/tasks/{task_id}")
+async def delete_task(task_id: int):
+    """Delete a task."""
+    if db:
+        db.delete_task(task_id)
+    return {"ok": True, "id": task_id}
+</code></pre>
+
+<h3>WebSocket Streaming Endpoint</h3>
+<p class="code-purpose">Real-time audio processing via WebSocket (src/api/main.py)</p>
+
+<pre><code>@app.websocket("/ws/stream")
+async def websocket_stream(websocket: WebSocket):
+    """Full streaming pipeline via WebSocket."""
+    await websocket.accept()
+    logger.info("WebSocket stream connected")
+    try:
+        while True:
+            data = await websocket.receive_bytes()
+            # Save to temp file for ASR
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                tmp.write(data)
+                tmp_path = tmp.name
+            try:
+                # Transcribe
+                asr_result = asr_engine.transcribe(tmp_path)
+                transcription = asr_result["text"]
+                # Process through agent
+                agent_result = orchestrator.process(transcription)
+                await websocket.send_json({
+                    "type": "response",
+                    "transcription": transcription,
+                    "response": agent_result["response"],
+                    "intent": agent_result.get("intent", "unknown"),
+                })
+            finally:
+                os.unlink(tmp_path)
+    except Exception as e:
+        logger.info(f"WebSocket disconnected: {e}")
+</code></pre>
+
+</div>
+
+<!-- Page 49: Config -->
+<div class="page">
+<span class="page-number">47</span>
+
+<h3>Configuration System</h3>
+<p class="code-purpose">YAML-based configuration with typed dataclasses (config/settings.yaml + src/config.py)</p>
+
+<pre><code># config/settings.yaml — Main application configuration
+app:
+  name: "Hyper-Localized Voice Assistant"
+  version: "0.2.0"
+  debug: true
+
+asr:
+  engine: "mms"           # mms | whisper | pingala | indic_whisper
+  model_size: "small"     # tiny | small | medium | large-v3
+  device: "cuda"          # cuda | cpu
+
+tts:
+  engine: "mms"           # mms | cartesia | indic_parler | chatterbox
+  default_language: "ml"
+  supported_languages: [ml, hi, ta, te, bn, mr, gu, kn, en]
+
+translation:
+  engine: "indictrans2"
+  model_variant: "dist"   # full (1B) | dist (211M, 5x smaller)
+  source_lang: "ml"
+  target_lang: "en"
+  device: "cuda"
+
+llm:
+  engine: "qwen3"         # qwen | qwen3
+  model_size: "0.6b"      # 0.5b | 0.6b | 1.5b | 3b | 7b
+  backend: "llamacpp"     # transformers | llamacpp
+  max_new_tokens: 256
+  temperature: 0.7
+  llamacpp:
+    n_ctx: 2048
+    n_gpu_layers: -1       # All layers to GPU
+
+agents:
+  orchestrator: "langgraph"
+  available_agents: [info_agent, task_agent, chat_agent]
+
+cache:
+  enabled: true
+  max_size: 500
+  ttl_seconds: 3600
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+</code></pre>
+
+<h3>Database Models</h3>
+<p class="code-purpose">Data models for persistence (src/db/models.py)</p>
+
+<pre><code>"""Database models for the voice assistant."""
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Optional, List
+
+@dataclass
+class Conversation:
+    id: Optional[int] = None
+    session_id: str = ""
+    language: str = "ml"
+    intent: str = "unknown"
+    asr_time_ms: float = 0
+    translation_time_ms: float = 0
+    llm_time_ms: float = 0
+    tts_time_ms: float = 0
+    total_time_ms: float = 0
+    created_at: Optional[datetime] = None
+    messages: List["Message"] = field(default_factory=list)
+
+@dataclass
+class Message:
+    id: Optional[int] = None
+    conversation_id: int = 0
+    role: str = "user"  # user | assistant
+    content: str = ""
+    language: str = "ml"
+    timestamp: Optional[datetime] = None
+
+@dataclass
+class Task:
+    id: Optional[int] = None
+    title: str = ""
+    status: str = "pending"  # pending | done
+    created_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    source_input: str = ""
+</code></pre>
+
+</div>
+
+<!-- Page 49: React Dashboard (excerpt) -->
+<div class="page">
+<span class="page-number">49</span>
+
+<h3>React Dashboard — Main Application Component</h3>
+<p class="code-purpose">Frontend dashboard entry point (frontend/src/App.tsx — excerpt)</p>
+
+<pre><code>import { useState, useEffect } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+import { ConversationViewer } from './components/conversations/ConversationViewer';
+import { HealthStatus } from './components/health/HealthStatus';
+import { LatencyChart } from './components/latency/LatencyChart';
+import { StatsCards } from './components/stats/StatsCards';
+import { TryItPanel } from './components/tryit/TryItPanel';
+import { TaskList } from './components/tasks/TaskList';
+import { LanguageSelector } from './components/languages/LanguageSelector';
+import { ThemeProvider } from './context/ThemeContext';
+
+function App() {
+  const [health, setHealth] = useState(null);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    // Fetch health and stats on mount
+    fetch('/health').then(r => r.json()).then(setHealth);
+    fetch('/api/dashboard/stats').then(r => r.json()).then(setStats);
+    // Poll every 10 seconds
+    const interval = setInterval(() => {
+      fetch('/health').then(r => r.json()).then(setHealth);
+      fetch('/api/dashboard/stats').then(r => r.json()).then(setStats);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    &lt;ThemeProvider&gt;
+      &lt;div className="min-h-screen bg-background"&gt;
+        &lt;header className="border-b px-6 py-3 flex items-center"&gt;
+          &lt;h1 className="text-xl font-bold"&gt;Voice Assistant Dashboard&lt;/h1&gt;
+          &lt;LanguageSelector /&gt;
+        &lt;/header&gt;
+        &lt;main className="p-6"&gt;
+          &lt;StatsCards stats={stats} /&gt;
+          &lt;Tabs defaultValue="conversations"&gt;
+            &lt;TabsList&gt;
+              &lt;TabsTrigger value="conversations"&gt;Conversations&lt;/TabsTrigger&gt;
+              &lt;TabsTrigger value="health"&gt;Health&lt;/TabsTrigger&gt;
+              &lt;TabsTrigger value="tryit"&gt;Try It&lt;/TabsTrigger&gt;
+              &lt;TabsTrigger value="tasks"&gt;Tasks&lt;/TabsTrigger&gt;
+            &lt;/TabsList&gt;
+            &lt;TabsContent value="conversations"&gt;
+              &lt;ConversationViewer /&gt;
+              &lt;LatencyChart /&gt;
+            &lt;/TabsContent&gt;
+            &lt;TabsContent value="health"&gt;
+              &lt;HealthStatus health={health} /&gt;
+            &lt;/TabsContent&gt;
+            &lt;TabsContent value="tryit"&gt;
+              &lt;TryItPanel /&gt;
+            &lt;/TabsContent&gt;
+            &lt;TabsContent value="tasks"&gt;
+              &lt;TaskList /&gt;
+            &lt;/TabsContent&gt;
+          &lt;/Tabs&gt;
+        &lt;/main&gt;
+      &lt;/div&gt;
+    &lt;/ThemeProvider&gt;
+  );
+}
+
+export default App;
+</code></pre>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 7 — TESTING (Pages 50-51)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">50</span>
+
+<h1>7. TESTING</h1>
+
+<h2>7.1 Unit Testing</h2>
+
+<p>The project employs a comprehensive testing strategy using pytest with async support (pytest-asyncio) and httpx for API testing. Tests are organized by module and cover initialization, API endpoints, database operations, caching, and integration scenarios.</p>
+
+<p><b>Test Suite Overview:</b></p>
+<table>
+  <thead>
+    <tr><th>Test File</th><th>Module</th><th>Test Count</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>test_api.py</td><td>API Layer</td><td>12</td><td>FastAPI endpoints, health check, dashboard, task CRUD</td></tr>
+    <tr><td>test_basic.py</td><td>Core Components</td><td>8</td><td>ASR initialization (Whisper, MMS), TTS initialization (MMS, Indic)</td></tr>
+    <tr><td>test_cache.py</td><td>Cache</td><td>6</td><td>Response caching, TTL expiration, LRU eviction</td></tr>
+    <tr><td>test_database.py</td><td>Database</td><td>10</td><td>SQLite operations, conversation logging, task persistence</td></tr>
+    <tr><td>test_integration.py</td><td>Pipeline</td><td>5</td><td>End-to-end pipeline tests (ASR → Translation → LLM → TTS)</td></tr>
+    <tr><td>test_new_modules.py</td><td>Recent Modules</td><td>4</td><td>Optimization, inference engine tests</td></tr>
+    <tr><td>test_optimization.py</td><td>Edge</td><td>3</td><td>Model quantization, ONNX conversion</td></tr>
+  </tbody>
+</table>
+
+<p><b>Sample Test Cases:</b></p>
+
+<pre><code>"""Test API endpoints (tests/test_api.py)."""
+import pytest
+from httpx import AsyncClient, ASGITransport
+from src.api.main import app
+
+@pytest.fixture
+async def client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
+        yield c
+
+@pytest.mark.asyncio
+async def test_health_endpoint(client):
+    """Health endpoint returns system status."""
+    response = await client.get("/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert "components" in data
+    assert "asr" in data["components"]
+    assert "llm" in data["components"]
+
+@pytest.mark.asyncio
+async def test_text_processing(client):
+    """Text endpoint processes input through pipeline."""
+    response = await client.post("/api/text",
+        data={"text": "What is the weather today?", "language": "en"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "response" in data
+    assert "intent" in data
+    assert data["intent"] in ["info", "task", "chat", "unknown"]
+
+@pytest.mark.asyncio
+async def test_dashboard_stats(client):
+    """Dashboard stats endpoint returns analytics."""
+    response = await client.get("/api/dashboard/stats")
+    assert response.status_code == 200
+    data = response.json()
+    assert "total_conversations" in data
+    assert "avg_latency_ms" in data
+
+@pytest.mark.asyncio
+async def test_task_crud(client):
+    """Task creation and management."""
+    # Create task via text endpoint
+    response = await client.post("/api/text",
+        data={"text": "Remind me to buy groceries", "language": "en"})
+    assert response.status_code == 200
+    # List tasks
+    response = await client.get("/api/tasks")
+    assert response.status_code == 200
+    tasks = response.json()["tasks"]
+    assert isinstance(tasks, list)
+</code></pre>
+
+</div>
+
+<!-- Page 51 -->
+<div class="page">
+<span class="page-number">51</span>
+
+<pre><code>"""Test database operations (tests/test_database.py)."""
+import pytest
+from src.db.database import Database
+
+@pytest.fixture
+def db(tmp_path):
+    return Database(db_path=str(tmp_path / "test.db"))
+
+def test_create_conversation(db):
+    """Conversations are persisted correctly."""
+    conv_id = db.log_conversation(
+        language="ml", intent="info",
+        asr_time_ms=120.5, llm_time_ms=350.2, total_time_ms=680.7,
+        user_message="What is the weather?",
+        assistant_message="The weather is sunny today.")
+    assert conv_id is not None
+    conv = db.get_conversation(conv_id)
+    assert conv["language"] == "ml"
+    assert conv["intent"] == "info"
+
+def test_create_task(db):
+    """Tasks are created and retrievable."""
+    db.create_task(title="Buy groceries", source_input="Remind me to buy groceries")
+    tasks = db.get_tasks(status="pending")
+    assert len(tasks) == 1
+    assert tasks[0]["title"] == "Buy groceries"
+
+def test_update_task_status(db):
+    """Task status can be updated."""
+    db.create_task(title="Test task")
+    tasks = db.get_tasks(status="pending")
+    task_id = tasks[0]["id"]
+    db.update_task(task_id, status="done")
+    done_tasks = db.get_tasks(status="done")
+    assert len(done_tasks) == 1
+
+"""Test cache module (tests/test_cache.py)."""
+from src.cache.response_cache import ResponseCache
+
+def test_cache_hit():
+    """Cached responses are returned on repeat queries."""
+    cache = ResponseCache(max_size=10, ttl_seconds=60)
+    cache.set("hello_ml_tts", b"audio_data_bytes")
+    assert cache.get("hello_ml_tts") == b"audio_data_bytes"
+
+def test_cache_ttl_expiration():
+    """Expired entries are not returned."""
+    cache = ResponseCache(max_size=10, ttl_seconds=0)  # Instant expiry
+    cache.set("key", "value")
+    import time; time.sleep(0.01)
+    assert cache.get("key") is None
+
+def test_lru_eviction():
+    """LRU eviction when cache is full."""
+    cache = ResponseCache(max_size=2, ttl_seconds=60)
+    cache.set("a", "1")
+    cache.set("b", "2")
+    cache.set("c", "3")  # Should evict "a"
+    assert cache.get("a") is None
+    assert cache.get("c") == "3"
+</code></pre>
+
+<p><b>Running Tests:</b></p>
+<pre><code># Run all tests
+pytest tests/ -v
+
+# Run with coverage report
+pytest tests/ --cov=src --cov-report=html
+
+# Run specific test module
+pytest tests/test_api.py -v
+
+# Run single test
+pytest tests/test_database.py::test_create_task -v
+</code></pre>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 8 — IMPLEMENTATION (Pages 52-55)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">52</span>
+
+<h1>8. IMPLEMENTATION</h1>
+
+<h2>8.1 Implementation Method Used in the Project</h2>
+
+<p>The implementation follows an incremental delivery model aligned with the Scrum sprint structure. Each sprint delivers a working increment that builds upon previous work, with continuous integration testing at each stage.</p>
+
+<p><b>I. Infrastructure Setup and Backend Development</b></p>
+<ul>
+  <li><b>Python Environment:</b> Setup virtual environment with <code>python -m venv venv</code>. Install all dependencies from <code>requirements.txt</code> (PyTorch, Transformers, FastAPI, LangGraph, etc.).</li>
+  <li><b>Project Structure:</b> Organized into <code>src/</code> with subdirectories per module (asr, tts, translation, llm, agents, pipeline, api, db, edge, cache). Each module has <code>__init__.py</code> for clean imports.</li>
+  <li><b>Configuration:</b> YAML-based settings loaded via typed dataclass loader. Environment variables override YAML values. Separate profiles for server (<code>settings.yaml</code>) and edge (<code>edge_profile.yaml</code>).</li>
+  <li><b>Database:</b> SQLite with WAL mode initialized on startup. Automatic schema creation. Tables: conversations, messages, tasks, system_metrics.</li>
+  <li><b>FastAPI Server:</b> Lifespan-managed application with model loading at startup. CORS middleware, static file serving, and comprehensive error handling.</li>
+</ul>
+
+<p><b>II. AI/ML Pipeline Development</b></p>
+<ul>
+  <li><b>ASR Integration:</b>
+    <ul>
+      <li>Primary: Meta MMS ASR 1B — optimized for Indian languages with specialized tokenizers</li>
+      <li>Fallback: OpenAI Whisper — multilingual support with language detection</li>
+      <li>Low-latency: Pingala ASR — faster inference for real-time applications</li>
+      <li>Audio preprocessing: noisereduce for spectral noise reduction</li>
+    </ul>
+  </li>
+  <li><b>Translation:</b>
+    <ul>
+      <li>AI4Bharat IndicTrans2 with both full (1B) and distilled (211M) variants</li>
+      <li>Bidirectional translation: Indian language ↔ English</li>
+      <li>11 language pairs with language-specific tokenization via SentencePiece</li>
+    </ul>
+  </li>
+  <li><b>LLM:</b>
+    <ul>
+      <li>Qwen 2.5 Instruct models (0.5B to 7B variants) via native Transformers</li>
+      <li>Qwen 3 models with llama.cpp backend for quantized GGUF inference</li>
+      <li>Conversation memory with configurable history length</li>
+      <li>Agent-specific system prompts and thinking extraction</li>
+    </ul>
+  </li>
+  <li><b>TTS:</b>
+    <ul>
+      <li>Meta MMS-TTS for offline synthesis in all supported languages</li>
+      <li>Cartesia API for online high-quality synthesis</li>
+      <li>AI4Bharat Indic Parler TTS with emotion control</li>
+      <li>Per-language model caching for fast repeated synthesis</li>
+    </ul>
+  </li>
+</ul>
+
+</div>
+
+<!-- Page 53-54 -->
+<div class="page">
+<span class="page-number">53</span>
+
+<p><b>III. Agent System Development</b></p>
+<ul>
+  <li><b>LangGraph Orchestrator:</b>
+    <ul>
+      <li>StateGraph workflow with 5 nodes: classify, info_agent, task_agent, chat_agent, respond</li>
+      <li>Conditional edges based on intent classification</li>
+      <li>State management via AgentState dataclass</li>
+    </ul>
+  </li>
+  <li><b>Intent Classification:</b> Regex + keyword-based classifier with priority ordering: task > smart_home > chat > info. Default to info for unrecognized queries.</li>
+  <li><b>Info Agent:</b> DuckDuckGo web search (up to 3 results) combined with LLM synthesis. Returns response with source URLs.</li>
+  <li><b>Task Agent:</b> Creates tasks in SQLite database. Extracts task title from user input using LLM. Special handling for alarms and reminders.</li>
+  <li><b>Chat Agent:</b> General conversation using LLM with voice-appropriate system prompts.</li>
+  <li><b>Fallback System:</b> Pre-generated contextual responses when LLM is unavailable. Rotating counter prevents identical responses.</li>
+  <li><b>Reasoning Leak Detection:</b> Detects when Qwen 3 outputs chain-of-thought instead of answers. Auto-retries with stricter prompts.</li>
+</ul>
+
+<p><b>IV. Frontend and Dashboard Development</b></p>
+<ul>
+  <li><b>Technology:</b> React 18 + TypeScript with Vite build system</li>
+  <li><b>UI Library:</b> Radix UI primitives for accessible, unstyled components + Tailwind CSS for responsive styling</li>
+  <li><b>Components:</b>
+    <ul>
+      <li>StatsCards: Total conversations, average latency, language distribution, intent breakdown</li>
+      <li>ConversationViewer: Real-time conversation list with search, filter, and detail view</li>
+      <li>HealthStatus: Component health indicators (ASR, LLM, TTS, Translation, Database)</li>
+      <li>LatencyChart: Performance metrics visualization with per-component breakdown</li>
+      <li>TryItPanel: Interactive text/voice input panel for testing the assistant from the browser</li>
+      <li>TaskList: View and manage tasks created by the Task Agent</li>
+      <li>LanguageSelector: Switch between supported languages</li>
+    </ul>
+  </li>
+  <li><b>Real-time Updates:</b> WebSocket connection for live conversation streaming. Polling for dashboard stats (10-second interval).</li>
+  <li><b>Build and Deployment:</b> Compiled React SPA served as static files by FastAPI at <code>/</code>. Assets in <code>src/api/static/</code>.</li>
+</ul>
+
+</div>
+
+<!-- Page 54-55 -->
+<div class="page">
+<span class="page-number">54</span>
+
+<p><b>V. Testing and Quality Assurance</b></p>
+<ul>
+  <li><b>Unit Tests:</b> pytest with fixtures for database, API client, and model mocks. 48 test cases across 7 test files.</li>
+  <li><b>Integration Tests:</b> End-to-end pipeline tests verifying audio → text → response → audio flow.</li>
+  <li><b>API Tests:</b> httpx AsyncClient with ASGI transport for testing FastAPI endpoints without a running server.</li>
+  <li><b>Coverage:</b> pytest-cov reporting with HTML output. Target >80% coverage for all modules.</li>
+  <li><b>Code Quality:</b> Black formatting (88 char line length), Ruff linting, Python type hints throughout.</li>
+</ul>
+
+<p><b>VI. Edge Deployment and Docker</b></p>
+<ul>
+  <li><b>Raspberry Pi 5:</b> Target deployment platform with BCM2712 Cortex-A76 quad-core and 4-8GB LPDDR4X RAM.</li>
+  <li><b>Model Optimization:</b>
+    <ul>
+      <li>Qwen 2.5 quantized to Q4_K_M (4-bit) or Q8_0 (8-bit) via llama.cpp</li>
+      <li>IndicTrans2 distilled variant (211M vs 1B) — 5x smaller, similar quality</li>
+      <li>MMS-TTS: lightweight per-language models (~100MB each)</li>
+      <li>ONNX Runtime for optimized CPU inference</li>
+    </ul>
+  </li>
+  <li><b>Edge Configuration:</b> <code>config/edge_profile.yaml</code> with reduced context window (1024), CPU-only inference, minimal language set (ML, HI, EN), and aggressive caching.</li>
+  <li><b>Docker Compose:</b> Resource-constrained deployment (2 CPU, 4GB RAM limit) with persistent volume mounts, health check, and auto-restart.</li>
+  <li><b>Deployment Steps:</b></li>
+</ul>
+
+<pre><code># Edge deployment on Raspberry Pi 5
+cd voice-assistant
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+# Download quantized models
+python -c "from src.llm.qwen3 import Qwen3LLM; Qwen3LLM(model_size='0.6b')"
+
+# Run with edge profile
+CONFIG_PROFILE=edge uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+
+# Or via Docker
+docker-compose up -d
+</code></pre>
+
+<p><b>Deliverables:</b> Deliverables align with the sprint schedule and backlog items. The implementation covers all 8 epics: Speech Recognition (E1), Translation (E2), Conversational AI (E3), Speech Synthesis (E4), Pipeline Integration (E5), Agent Framework (E6), Edge Deployment (E7), and DevOps &amp; Testing (E8). Total implementation spans 114 story points across 6 sprints.</p>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 9 — BUSINESS PERSPECTIVE (Pages 55-56)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">56</span>
+
+<h1>9. BUSINESS PERSPECTIVE</h1>
+
+<p>The Hyper-Localized Multilingual Voice Assistant represents a strategic technology solution focused on digital inclusion, cost efficiency, and scalable deployment for linguistically diverse communities.</p>
+
+<p><b>I. Digital Inclusion and Revenue Growth</b></p>
+<ul>
+  <li><b>Expanded User Base:</b> Supporting 11 Indian languages unlocks access for over 900 million potential users who are underserved by English-centric voice assistants. This represents a massive untapped market in India's digital economy.</li>
+  <li><b>Government and Public Services:</b> Edge-deployable voice assistants can be integrated into public service delivery — healthcare kiosks, agricultural advisory systems, banking services — enabling digital government services in regional languages.</li>
+  <li><b>Enterprise Deployments:</b> Companies operating in India can deploy this as a customer service solution, supporting regional language interactions without cloud API costs.</li>
+</ul>
+
+<p><b>II. Cost Reduction and Efficiency</b></p>
+<ul>
+  <li><b>Zero Recurring Costs:</b> Edge-first architecture eliminates cloud compute costs. A one-time hardware investment of ~$100 (Raspberry Pi + peripherals) replaces ongoing cloud API subscriptions that can cost $100+/month at scale.</li>
+  <li><b>Open-Source Stack:</b> All models and frameworks are open-source with permissive licenses, eliminating licensing fees.</li>
+  <li><b>Self-Managed:</b> The monitoring dashboard and Docker deployment reduce operational overhead. No dedicated ML ops team required for maintenance.</li>
+</ul>
+
+<p><b>III. Privacy and Compliance</b></p>
+<ul>
+  <li><b>Data Sovereignty:</b> All processing happens locally. No audio data leaves the device/network, ensuring compliance with India's Digital Personal Data Protection Act (DPDPA).</li>
+  <li><b>Audit Trail:</b> All interactions are logged locally with full timing and component metrics, enabling transparent audit reporting.</li>
+  <li><b>Sector-Specific Compliance:</b> Healthcare, education, and government sectors that require data residency can deploy with confidence.</li>
+</ul>
+
+<p><b>IV. Scalability and Market Potential</b></p>
+<ul>
+  <li><b>Modular Architecture:</b> New languages, agents, and capabilities can be added without redesigning the system.</li>
+  <li><b>Hardware Scalable:</b> The same codebase runs on Raspberry Pi (edge), desktop GPU (development), and cloud servers (enterprise) — just change the configuration profile.</li>
+  <li><b>White-Label Ready:</b> The modular design supports customization for different verticals (healthcare, agriculture, education, customer service) with domain-specific agents and vocabularies.</li>
+</ul>
+
+<p><b>Strategic Outcomes:</b></p>
+<ul>
+  <li>Bridge the digital divide for India's non-English-speaking population through accessible voice technology</li>
+  <li>Demonstrate commercial viability of edge AI for voice applications without cloud dependency</li>
+  <li>Enable privacy-compliant voice services in regulated sectors</li>
+  <li>Create a replicable model for multilingual voice assistants in other linguistically diverse regions</li>
+</ul>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 10 — FUTURE SCOPE (Pages 57-60)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">58</span>
+
+<h1>10. FUTURE SCOPE OR ENHANCEMENTS</h1>
+
+<p>The Hyper-Localized Multilingual Voice Assistant establishes a foundation for significant enhancements across model quality, user experience, platform capabilities, and deployment scale.</p>
+
+<p><b>I. Advanced User Experience Features</b></p>
+<ul>
+  <li><b>Speaker Identification and Personalization:</b> Add speaker diarization to identify different users and maintain per-user conversation history, preferences, and language settings.</li>
+  <li><b>Emotion-Aware Responses:</b> Leverage the Indic Parler TTS emotion control capability to generate responses with appropriate emotional tone (calm, excited, empathetic) based on the user's detected sentiment.</li>
+  <li><b>Wake Word Detection:</b> Implement on-device keyword spotting (e.g., "Hey Assistant") for hands-free activation without button presses.</li>
+  <li><b>Multi-Turn Conversation Improvements:</b> Enhance conversation context with persistent memory across sessions, enabling the assistant to remember user preferences, previous interactions, and ongoing tasks.</li>
+  <li><b>Voice Cloning:</b> Allow users to customize the assistant's voice using Chatterbox TTS voice cloning capabilities for a more personalized experience.</li>
+</ul>
+
+<p><b>II. Model and Pipeline Improvements</b></p>
+<ul>
+  <li><b>Fine-Tuned Models:</b> Fine-tune Whisper and Qwen models on Indian language conversational data to improve accuracy for regional accents and domain-specific vocabulary.</li>
+  <li><b>Streaming ASR:</b> Replace batch ASR with streaming speech recognition for real-time transcription as the user speaks, reducing perceived latency.</li>
+  <li><b>Speculative Decoding:</b> Implement draft-model speculative decoding for the LLM to achieve 2-3x faster token generation on edge hardware.</li>
+  <li><b>Model Distillation:</b> Create custom distilled models specifically optimized for Indian language voice assistant tasks, further reducing model size while maintaining quality.</li>
+  <li><b>Retrieval-Augmented Generation (RAG):</b> Integrate a vector database for domain-specific knowledge retrieval, enabling the assistant to answer questions from local document stores.</li>
+</ul>
+
+</div>
+
+<!-- Page 59-60 -->
+<div class="page">
+<span class="page-number">59</span>
+
+<p><b>III. Platform Expansion</b></p>
+<ul>
+  <li><b>Mobile Application:</b> Develop a companion mobile app (React Native or Flutter) that connects to the edge device for remote control and configuration.</li>
+  <li><b>Smart Home Integration:</b> Full IoT integration with Matter/Thread protocols for controlling smart home devices via voice commands in regional languages.</li>
+  <li><b>Multi-Device Mesh:</b> Enable multiple Raspberry Pi devices to form a mesh network, allowing voice interaction from any room while sharing a single processing backend.</li>
+  <li><b>Cloud Hybrid Mode:</b> Add optional cloud processing for complex queries that exceed edge device capabilities, with automatic routing based on query complexity and device load.</li>
+</ul>
+
+<p><b>IV. Operational and Enterprise Features</b></p>
+<ul>
+  <li><b>Analytics Dashboard:</b> Advanced analytics with conversation flow visualization, user behavior patterns, intent distribution heatmaps, and performance trend analysis.</li>
+  <li><b>A/B Testing Framework:</b> Built-in support for testing different model configurations, system prompts, and pipeline strategies to optimize response quality.</li>
+  <li><b>Multi-Tenant Support:</b> Enable multiple organizations to deploy isolated instances with separate configurations, agent customizations, and data stores.</li>
+  <li><b>Automated Testing:</b> CI/CD pipeline with automated model quality checks, latency regression testing, and translation accuracy benchmarks on every code change.</li>
+</ul>
+
+<p><b>V. Advanced Agent Capabilities</b></p>
+<ul>
+  <li><b>Tool Use:</b> Enable agents to interact with external APIs (weather, news, transportation) through a standardized tool-use framework.</li>
+  <li><b>Multi-Agent Collaboration:</b> Allow agents to delegate sub-tasks to other agents, enabling complex multi-step workflows (e.g., "Find a restaurant near me and make a reservation").</li>
+  <li><b>Learning from Feedback:</b> Implement user feedback loops where positive/negative signals improve intent classification and response quality over time.</li>
+  <li><b>Proactive Assistance:</b> Enable the assistant to proactively notify users about upcoming tasks, weather changes, or relevant information based on learned patterns.</li>
+</ul>
+
+<p><b>VI. Scalability and Deployment</b></p>
+<ul>
+  <li><b>Kubernetes Deployment:</b> Containerized deployment on Kubernetes for enterprise-scale multi-instance management.</li>
+  <li><b>Model Serving:</b> Dedicated model serving infrastructure (Triton, vLLM) for high-throughput inference in multi-user deployments.</li>
+  <li><b>Federated Learning:</b> Privacy-preserving model improvement across multiple edge deployments without centralizing user data.</li>
+  <li><b>Additional Languages:</b> Extend support to all 22 scheduled Indian languages and explore Southeast Asian and African languages using similar model architectures.</li>
+</ul>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 11 — APPENDIX (Pages 61-66)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">62</span>
+
+<h1>11. APPENDIX</h1>
+
+<h2>11.1 Git History [Sprint Wise]</h2>
+
+<p><b>Sprint 1 — Research, Setup &amp; Core PoCs</b></p>
+<ul>
+  <li>Defined project scope, user stories, and acceptance criteria</li>
+  <li>Created project structure: <code>src/</code>, <code>tests/</code>, <code>config/</code>, <code>docs/</code>, <code>scripts/</code></li>
+  <li>Implemented Whisper ASR wrapper with multilingual support</li>
+  <li>Implemented MMS-TTS wrapper for Indian language synthesis</li>
+  <li>Created TTS comparison script for quality evaluation</li>
+  <li>Setup Python virtual environment with GPU/CUDA configuration</li>
+  <li>Documented technology stack decisions and architecture</li>
+</ul>
+
+<p><b>Sprint 2 — Translation &amp; LLM Integration</b></p>
+<ul>
+  <li>Integrated IndicTrans2 for bidirectional ML↔EN translation</li>
+  <li>Setup both full (1B) and distilled (211M) model variants</li>
+  <li>Implemented Qwen 2.5 LLM wrapper with conversation memory</li>
+  <li>Created voice assistant system prompts</li>
+  <li>Built configuration system with YAML loader and typed dataclasses</li>
+  <li>Added basic intent detection module</li>
+</ul>
+
+<p><b>Sprint 3 — Full Pipeline &amp; API Development</b></p>
+<ul>
+  <li>Created pipeline orchestrator connecting ASR → Translation → LLM → TTS</li>
+  <li>Implemented FastAPI server with REST endpoints and WebSocket streaming</li>
+  <li>Added audio file handling, CORS middleware, and static file serving</li>
+  <li>Created database module with SQLite persistence</li>
+  <li>Built error handling and graceful degradation across all components</li>
+  <li>Added detailed timing metrics to pipeline execution</li>
+</ul>
+
+<p><b>Sprint 4 — Agent Framework</b></p>
+<ul>
+  <li>Integrated LangGraph with StateGraph workflow</li>
+  <li>Implemented intent classifier with regex + keyword matching</li>
+  <li>Created Info Agent with DuckDuckGo web search integration</li>
+  <li>Created Task Agent with SQLite task persistence</li>
+  <li>Created Chat Agent for general conversation</li>
+  <li>Added agent routing display to dashboard</li>
+  <li>Seeded demo data for dashboard testing</li>
+</ul>
+
+</div>
+
+<!-- Page 62 -->
+<div class="page">
+<span class="page-number">63</span>
+
+<p><b>Sprint 5 — Edge Deployment &amp; Optimization</b></p>
+<ul>
+  <li>Added llama.cpp backend for quantized GGUF model inference</li>
+  <li>Created edge configuration profile with reduced model sizes</li>
+  <li>Implemented LRU response cache with TTL for translations and TTS</li>
+  <li>Created Docker Compose for containerized deployment</li>
+  <li>Added ONNX backend for model optimization</li>
+  <li>Implemented model optimization utilities (quantization, pruning)</li>
+  <li>Built React dashboard with Vite + TypeScript + Radix UI + Tailwind</li>
+</ul>
+
+<p><b>Sprint 6 — Testing, Documentation &amp; Release</b></p>
+<ul>
+  <li>Wrote comprehensive test suite: API, database, cache, integration, optimization tests</li>
+  <li>Added task management and web search capabilities</li>
+  <li>Implemented audio denoising with noisereduce</li>
+  <li>Enhanced dashboard with latency charts, health monitoring, and try-it panel</li>
+  <li>Created demo scripts and benchmarking tools</li>
+  <li>Switched to offline-only models for reliable demonstration</li>
+  <li>Final documentation, README, and sprint reports</li>
+</ul>
+
+<h2>11.2 Screenshots of Forms, Reports, Diagrams</h2>
+
+<p class="screenshot-caption">Dashboard — Main View</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_dashboard.png" alt="Dashboard Main View">
+</div>
+
+<p class="screenshot-caption">Dashboard — Full Page</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_dashboard_full.png" alt="Dashboard Full Page">
+</div>
+
+</div>
+
+<!-- Page 63-64 -->
+<div class="page">
+<span class="page-number">64</span>
+
+<p class="screenshot-caption">Dashboard — Conversation Logs</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_conversations.png" alt="Conversation Logs">
+</div>
+
+<p class="screenshot-caption">Dashboard — Health &amp; Latency Monitoring</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_health_latency.png" alt="Health and Latency">
+</div>
+
+<p class="screenshot-caption">Dashboard — Statistics Overview</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_stats.png" alt="Statistics">
+</div>
+
+</div>
+
+<!-- Page 65 -->
+<div class="page">
+<span class="page-number">65</span>
+
+<p class="screenshot-caption">Dashboard — Try-It Panel &amp; Task Management</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_tryit_tasks.png" alt="Try It and Tasks">
+</div>
+
+<p class="screenshot-caption">Dashboard — Middle Section (Agent Routing Display)</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_dashboard_mid.png" alt="Dashboard Middle">
+</div>
+
+<p class="screenshot-caption">Dashboard — Bottom Section (Performance Metrics)</p>
+<div class="screenshot">
+  <img src="report_assets/screenshot_dashboard_bottom.png" alt="Dashboard Bottom">
+</div>
+
+</div>
+
+<!-- Page 66: Figures -->
+<div class="page">
+<span class="page-number">66</span>
+
+<p class="screenshot-caption">Language Support Distribution</p>
+<div class="figure">
+  <img src="report_assets/languages.png" alt="Language Support">
+</div>
+
+<p class="screenshot-caption">Component Latency Breakdown</p>
+<div class="figure">
+  <img src="report_assets/latency.png" alt="Latency Breakdown">
+</div>
+
+<p class="screenshot-caption">Model Memory Footprint</p>
+<div class="figure">
+  <img src="report_assets/memory.png" alt="Memory Usage">
+</div>
+
+</div>
+
+<!-- Page 67: Burndown -->
+<div class="page">
+<span class="page-number">68</span>
+
+<h2>11.3 Burndown Charts</h2>
+
+<div class="figure">
+  <img src="report_assets/burndown.png" alt="Burndown Chart">
+  <p class="figure-caption">Fig 11.1 — Overall Sprint Burndown Chart</p>
+</div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     CHAPTER 12 — REFERENCES (Pages 67-69)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="page">
+<span class="page-number">69</span>
+
+<h1>12. REFERENCES / BIBLIOGRAPHY</h1>
+
+<p><b>Books and Articles</b></p>
+<ol>
+  <li>Radford, A., Kim, J.W., Xu, T., et al. (2023). "Robust Speech Recognition via Large-Scale Weak Supervision." <i>Proceedings of ICML 2023</i>. (OpenAI Whisper paper)</li>
+  <li>Pratap, V., Tjandra, A., Shi, B., et al. (2023). "Scaling Speech Technology to 1,000+ Languages." <i>Meta AI Research</i>. (MMS ASR/TTS paper)</li>
+  <li>Gala, J., Chitale, P., et al. (2023). "IndicTrans2: Towards High-Quality and Accessible Machine Translation Models for all 22 Scheduled Indian Languages." <i>AI4Bharat, IIT Madras</i>.</li>
+  <li>Qwen Team, Alibaba Cloud. (2024). "Qwen2.5: A Party of Foundation Models." <i>Alibaba Group Technical Report</i>.</li>
+  <li>Harrison Chase, et al. (2024). "LangGraph: Building Language Agents as Graphs." <i>LangChain Documentation</i>.</li>
+  <li>Ramirez, S. (2021). "FastAPI: Modern, Fast Web Framework for Building APIs." <i>Tiangolo Documentation</i>.</li>
+  <li>Raspberry Pi Foundation. (2023). "Raspberry Pi 5: Product Brief." <i>Raspberry Pi Ltd</i>.</li>
+</ol>
+
+<p><b>Research Papers</b></p>
+<ol>
+  <li>Kakwani, D., Kunchukuttan, A., et al. (2020). "IndicNLPSuite: Monolingual Corpora, Evaluation Benchmarks and Pre-trained Multilingual Language Models for Indian Languages." <i>Findings of EMNLP</i>.</li>
+  <li>Vaswani, A., Shazeer, N., et al. (2017). "Attention Is All You Need." <i>Advances in Neural Information Processing Systems</i>.</li>
+  <li>Touvron, H., et al. (2023). "Llama 2: Open Foundation and Fine-Tuned Chat Models." <i>Meta AI</i>.</li>
+  <li>Dettmers, T., et al. (2022). "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers." <i>ICLR 2023</i>.</li>
+</ol>
+
+<p><b>Online Documentation</b></p>
+<ol>
+  <li>PyTorch Documentation — https://pytorch.org/docs/</li>
+  <li>Hugging Face Transformers — https://huggingface.co/docs/transformers/</li>
+  <li>FastAPI Documentation — https://fastapi.tiangolo.com/</li>
+  <li>LangGraph Documentation — https://langchain-ai.github.io/langgraph/</li>
+  <li>IndicTrans2 Repository — https://github.com/AI4Bharat/IndicTrans2</li>
+  <li>OpenAI Whisper Repository — https://github.com/openai/whisper</li>
+  <li>Meta MMS Repository — https://github.com/facebookresearch/fairseq/tree/main/examples/mms</li>
+  <li>Qwen 2.5 Models — https://huggingface.co/Qwen/</li>
+  <li>llama.cpp Repository — https://github.com/ggerganov/llama.cpp</li>
+  <li>React Documentation — https://react.dev/</li>
+  <li>Radix UI — https://www.radix-ui.com/</li>
+  <li>Tailwind CSS — https://tailwindcss.com/</li>
+</ol>
+
+</div>
+
+<!-- Final page -->
+<div class="page">
+<span class="page-number">70</span>
+
+<p><b>Technical Standards and Guidelines</b></p>
+<ol>
+  <li>OWASP Top 10 — https://owasp.org/www-project-top-ten/ — Web application security standards for API development.</li>
+  <li>W3C Web Content Accessibility Guidelines (WCAG) 2.1 — https://www.w3.org/TR/WCAG21/ — Accessibility standards for the dashboard interface.</li>
+  <li>PEP 8 — Python Style Guide — https://peps.python.org/pep-0008/ — Python coding conventions followed throughout the project.</li>
+  <li>Unicode CLDR — https://cldr.unicode.org/ — Locale data for Indian language support.</li>
+</ol>
+
+<p><b>Community Resources</b></p>
+<ol>
+  <li>AI4Bharat Community — https://ai4bharat.iitm.ac.in/ — Indian language AI research and model hub.</li>
+  <li>Hugging Face Model Hub — https://huggingface.co/models — Repository for pre-trained ML models.</li>
+  <li>LangChain Community — https://github.com/langchain-ai/ — Open-source framework for LLM applications.</li>
+  <li>Raspberry Pi Forums — https://forums.raspberrypi.com/ — Community support for edge device deployment.</li>
+  <li>PyTorch Forums — https://discuss.pytorch.org/ — ML framework community support.</li>
+</ol>
+
+</div>
+
+</body>
+</html>

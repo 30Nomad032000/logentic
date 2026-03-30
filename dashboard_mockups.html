@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e1e4e8; }
+
+  /* ── Dashboard mockup ── */
+  .dashboard {
+    width: 1200px;
+    padding: 24px;
+    background: #0f1117;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0 20px;
+    border-bottom: 1px solid #21262d;
+    margin-bottom: 20px;
+  }
+  .header h1 { font-size: 22px; color: #f0f3f6; font-weight: 600; }
+  .header .version { background: #238636; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 12px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card {
+    background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 18px;
+  }
+  .stat-card .label { font-size: 12px; color: #8b949e; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: #f0f3f6; }
+  .stat-card .sub { font-size: 11px; color: #3fb950; margin-top: 4px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .card {
+    background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 18px;
+  }
+  .card h3 { font-size: 14px; color: #f0f3f6; margin-bottom: 14px; font-weight: 600; }
+
+  /* Health indicators */
+  .health-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .health-item {
+    display: flex; align-items: center; gap: 8px;
+    background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 10px 14px; flex: 1;
+  }
+  .health-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .health-dot.green { background: #3fb950; box-shadow: 0 0 6px #3fb95088; }
+  .health-dot.yellow { background: #d29922; box-shadow: 0 0 6px #d2992288; }
+  .health-name { font-size: 12px; color: #c9d1d9; font-weight: 500; }
+  .health-status { font-size: 10px; color: #8b949e; }
+
+  /* Latency bars */
+  .latency-item { margin-bottom: 12px; }
+  .latency-label { display: flex; justify-content: space-between; font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+  .latency-bar { height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
+  .latency-fill { height: 100%; border-radius: 4px; }
+  .latency-fill.asr { background: linear-gradient(90deg, #58a6ff, #388bfd); width: 18%; }
+  .latency-fill.trans { background: linear-gradient(90deg, #3fb950, #2ea043); width: 8%; }
+  .latency-fill.llm { background: linear-gradient(90deg, #bc8cff, #8b5cf6); width: 52%; }
+  .latency-fill.tts { background: linear-gradient(90deg, #f78166, #da3633); width: 28%; }
+
+  /* Try It panel */
+  .tryit-input {
+    width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d;
+    border-radius: 8px; color: #c9d1d9; font-size: 13px; margin-bottom: 12px; resize: none;
+  }
+  .btn-row { display: flex; gap: 8px; }
+  .btn {
+    padding: 8px 18px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer;
+  }
+  .btn-primary { background: #238636; color: #fff; }
+  .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+  .waveform { height: 40px; display: flex; align-items: center; gap: 2px; margin-top: 12px; }
+  .waveform .bar { width: 3px; background: #58a6ff; border-radius: 2px; opacity: 0.6; }
+
+  /* Conversations */
+  .conv-list { }
+  .conv-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; border-bottom: 1px solid #21262d; font-size: 12px;
+  }
+  .conv-item:last-child { border-bottom: none; }
+  .conv-lang { background: #0d419d; color: #58a6ff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .conv-intent { color: #8b949e; font-size: 11px; }
+  .conv-time { color: #484f58; font-size: 10px; }
+  .conv-text { color: #c9d1d9; flex: 1; margin: 0 12px; }
+
+  /* Tasks */
+  .task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #21262d;
+  }
+  .task-check { width: 16px; height: 16px; border: 2px solid #30363d; border-radius: 4px; }
+  .task-check.done { background: #238636; border-color: #238636; }
+  .task-text { font-size: 12px; color: #c9d1d9; }
+  .task-text.done-text { color: #484f58; text-decoration: line-through; }
+  .task-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; }
+  .task-badge.pending { background: #d29922; color: #0d1117; }
+  .task-badge.completed { background: #238636; color: #fff; }
+
+  .full-width { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREENSHOT 1: FULL DASHBOARD ═══ -->
+<div class="dashboard" id="dashboard-overview">
+  <div class="header">
+    <div>
+      <h1>Voice Assistant Dashboard</h1>
+      <span style="font-size:12px;color:#8b949e;">Hyper-Localized Multilingual Voice Assistant v0.2.0</span>
+    </div>
+    <span class="version">v0.2.0</span>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="label">Total Conversations</div>
+      <div class="value">147</div>
+      <div class="sub">+12 today</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg Latency</div>
+      <div class="value">695ms</div>
+      <div class="sub" style="color:#d29922;">GPU mode</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Active Languages</div>
+      <div class="value">6</div>
+      <div class="sub">ml, hi, ta, te, en, bn</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Agent Accuracy</div>
+      <div class="value">93.2%</div>
+      <div class="sub">Intent routing</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Component Health -->
+    <div class="card">
+      <h3>Component Health</h3>
+      <div class="health-row">
+        <div class="health-item">
+          <div class="health-dot green"></div>
+          <div><div class="health-name">ASR (MMS)</div><div class="health-status">Loaded</div></div>
+        </div>
+        <div class="health-item">
+          <div class="health-dot green"></div>
+          <div><div class="health-name">LLM (Qwen)</div><div class="health-status">Ready</div></div>
+        </div>
+        <div class="health-item">
+          <div class="health-dot green"></div>
+          <div><div class="health-name">TTS (MMS)</div><div class="health-status">Active</div></div>
+        </div>
+        <div class="health-item">
+          <div class="health-dot green"></div>
+          <div><div class="health-name">Database</div><div class="health-status">WAL mode</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latency Breakdown -->
+    <div class="card">
+      <h3>Latency Breakdown</h3>
+      <div class="latency-item">
+        <div class="latency-label"><span>ASR (Whisper)</span><span>120ms</span></div>
+        <div class="latency-bar"><div class="latency-fill asr"></div></div>
+      </div>
+      <div class="latency-item">
+        <div class="latency-label"><span>Translation (IndicTrans2)</span><span>45ms</span></div>
+        <div class="latency-bar"><div class="latency-fill trans"></div></div>
+      </div>
+      <div class="latency-item">
+        <div class="latency-label"><span>LLM (Qwen 2.5)</span><span>350ms</span></div>
+        <div class="latency-bar"><div class="latency-fill llm"></div></div>
+      </div>
+      <div class="latency-item">
+        <div class="latency-label"><span>TTS (MMS-TTS)</span><span>180ms</span></div>
+        <div class="latency-bar"><div class="latency-fill tts"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Try It Panel -->
+    <div class="card">
+      <h3>Try It</h3>
+      <textarea class="tryit-input" rows="2" placeholder="Type a message or click Record...">എന്റെ അലാറം രാവിലെ 5 മണിക്ക് സെറ്റ് ചെയ്യൂ</textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary">Send</button>
+        <button class="btn btn-secondary">Record</button>
+        <select style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:4px 8px;font-size:11px;">
+          <option>Malayalam (ml)</option>
+          <option>Hindi (hi)</option>
+          <option>Tamil (ta)</option>
+        </select>
+      </div>
+      <div class="waveform">
+        <div class="bar" style="height:8px;"></div><div class="bar" style="height:18px;"></div>
+        <div class="bar" style="height:30px;"></div><div class="bar" style="height:22px;"></div>
+        <div class="bar" style="height:35px;"></div><div class="bar" style="height:15px;"></div>
+        <div class="bar" style="height:28px;"></div><div class="bar" style="height:38px;"></div>
+        <div class="bar" style="height:20px;"></div><div class="bar" style="height:12px;"></div>
+        <div class="bar" style="height:25px;"></div><div class="bar" style="height:32px;"></div>
+        <div class="bar" style="height:18px;"></div><div class="bar" style="height:28px;"></div>
+        <div class="bar" style="height:14px;"></div><div class="bar" style="height:22px;"></div>
+        <div class="bar" style="height:36px;"></div><div class="bar" style="height:10px;"></div>
+        <div class="bar" style="height:20px;"></div><div class="bar" style="height:30px;"></div>
+      </div>
+    </div>
+
+    <!-- Task Panel -->
+    <div class="card">
+      <h3>Tasks</h3>
+      <div class="task-item">
+        <div class="task-check"></div>
+        <div class="task-text">Set alarm for 5:00 AM tomorrow</div>
+        <span class="task-badge pending">pending</span>
+      </div>
+      <div class="task-item">
+        <div class="task-check"></div>
+        <div class="task-text">Buy groceries from market</div>
+        <span class="task-badge pending">pending</span>
+      </div>
+      <div class="task-item">
+        <div class="task-check done"></div>
+        <div class="task-text done-text">Call doctor at 10 AM</div>
+        <span class="task-badge completed">done</span>
+      </div>
+      <div class="task-item">
+        <div class="task-check done"></div>
+        <div class="task-text done-text">Submit project report</div>
+        <span class="task-badge completed">done</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conversations -->
+  <div class="card" style="margin-top:16px;">
+    <h3>Conversation Log</h3>
+    <div class="conv-list">
+      <div class="conv-item">
+        <span class="conv-lang">ML</span>
+        <span class="conv-text">"എന്റെ അലാറം രാവിലെ 5 മണിക്ക് സെറ്റ് ചെയ്യൂ"</span>
+        <span class="conv-intent">task_management</span>
+        <span class="conv-time">2 min ago</span>
+      </div>
+      <div class="conv-item">
+        <span class="conv-lang">HI</span>
+        <span class="conv-text">"आज का मौसम कैसा है?"</span>
+        <span class="conv-intent">information_query</span>
+        <span class="conv-time">5 min ago</span>
+      </div>
+      <div class="conv-item">
+        <span class="conv-lang">TA</span>
+        <span class="conv-text">"இன்றைய செய்திகள் என்ன?"</span>
+        <span class="conv-intent">information_query</span>
+        <span class="conv-time">12 min ago</span>
+      </div>
+      <div class="conv-item">
+        <span class="conv-lang">EN</span>
+        <span class="conv-text">"Tell me a joke"</span>
+        <span class="conv-intent">general_chat</span>
+        <span class="conv-time">18 min ago</span>
+      </div>
+      <div class="conv-item">
+        <span class="conv-lang">ML</span>
+        <span class="conv-text">"ലൈറ്റ് ഓഫ് ചെയ്യൂ"</span>
+        <span class="conv-intent">smart_home</span>
+        <span class="conv-time">25 min ago</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

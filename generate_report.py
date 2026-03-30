@@ -1,213 +1,147 @@
 """
-Generate project report by cloning the reference document and replacing content.
-Preserves all formatting, images, borders, and styles from the original.
+Generate project report PDF from HTML using Puppeteer (via Node.js subprocess).
+Also regenerates figures if needed.
+
+Usage:
+    python generate_report.py              # Generate PDF from existing HTML
+    python generate_report.py --figures    # Regenerate figures first, then PDF
+    python generate_report.py --screenshots # Capture dashboard screenshots first
+    python generate_report.py --all        # Do everything: figures + screenshots + PDF
 """
-from docx import Document
 
-SOURCE = r"C:\Users\Admin\Downloads\project 1 (1).docx"
-OUTPUT = r"D:\Work\logentic\Project_Report_Voice_Assistant.docx"
+import subprocess
+import sys
+import os
+import argparse
 
-NEW_TITLE_MIXED = "Hyper-Localized Multilingual Voice Assistant Using Edge Computing and Agentic Workflows"
+ROOT = os.path.dirname(os.path.abspath(__file__))
+HTML_PATH = os.path.join(ROOT, "project_report.html")
+PDF_PATH = os.path.join(ROOT, "Project_Report_Voice_Assistant_Final.pdf")
+FIGURES_SCRIPT = os.path.join(ROOT, "generate_figures.py")
+SCREENSHOT_SCRIPT = os.path.join(ROOT, "capture_screenshots.js")
 
 
-def replace_in_paragraph(paragraph, old_text, new_text):
-    """Replace text in a paragraph, keeping first run's formatting."""
-    full_text = paragraph.text
-    if old_text not in full_text:
-        return False
-    new_full = full_text.replace(old_text, new_text)
-    if not paragraph.runs:
-        return False
-    paragraph.runs[0].text = new_full
-    for run in paragraph.runs[1:]:
-        run.text = ""
-    return True
+def run_cmd(cmd, description):
+    """Run a command and print output."""
+    print(f"\n{'='*60}")
+    print(f"  {description}")
+    print(f"{'='*60}")
+    result = subprocess.run(cmd, cwd=ROOT, capture_output=False)
+    if result.returncode != 0:
+        print(f"WARNING: {description} returned exit code {result.returncode}")
+    return result.returncode
+
+
+def generate_figures():
+    """Regenerate matplotlib figures."""
+    python = sys.executable
+    return run_cmd([python, FIGURES_SCRIPT], "Generating figures with matplotlib")
+
+
+def capture_screenshots():
+    """Capture dashboard screenshots with Puppeteer."""
+    return run_cmd(["node", SCREENSHOT_SCRIPT],
+                   "Capturing dashboard screenshots")
+
+
+def generate_pdf():
+    """Convert HTML report to PDF using Puppeteer."""
+    converter_js = os.path.join(ROOT, "_convert_pdf.js")
+
+    html_file_url = "file:///" + HTML_PATH.replace("\\", "/")
+
+    js_code = """
+const puppeteer = require("puppeteer");
+const path = require("path");
+
+(async () => {
+  console.log("Launching browser for PDF generation...");
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  const page = await browser.newPage();
+
+  const htmlUrl = """ + repr(html_file_url) + """;
+  console.log("Loading HTML from: " + htmlUrl);
+  await page.goto(htmlUrl, {
+    waitUntil: "networkidle0",
+    timeout: 60000,
+  });
+
+  // Wait for images to load
+  await new Promise(r => setTimeout(r, 3000));
+
+  const pdfPath = """ + repr(PDF_PATH.replace("\\", "/")) + """;
+  console.log("Generating PDF: " + pdfPath);
+  await page.pdf({
+    path: pdfPath,
+    format: "A4",
+    printBackground: true,
+    margin: { top: "0", bottom: "0", left: "0", right: "0" },
+    displayHeaderFooter: false,
+  });
+
+  console.log("PDF generated successfully!");
+  await browser.close();
+})();
+"""
+
+    with open(converter_js, "w") as f:
+        f.write(js_code)
+
+    try:
+        rc = run_cmd(["node", converter_js], "Generating PDF with Puppeteer")
+        return rc
+    finally:
+        if os.path.exists(converter_js):
+            os.unlink(converter_js)
 
 
 def main():
-    doc = Document(SOURCE)
-    done = []
+    parser = argparse.ArgumentParser(description="Generate project report PDF")
+    parser.add_argument("--figures", action="store_true",
+                        help="Regenerate matplotlib figures")
+    parser.add_argument("--screenshots", action="store_true",
+                        help="Capture dashboard screenshots (requires server running)")
+    parser.add_argument("--all", action="store_true",
+                        help="Run everything: figures + screenshots + PDF")
+    parser.add_argument("--html-only", action="store_true",
+                        help="Skip PDF generation, just prepare assets")
+    args = parser.parse_args()
 
-    for para in doc.paragraphs:
-        t = para.text
+    if args.all:
+        args.figures = True
+        args.screenshots = True
 
-        # ── TITLE (all caps, appears on cover pages) ──
-        if "AUTOMATIC TEXT SUMMARIZATION USING NLP" in t:
-            replace_in_paragraph(para, t, t.replace(
-                "AUTOMATIC TEXT SUMMARIZATION USING NLP",
-                "HYPER-LOCALIZED MULTILINGUAL VOICE ASSISTANT USING EDGE COMPUTING AND AGENTIC WORKFLOWS"
-            ))
-            done.append("TITLE")
-            continue
+    if args.figures:
+        generate_figures()
 
-        # ── DECLARATION (must come before generic NAME/REG replacements) ──
-        if "I hereby declare" in t:
-            new = t.replace(
-                "Automatic Text Summarization using Natural Language Processing",
-                NEW_TITLE_MIXED
-            ).replace(
-                "Ms. Rintu Augustine Assistant professor",
-                "Prof. Sukrith Lal Assistant Professor"
-            ).replace("ALEXANDER SAJAN", "EBIN JOHN JOSEPH"
-            ).replace("ASI24MCA-2006", "ASI24MCA-2025")
-            replace_in_paragraph(para, t, new)
-            done.append("DECLARATION")
-            continue
+    if args.screenshots:
+        print("\nNOTE: For screenshots, ensure the server is running:")
+        print("  uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000")
+        capture_screenshots()
 
-        # ── CERTIFICATE (must come before generic NAME/REG replacements) ──
-        if "This is to certify" in t:
-            new = t
-            # Replace title (handle various quote characters)
-            new = new.replace(
-                "Automatic Text Summarization using Natural Language Processing",
-                NEW_TITLE_MIXED
-            )
-            new = new.replace("ALEXANDER SAJAN", "EBIN JOHN JOSEPH")
-            new = new.replace("ASI24MCA-2006", "ASI24MCA-2025")
-            new = new.replace("him/her", "him")
-            replace_in_paragraph(para, t, new)
-            done.append("CERTIFICATE")
-            continue
+    if not args.html_only:
+        if not os.path.exists(HTML_PATH):
+            print(f"ERROR: HTML report not found: {HTML_PATH}")
+            sys.exit(1)
 
-        # ── STUDENT NAME ──
-        if "ALEXANDER SAJAN" in t:
-            replace_in_paragraph(para, t, t.replace("ALEXANDER SAJAN", "EBIN JOHN JOSEPH"))
-            done.append("NAME")
-            continue
+        try:
+            subprocess.run(["node", "--version"], capture_output=True, check=True)
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            print("ERROR: Node.js not found. Install Node.js to generate PDF.")
+            sys.exit(1)
 
-        # ── REG NUMBER ──
-        if "ASI24MCA-2006" in t:
-            replace_in_paragraph(para, t, t.replace("ASI24MCA-2006", "ASI24MCA-2025"))
-            done.append("REG")
-            continue
+        generate_pdf()
 
-        # ── GUIDE NAME (heading style, cover page 2) ──
-        if t.strip() == "Ms. Rintu Augustine":
-            replace_in_paragraph(para, t, t.replace("Ms. Rintu Augustine", "Prof. Sukrith Lal"))
-            done.append("GUIDE_COVER")
-            continue
-
-        # ── GUIDE TITLE ──
-        if t.strip() == "Assistant professor":
-            replace_in_paragraph(para, t, t.replace("Assistant professor", "Assistant Professor"))
-            done.append("GUIDE_TITLE")
-            continue
-
-        # (Declaration and Certificate handled above, before NAME/REG)
-
-        # ── CERTIFICATE: Guide + HOD line ──
-        if "Asst. Prof. Rintu Augustine" in t and "Dr." in t:
-            replace_in_paragraph(para, t, t.replace(
-                "Asst. Prof. Rintu Augustine", "Prof. Sukrith Lal"
-            ))
-            done.append("CERT_GUIDE_LINE")
-            continue
-
-        # ── ACKNOWLEDGEMENT: Guide paragraph ──
-        if "Asst. Prof. Rintu Augustine" in t or ("Rintu Augustine" in t and "heartfelt" in t):
-            new = t.replace("Asst. Prof. Rintu Augustine", "Prof. Sukrith Lal")
-            new = new.replace("Rintu Augustine", "Sukrith Lal")
-            new = new.replace("Her insights", "His insights")
-            new = new.replace("Her ", "His ")
-            new = new.replace("her ", "his ")
-            new = new.replace(
-                "automatic text summarization using Natural Language Processing",
-                "building a hyper-localized multilingual voice assistant using edge computing and agentic workflows"
-            )
-            replace_in_paragraph(para, t, new)
-            done.append("ACK_GUIDE")
-            continue
-
-        # ── ACKNOWLEDGEMENT: College paragraph ──
-        if "full-stack web application development" in t:
-            new = t.replace(
-                "full-stack web application development",
-                "advanced machine learning, natural language processing, and edge computing"
-            ).replace(
-                "software engineering and modern AI-based systems",
-                "AI-driven software engineering and modern voice-based systems"
-            )
-            replace_in_paragraph(para, t, new)
-            done.append("ACK_COLLEGE")
-            continue
-
-        # ── ACKNOWLEDGEMENT: Open source paragraph ──
-        if "modern frameworks and NLP libraries" in t:
-            new = t.replace(
-                "modern frameworks and NLP libraries",
-                "modern frameworks such as PyTorch, Transformers, LangGraph, and FastAPI"
-            )
-            replace_in_paragraph(para, t, new)
-            done.append("ACK_OPEN")
-            continue
-
-        # ── ACKNOWLEDGEMENT: Feedback paragraph ──
-        if "testing phase" in t and "real-world user requirements" in t and "languages" not in t:
-            new = t.replace(
-                "real-world user requirements.",
-                "real-world user requirements across multiple Indian languages."
-            )
-            if new != t:
-                replace_in_paragraph(para, t, new)
-                done.append("ACK_FEEDBACK")
-            continue
-
-        # ── ABSTRACT paragraph 1 ──
-        if "intelligent system" in t and "Automatic Text Summarization" in t:
-            new = t.replace(
-                "\u201cAutomatic Text Summarization using Natural Language Processing (NLP)\u201d, "
-                "designed to efficiently process and condense large volumes of textual data into "
-                "concise and meaningful summaries. The primary problem addressed is the difficulty "
-                "faced by users in understanding and analyzing lengthy documents, which is "
-                "time-consuming and often impractical in today\u2019s information-rich environment.",
-
-                "\u201cHyper-Localized Multilingual Voice Assistant Using Edge Computing and "
-                "Agentic Workflows\u201d, designed to enable seamless interaction with digital "
-                "services through natural voice commands in regional Indian languages. The primary "
-                "problem addressed is the digital divide faced by millions of users in India who "
-                "are unable to effectively interact with technology due to limited support for their "
-                "native languages, particularly in voice-based interfaces."
-            )
-            replace_in_paragraph(para, t, new)
-            done.append("ABSTRACT_1")
-            continue
-
-        # ── ABSTRACT paragraph 2 ──
-        if "reduce reading time" in t or "TF-IDF" in t:
-            new = (
-                "The system\u2019s core objective is to bridge this accessibility gap by providing a "
-                "voice assistant that supports 11 Indian languages including Malayalam, Hindi, Tamil, "
-                "Telugu, Bengali, Marathi, Gujarati, Kannada, Punjabi, Urdu, and English. The solution "
-                "integrates a complete processing pipeline comprising Automatic Speech Recognition (ASR) "
-                "using the Pingala V1 model, bidirectional translation using IndicTrans2, intent detection "
-                "using keyword-based and ML-based classifiers, response generation using locally-deployed "
-                "Qwen3 large language models, and Text-to-Speech (TTS) synthesis using Meta MMS-TTS."
-            )
-            replace_in_paragraph(para, t, new)
-            done.append("ABSTRACT_2")
-            continue
-
-        # ── ABSTRACT paragraph 3 ──
-        if "user input handling" in t or "PDF or Word files" in t:
-            new = (
-                "The system is structured using a modular architecture with LangGraph-based agentic "
-                "workflows that intelligently route user queries to specialized agents\u2014including "
-                "Information, Task Management, Conversation, and Smart Home agents\u2014enabling "
-                "context-aware and domain-specific responses. The entire system is designed for edge "
-                "deployment on Raspberry Pi 5 hardware, utilizing quantized models and CPU-first "
-                "inference strategies to achieve low-latency, privacy-preserving, and offline-capable "
-                "operation. A FastAPI-based REST and WebSocket API serves as the backend, complemented "
-                "by a React-based monitoring dashboard for real-time system analytics."
-            )
-            replace_in_paragraph(para, t, new)
-            done.append("ABSTRACT_3")
-            continue
-
-    doc.save(OUTPUT)
-    print(f"Saved: {OUTPUT}")
-    print(f"Replacements: {len(done)}")
-    for d in done:
-        print(f"  {d}")
+    print(f"\n{'='*60}")
+    print(f"  DONE!")
+    print(f"  HTML Report: {HTML_PATH}")
+    if not args.html_only:
+        print(f"  PDF Report:  {PDF_PATH}")
+    print(f"{'='*60}")
 
 
 if __name__ == "__main__":

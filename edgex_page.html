@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WiFi Configuration</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="referrer no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        input[type="submit"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #ap_list {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        #ap_list a {
+            display: block;
+            margin-top: 5px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        #ap_list a:hover {
+            text-decoration: underline;
+        }
+
+        .language-switch {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .language-switch select {
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;  /* 垂直居中 */
+            justify-content: center;  /* 水平居中 */
+        }
+        .logo {
+            /*width: 40px;*/
+            height: 40px;
+            margin-right: 10px; /* Logo 和标题之间的间隔 */
+            margin-left: 10px; /* Logo 和标题之间的间隔 */
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switch">
+        <select id="language" onchange="changeLanguage()">
+            <option value="zh-CN">中文</option>
+            <option value="en-US">English</option>
+        </select>
+    </div>
+
+    <div class="header-container">
+        <!-- Logo Image -->
+        <img src="data:image/png;base64,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" alt="Logo" class="logo">
+        <!-- Title -->
+        <h1 data-lang="title">WiFi 配置</h1>
+    </div>
+<!--    <h1 data-lang="title">WiFi 配置</h1>-->
+    <form action="/submit" method="post" onsubmit="submitForm(event)">
+        <div id="saved_list_container" style="display: none;">
+            <h3 data-lang="saved_wifi">已保存的 WiFi</h3>
+            <ul id="saved_list">
+                <li>
+                    <span>SSID</span>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <h3 data-lang="new_wifi">新的 WiFi</h3>
+            <p class="error" style="color: red; text-align: center;" id="error">
+            </p>
+            <p>
+                <label for="ssid">SSID:</label>
+                <input type="text" id="ssid" name="ssid" required>
+            </p>
+            <p>
+                <label for="password" data-lang="password">密码:</label>
+                <input type="password" id="password" name="password">
+            </p>
+            <p style="text-align: center;">
+                <input type="submit" value="连接" id="button" data-lang-value="connect">
+            </p>
+            <p id="ap_list">
+            </p>
+        </div>
+    </form>
+
+    <script type="text/javascript">
+        const button = document.getElementById('button');
+        const error = document.getElementById('error');
+        const ssid = document.getElementById('ssid');
+
+        // Add language translations
+        const translations = {
+            'zh-CN': {
+                title: 'WiFi 配置',
+                saved_wifi: '已保存的 WiFi',
+                new_wifi: '新的 WiFi',
+                password: '密码:',
+                connect: '连接',
+                select_wifi: '从下面列表选择 2.4G WiFi:'
+            },
+            'en-US': {
+                title: 'WiFi Configuration',
+                saved_wifi: 'Saved WiFi',
+                new_wifi: 'New WiFi',
+                password: 'Password:',
+                connect: 'Connect',
+                select_wifi: 'Select an 2.4G WiFi from the list below:'
+            }
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById('language').value;
+            // 检查语言值是否合法
+            if (!translations[lang]) {
+                console.warn(`不支持的语言: ${lang}，默认使用中文`);
+                document.getElementById('language').value = 'zh-CN';
+                return changeLanguage();
+            }
+            
+            document.querySelectorAll('[data-lang]').forEach(element => {
+                const key = element.getAttribute('data-lang');
+                element.textContent = translations[lang][key];
+            });
+            document.querySelectorAll('[data-lang-value]').forEach(element => {
+                const key = element.getAttribute('data-lang-value');
+                element.value = translations[lang][key];
+            });
+            // Update AP list text
+            const apList = document.getElementById('ap_list');
+            if (apList.firstChild) {
+                apList.firstChild.textContent = translations[lang].select_wifi;
+            }
+            // Save language preference
+            localStorage.setItem('preferred_language', lang);
+        }
+
+        function renderSavedList(data) {
+            const savedListContainer = document.getElementById('saved_list_container');
+            const savedList = document.getElementById('saved_list');
+            savedList.innerHTML = '';
+            data.forEach((ssid, index) => {
+                const li = document.createElement('li');
+                let html = `<span>${ssid}</span>`;
+                // Only add priority and delete buttons after the first item
+                if (index > 0) {
+                    html += ` <span>
+                        <button type="button" onclick="setDefaultItem(this, ${index})">⬆️</button>
+                        <button type="button" onclick="deleteItem(this, ${index})">❌</button>
+                    </span>`;
+                } else {
+                    html += ` <span><button type="button" onclick="deleteItem(this, ${index})">❌</button></span>`;
+                }
+                li.innerHTML = html;
+                savedList.appendChild(li);
+            });
+            if (data.length > 0) {
+                savedListContainer.style.display = 'block';
+            } else {
+                savedListContainer.style.display = 'none';
+            }
+        }
+
+        // Delete one item from the list
+        function deleteItem(item, index) {
+            // disable the button
+            item.disabled = true;
+            // /saved/delete?index=INDEX
+            fetch('/saved/delete?index=' + index)
+                .then(response => response.json())
+                .then(data => {
+                    loadSavedList();
+                });
+        }
+
+        function setDefaultItem(item, index) {
+            item.disabled = true;
+            fetch('/saved/set_default?index=' + index)
+                .then(response => response.json())
+                .then(data => {
+                    loadSavedList();
+                });
+        }
+
+        // Load saved ssid and password list
+        function loadSavedList() {
+            fetch('/saved/list')
+                .then(response => response.json())
+                .then(data => {
+                    renderSavedList(data);
+                });
+        }
+
+        // Load AP list from /scan
+        function loadAPList() {
+            if (button.disabled) {
+                return;
+            }
+
+            fetch('/scan')
+                .then(response => response.json())
+                .then(data => {
+                    const lang = document.getElementById('language').value;
+                    const apList = document.getElementById('ap_list');
+                    apList.innerHTML = '<p>' + translations[lang].select_wifi + '</p>';
+                    data.forEach(ap => {
+                        // Create a link for each AP
+                        const link = document.createElement('a');
+                        link.href = '#';
+                        link.textContent = ap.ssid + ' (' + ap.rssi + ' dBm)';
+                        if (ap.authmode === 0) {
+                            link.textContent += ' 🌐';
+                        } else {
+                            link.textContent += ' 🔒';
+                        }
+                        link.addEventListener('click', () => {
+                            ssid.value = ap.ssid;
+                        });
+                        apList.appendChild(link);
+                    });
+                    setTimeout(loadAPList, 5000);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Set initial language
+        document.addEventListener('DOMContentLoaded', () => {
+            // 从 URL 参数中获取语言设置
+            const urlParams = new URLSearchParams(window.location.search);
+            const langParam = urlParams.get('lang');
+            
+            // 优先使用 URL 参数的语言设置，其次是本地存储的设置，最后默认使用中文
+            const savedLang = langParam || localStorage.getItem('preferred_language') || 'zh-CN';
+            document.getElementById('language').value = savedLang;
+            changeLanguage();
+            loadSavedList();
+            loadAPList();
+        });
+
+        // 监听 pageshow 事件以处理浏览器返回键
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                loadSavedList();
+            } else {
+                // 正常加载时已处理
+            }
+        });
+
+        async function submitForm(event) {
+            event.preventDefault();
+            button.disabled = true;
+            error.textContent = '';
+
+            const ssidValue = ssid.value;
+            const passwordValue = document.getElementById('password').value;
+
+            const payload = {
+                ssid: ssidValue,
+                password: passwordValue
+            };
+
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || '连接失败');
+                }
+
+                // 连接成功，跳转到完成页面
+                button.disabled = false;
+                window.location.href = '/done.html';
+            } catch (err) {
+                error.textContent = err.message;
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

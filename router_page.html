@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+<meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<meta HTTP-equiv="Cache-Control" content="no-cache">
+<link rel="stylesheet" href="/admin/reset.css">
+<link rel="stylesheet" href="/admin/base.css">
+<link rel="stylesheet" href="/admin/style.css">
+<script language="javascript" src="common.js"></script>
+<script type="text/javascript" src="share.js"></script>
+
+<TITLE></TITLE>
+<!--System share css-->
+<STYLE type=text/css>
+@import url(/style/default.css);
+.STYLE2 {color: #FFFFFF}
+.STYLE3 {color: #33CC00}
+.STYLE4 {color: #339900}
+.STYLE5 {color: #666666}
+</STYLE>
+<!--System share scripts-->
+<SCRIPT language="javascript" type="text/javascript">
+var loginFlag = 0;
+if (window.top != window.self) {
+// in a frame
+ window.top.location.href = "/admin/login.asp";
+}
+/* Added by peichao for mission#0007440 */
+function CreateCode()
+{
+ document.getElementById('check_code').value='78pp5';
+}
+function refresh()
+{
+ window.location.reload();
+}
+/* End of mission#0007440 */
+function myKeyDown(e)
+{
+ var code;
+ if (!e) {
+  e = window.event;
+ }
+ if (e.keyCode) {
+  code = e.keyCode;
+ } else if (e.which) {
+  code = e.which;
+ }
+ if (code == 13) {
+  on_submit();
+ }
+ return true;
+}
+document.onkeydown = myKeyDown;
+if (document.captureEvents) document.captureEvents(Event.KEYDOWN);
+/********************************************************************
+**          on document load
+********************************************************************/
+function on_init()
+{
+ document.forms[0].username1.focus();
+ var mobileAgent = new Array("iphone", "ipod", "ipad", "android", "mobile", "blackberry", "webos", "incognito", "webmate", "bada", "nokia", "lg", "ucweb", "skyfire");
+ var browser = navigator.userAgent.toLowerCase();
+ for (var i=0; i<mobileAgent.length; i++){
+ if (browser.indexOf(mobileAgent[i])!=-1){ ismobile.value = "1";location.href = '/mobile/login_mobile.asp';break; } }
+ var  verificationenable = "1";
+ if (verificationenable != "0")
+ {
+  CreateCode();/* Added by peichao for mission#0007440 */
+ }
+ if (ismobile.value != "1")
+ {
+  auto_lang();
+  //alert("finish auto lang");
+ }
+}
+/********************************************************************
+**          on document submit
+********************************************************************/
+function on_submit()
+{
+ if (loginFlag)
+  return 1;
+ with ( document.forms[0] ) {
+  username.value = username1.value;
+  psd.value = psd1.value;
+  sec_lang.value="0";
+  if(username.value.length <= 0) {
+   alert("Username is a required field!");
+   return;
+  }
+  if(psd.value.length <= 0) {
+   alert("password is a required field!");
+   return;
+  }
+  loginFlag = 1;
+  submit();
+ }
+}
+function auto_lang()
+{
+ with ( document.forms[0] ) {
+ var  currentlanguage = "en";
+ var  languagesetmode = "1";
+ var  is_login_busy = "0";
+ var lang = navigator.language || navigator.userLanguage;
+ if(languagesetmode == "2" && is_login_busy == "0")
+ {
+  if(lang.substr(0, 2) == "zh")
+  {
+   loginSelinit.value = "1" ;
+   if(currentlanguage != "cn")
+   {
+    mlhandle();
+    //alert("set to cn");
+   }
+  }
+  else if(lang.substr(0, 2) == "en")
+  {
+   loginSelinit.value= "0" ;
+   if(currentlanguage != "en")
+   {
+    mlhandle();
+    //alert("set to en 1");
+   }
+  }
+  else if(lang.substr(0, 2) == "pt")
+  {
+   loginSelinit.value= "2" ;
+   if(currentlanguage != "pt")
+   {
+    mlhandle();
+    //alert("set to pt");
+   }
+  }
+  else if(lang.substr(0, 2) == "es")
+  {
+   loginSelinit.value= "3" ;
+   if(currentlanguage != "es")
+   {
+    mlhandle();
+    //alert("set to es");
+   }
+  }
+  else
+  {
+   loginSelinit.value= "0" ;
+   if(currentlanguage != "en")
+   {
+    mlhandle();
+    //alert("set to en 2");
+   }
+  }
+ }
+ }
+}
+function mlhandle()
+{
+ with ( document.forms[0] ) {
+  sec_lang.value="1";
+  submit();
+ }
+}
+</SCRIPT>
+</head>
+<body leftmargin="0" topmargin="0" bgcolor="#FFFFFF" onLoad="on_init();">
+<span class="STYLE2"></span><span class="STYLE5"></span><span class="STYLE4"></span><span class="STYLE3"></span><span class="STYLE2"></span><span class="STYLE2"></span>
+<form action=/boaform/admin/formLogin method=POST name="cmlogin">
+<table width="1440" height="810" align="center" valign="middle" background="/image/background_normal.png" >
+<tr>
+ <td width="25%" height="25%"></td>
+ <td width="50%" ></td>
+ <td width="25%"></td>
+</tr>
+<tr align="left" valign="top">
+ <td height="50%"></td>
+ <td>
+  <table vertical-align="middle" width="100%" height="100%">
+  <tr>
+   <td width="280" style="padding-left:50px;background-repeat:no-repeat;background-position-x:100px;background-position-y:130px;background-size:150px 100px"></td>
+   <td>
+   <table cellspacing="1" height="100%" style="font-size:10pt;" align="left">
+    <!--
+    <tr height="40px" width="240px">
+     <td width="80px" valign="baseline"><font color="white" size="3"><b>Username:</b></font></td>
+     <td align="left" valign="baseline"><input type="text" name="username1" id="username1" style="width:150px;border:none;background: url(/image/input_normal.png) no-repeat center right;width:150px;height:20px;cursor:pointer"/></td>
+    </tr>
+    <tr height="40px">
+     <td width="80px" valign="baseline"><font color="white" size="3"><b>Password:</b></font></td>
+                    <td align="left" valign="baseline"><input type="password" name="psd1" id="psd1" style="width:150px;border:none;background: url(/image/input_normal.png) no-repeat center right;width:150px;height:20px;cursor:pointer"/></td>
+                </tr>
+    <tr height="40px">
+<td width="80px" valign="baseline"><input name="button" type="button" class="button" onClick="refresh();" id="check_code" style="font-size:15pt; width:80px; height:25px; color:white; border:none;background-color: #845f5f;text-shadow: 1px -1px 0px black;box-shadow: inset 2px -1px 4px 0px black;" readonly="readonly" oncopy="return false" name="Create_Code" /></td>
+<td align="left" valign="baseline"><input type="text" name="verification_code" id="verification_code" style="width:150px;border:none;background: url(/image/input_normal.png) no-repeat center right;width:150px;height:20px;cursor:pointer" placeholder="Verification Code"/></td>
+</tr>
+
+     
+    <tr height="40px">
+                    <td align="middle" valign="baseline">
+     <input name="button" type="button" class="button" onClick="on_submit();" style=" color:white; border:none;background: url(/image/button_normal.png) no-repeat center right;width:77px;height: 40px;cursor:pointer;" value=" Login"/>
+     </td>
+     <td align="middle" valign="baseline">
+     <input type="reset" style="color:white; border:none;background: url(/image/button_normal.png) no-repeat center right;width:77px;height:40px;cursor:pointer" value=" Rewrite" />
+     </td>
+    </tr>
+    <tr height="155px">-->
+    <tr height="115px" width="240px"></tr>
+<tr height="40px" width="240px">
+<td width="80px" valign="baseline"><font color="white" size="3"><b>Username:</b></font></td>
+<td align="left" valign="baseline"><input type="text" name="username1" id="username1" style="width:150px;border:none;background: url(/image/input_normal.png) no-repeat center right;width:150px;height:20px;cursor:pointer" placeholder="Username"></td>
+</tr>
+<tr height="40px">
+<td width="80px" valign="baseline"><font color="white" size="3"><b>Password:</b></font></td>
+<td align="left" valign="baseline"><input type="password" name="psd1" id="psd1" style="width:150px;border:none;background: url(/image/input_normal.png) no-repeat center right;width:150px;height:20px;cursor:pointer" placeholder="Password"></td>
+</tr>
+<tr height="40px">
+<td width="80px" valign="baseline"><input name="button" type="button" class="button" onclick="refresh();" id="check_code" style="font-size:15pt; width:80px; height:25px; color:white; border:none;background-color: #845f5f;text-shadow: 1px -1px 0px black;box-shadow: inset 2px -1px 4px 0px black;" readonly="readonly" oncopy="return false"></td>
+<td align="left" valign="top"><input type="text" name="verification_code" id="verification_code" style="width:150px;border:none;background: url(/image/input_normal.png) no-repeat center right;width:150px;height:20px;cursor:pointer" placeholder="Verification Code"></td>
+</tr>
+<tr height="40px">
+<td align="middle" valign="baseline">
+<input name="button" type="button" class="button" onclick="on_submit();" style=" color:white; border:none;background: url(/image/button_normal.png) no-repeat center right;width:77px;height: 40px;cursor:pointer;" value=" Login">
+</td>
+<td align="middle" valign="baseline">
+<input type="reset" style="color:white; border:none;background: url(/image/button_normal.png) no-repeat center right;width:77px;height:40px;cursor:pointer" value=" Rewrite">
+</td>
+</tr>
+<tr height="155px"></tr>
+
+    </tr>
+   </table>
+   </td>
+  </tr>
+  </table>
+ </td>
+ <td></td>
+</tr>
+<tr>
+ <td height="25%"></td>
+ <td></td>
+ <td></td>
+</tr>
+</table>
+<input type="hidden" name="username" id="username" value=''>
+<input type="hidden" name="psd" id="psd" value=''>
+<input type="hidden" name="sec_lang" id="sec_lang" value=''>
+<input type="hidden" name="loginSelinit" id="loginSelinit" value=''>
+<input type="hidden" name="ismobile" id="ismobile" value=''>
+<input type='hidden' name='csrftoken' value='1e9abd3e9e87ae1a9b88ea80c9633d71' />
+</form>
+</BODY>
+
+</html>
